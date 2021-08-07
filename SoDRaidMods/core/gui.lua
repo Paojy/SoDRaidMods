@@ -816,34 +816,13 @@ T.CreateEncounterOptions = function(parent, index, data)
 	for Alert_Type, Alerts in T.pairsByKeys(data["alerts"]) do
 		if Alert_Type == "BossMods" then -- 已改
 			for i, args in pairs(Alerts) do
-				if SoD_CDB["BossMods"][args.spellID] == nil then
-					if SoD_DB["resetmode"] == "enable" or SoD_DB["resetmode"] == "spec" then
-						SoD_CDB["BossMods"][args.spellID] = true
-					elseif SoD_DB["resetmode"] == "disable" then
-						SoD_CDB["BossMods"][args.spellID] = false
-					end		
-				end
 				local points = args.points or {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400, hide = false, hide_title = true}
 				T.CreateBossMod(ef, index, args.spellID, args.tip, points, args.events, args.difficulty_id, args.width, args.height, args.init, args.reset, args.update, args.update_onframe, args.update_rate)
 			end
 		elseif Alert_Type == "AlertIcon" then
 			for i, args in pairs(Alerts) do -- 已改			
 				local v = args.type.."_"..args.spellID
-				
-				if SoD_CDB["Icons"][v] == nil then
-					if SoD_DB["resetmode"] == "enable" then
-						SoD_CDB["Icons"][v] = true
-					elseif SoD_DB["resetmode"] == "disable" then
-						SoD_CDB["Icons"][v] = false
-					elseif SoD_DB["resetmode"] == "spec" then
-						if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-							SoD_CDB["Icons"][v] = true
-						else
-							SoD_CDB["Icons"][v] = false
-						end
-					end
-				end
-				
+
 				local dif = args.dif or {["all"] = true}
 				local hl = args.hl or "no"
 				
@@ -873,21 +852,7 @@ T.CreateEncounterOptions = function(parent, index, data)
 					v = args.spellID
 				else
 					v = args.type.."_"..args.data.npc_id -- 血量、能量提示
-				end
-				
-				if SoD_CDB["Text_Alerts"][v] == nil then
-					if SoD_DB["resetmode"] == "enable" then
-						SoD_CDB["Text_Alerts"][v] = true
-					elseif SoD_DB["resetmode"] == "disable" then
-						SoD_CDB["Text_Alerts"][v] = false
-					elseif SoD_DB["resetmode"] == "spec" then
-						if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-							SoD_CDB["Text_Alerts"][v] = true
-						else
-							SoD_CDB["Text_Alerts"][v] = false
-						end
-					end
-				end
+				end		
 				
 				local dif = args.dif or {["all"] = true}
 				local color = args.color or {1, 1, 0}
@@ -907,20 +872,6 @@ T.CreateEncounterOptions = function(parent, index, data)
 				
 				local v = args.type.."_"..args.spellID..(args.Glow and "_Glow" or "")
 				
-				if SoD_CDB[args.type][v] == nil then
-					if SoD_DB["resetmode"] == "enable" then
-						SoD_CDB[args.type][v] = true
-					elseif SoD_DB["resetmode"] == "disable" then
-						SoD_CDB[args.type][v] = false
-					elseif SoD_DB["resetmode"] == "spec" then
-						if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-							SoD_CDB[args.type][v] = true
-						else
-							SoD_CDB[args.type][v] = false
-						end
-					end
-				end
-				
 				local dif = args.dif or {["all"] = true}
 				
 				T.Create_HL_EventFrame(ef, dif, index, v, args.role, args.stack, args.arg, args.amount)
@@ -929,21 +880,6 @@ T.CreateEncounterOptions = function(parent, index, data)
 		elseif Alert_Type == "PlateAlert" then -- 已改
 			for i, args in pairs(Alerts) do
 				if args.type == "PlatePower" or args.type == "PlateNpcID" then
-
-					if SoD_CDB[args.type][args.mobID] == nil then
-						if SoD_DB["resetmode"] == "enable" then
-							SoD_CDB[args.type][args.mobID] = true
-						elseif SoD_DB["resetmode"] == "disable" then
-							SoD_CDB[args.type][args.mobID] = false
-						elseif SoD_DB["resetmode"] == "spec" then
-							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-								SoD_CDB[args.type][args.mobID] = true
-							else
-								SoD_CDB[args.type][args.mobID] = false
-							end
-						end
-					end
-					
 					if not G.Plate_Alerts[args.type] then
 						G.Plate_Alerts[args.type] = {}
 					end
@@ -953,25 +889,10 @@ T.CreateEncounterOptions = function(parent, index, data)
 							G.Plate_Alerts[args.type][args.mobID]["color"] = args.color or {1,0,0,1}
 						end
 					end
-
+					
 					T.Create_PlateAlert_Options(ef, args.mobID, args.role, args.type)
 					
 				else -- 光环或施法，有法术id
-
-					if SoD_CDB[args.type][args.spellID] == nil then
-						if SoD_DB["resetmode"] == "enable" then
-							SoD_CDB[args.type][args.spellID] = true
-						elseif SoD_DB["resetmode"] == "disable" then
-							SoD_CDB[args.type][args.spellID] = false
-						elseif SoD_DB["resetmode"] == "spec" then
-							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-								SoD_CDB[args.type][args.spellID] = true
-							else
-								SoD_CDB[args.type][args.spellID] = false
-							end
-						end
-					end
-					
 					if not G.Plate_Alerts[args.type] then
 						G.Plate_Alerts[args.type] = {}
 					end
@@ -989,25 +910,12 @@ T.CreateEncounterOptions = function(parent, index, data)
 					end
 					
 					T.Create_PlateAlert_Options(ef, args.spellID, args.role, args.type, args.mobID, args.hl_np)
+				
 				end			
 			end
 		elseif Alert_Type == "ChatMsg" then -- 已改
 			for i, args in pairs(Alerts) do			
 
-				if SoD_CDB[args.type][args.spellID] == nil then
-					if SoD_DB["resetmode"] == "enable" then
-						SoD_CDB[args.type][args.spellID] = true
-					elseif SoD_DB["resetmode"] == "disable" then
-						SoD_CDB[args.type][args.spellID] = false
-					elseif SoD_DB["resetmode"] == "spec" then
-						if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-							SoD_CDB[args.type][args.spellID] = true
-						else
-							SoD_CDB[args.type][args.spellID] = false
-						end
-					end
-				end
-					
 				if not G.Msgs[args.type] then
 					G.Msgs[args.type] = {}
 				end
@@ -1024,7 +932,9 @@ T.CreateEncounterOptions = function(parent, index, data)
 						show_dur = args.show_dur,
 					}
 				end
+				
 				T.Create_ChatMsg_Options(ef, args.spellID, args.role, args.type)
+				
 			end
 		elseif Alert_Type == "Sound" then -- 已改
 			for i, args in pairs(Alerts) do
@@ -1050,20 +960,6 @@ T.CreateEncounterOptions = function(parent, index, data)
 					file = G.media.sounds..args.spellID.."pp.ogg"
 				else
 					file = G.media.sounds..tag..".ogg"
-				end
-				
-				if SoD_CDB["Sound"][tag] == nil then
-					if SoD_DB["resetmode"] == "enable" then
-						SoD_CDB["Sound"][tag] = true
-					elseif SoD_DB["resetmode"] == "disable" then
-						SoD_CDB["Sound"][tag] = false
-					elseif SoD_DB["resetmode"] == "spec" then
-						if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
-							SoD_CDB["Sound"][tag] = true
-						else
-							SoD_CDB["Sound"][tag] = false
-						end
-					end
 				end
 				
 				if not G.Sounds[tag] then
@@ -1202,7 +1098,6 @@ testbutton:SetScript("OnClick", function()
 	for k, frame in pairs(G.Test) do
 		frame.StartTest()
 	end
-	gui:Hide()
 end)
 
 options.Golbal_disable_all = createcheckbutton(options.sfa, 50, -90, L["禁用插件"], "General", false, "disable_all")
@@ -1221,7 +1116,7 @@ options.AlertFrame_enable = createcheckbutton(options.sfa, 50, -160, L["启用"]
 options.AlertFrame_enable.apply = function() T.EditAlertFrame("enable") end
 
 options.AlertFrame_spellname = createcheckbutton(options.sfa, 210, -160, L["显示法术名字"], "AlertFrame", false, "show_spellname")
-options.AlertFrame_spellname.apply = function() T.EditAlertFrame("ifont_size") end
+options.AlertFrame_spellname.apply = function() T.EditAlertFrame("spelltext") end
 
 local growdirection_group = {
 	{"RIGHT",  L["左"]},	
@@ -1313,17 +1208,21 @@ options.BossMods_enable.apply = function() T.EditBossModsFrame("enable") end
 options.BossMods_scale = createslider(options.sfa, 80, -1010, L["尺寸"], "BM", false, "scale", 50, 200, 1)
 options.BossMods_scale.apply = function() T.EditBossModsFrame("scale") end
 
---options.import = T.createUIPanelButton(options, addon_name.."ImportButton", 50, 20, L["导入"])
---options.import:SetPoint("TOPRIGHT", gui.bot_line, "BOTTOMRIGHT", 0, -5)
---options.import:SetScript("OnClick", function()
---	StaticPopup_Show(G.addon_name.."Import")
---end)
+options.import = T.createUIPanelButton(options, addon_name.."ImportButton", 50, 20, L["导入"])
+options.import:SetPoint("TOPRIGHT", gui.bot_line, "BOTTOMRIGHT", 0, -5)
+options.import:SetScript("OnClick", function()
+	StaticPopupDialogs[G.addon_name.."Import"].OnAccept = function(self)
+		local str = self.editBox:GetText()
+		T.ImportSettings(str)
+	end
+	StaticPopup_Show(G.addon_name.."Import")
+end)
 
---options.export = T.createUIPanelButton(options, addon_name.."ExportButton", 50, 20, L["导出"])
---options.export:SetPoint("RIGHT", options.import, "LEFT", -5, 0)
---options.export:SetScript("OnClick", function()
---	StaticPopup_Show(G.addon_name.."Export")
---end)
+options.export = T.createUIPanelButton(options, addon_name.."ExportButton", 50, 20, L["导出"])
+options.export:SetPoint("RIGHT", options.import, "LEFT", -5, 0)
+options.export:SetScript("OnClick", function()
+	StaticPopup_Show(G.addon_name.."Export")
+end)
 
 ----------------------------------------------------------
 -----------------[[     Raid Tools     ]]-----------------

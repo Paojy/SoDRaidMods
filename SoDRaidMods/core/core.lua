@@ -23,7 +23,7 @@ G.Msgs = {}
 G.Sounds = {}
 
  -- 需要转团队
-G.Test_Mod = true
+G.Test_Mod = false
 G.Test_Exrt = false
 ----------------------------------------------------------
 -----------------[[    Frame Holder    ]]------------------
@@ -254,6 +254,7 @@ TransFrame.anim:SetLooping("REPEAT")
 TransFrame.timer = TransFrame.anim:CreateAnimation()
 TransFrame.timer.t = 0
 TransFrame.timer:SetDuration(.5)
+TransFrame.last_played = 0
 
 TransFrame:SetScript("OnUpdate", function(self, e)
 	if SoD_CDB["General"]["trans"] then
@@ -264,7 +265,10 @@ TransFrame:SetScript("OnUpdate", function(self, e)
 				if inrange and not TransFrame.state then
 					TransFrame.state = true
 					if not SoD_CDB["General"]["disable_sound"] and SoD_CDB["General"]["trans_sound"] then
-						PlaySoundFile(G.media.sounds.."transready.ogg", "Master") -- 声音 标记名字
+						if GetTime() - TransFrame.last_played > 10 then -- 10秒内不再播放
+							PlaySoundFile(G.media.sounds.."transready.ogg", "Master") -- 声音 标记名字
+							TransFrame.last_played = GetTime()
+						end
 					end
 					self.timer.exp = GetTime() + 5
 					self.timer:SetScript("OnUpdate", function(timer,e)
@@ -729,6 +733,12 @@ T.CreateTestIcon = function(v, hl, dur, r, g, b)
 		frame.text2:SetFont(G.Font, SoD_CDB["AlertFrame"]["font_size"], "OUTLINE")
 		frame.bottomtext:SetFont(G.Font, SoD_CDB["AlertFrame"]["ifont_size"], "OUTLINE")
 		
+		if SoD_CDB["AlertFrame"]["show_spellname"] then
+			frame.bottomtext:Show()
+		else
+			frame.bottomtext:Hide()
+		end
+		
 		AlertFrame.LineUpIcons()
 	end
 	
@@ -822,6 +832,14 @@ T.CreateAura = function(option_page, difficulty_id, index, v, hl, role, tip, aur
 		
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
+		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
 		end
 	end
 	
@@ -1000,6 +1018,14 @@ T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, au
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
 		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
+		end
 	end
 	
 	frame.encounter_check = function(event, ...)
@@ -1066,19 +1092,18 @@ T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, au
 			
 				frame.auras = table.wipe(frame.auras)
 				for player, info in pairs(frame.players) do
-					if player then
-						local t = {
+					if player and info then
+						table.insert(frame.auras, {
 							name = player,
 							count = info.count,
 							exp = info.exp,
 							dur = info.dur,
 							amount = info.amount
-						}
-						table.insert(frame.auras, t)
+						})
 					end
 				end
 				
-				if #frame.auras > 0 then
+				if #frame.auras > 1 then
 					table.sort(frame.auras, function(a, b)
 						if a.count and b.count and a.count >= b.count then
 							return true
@@ -1090,7 +1115,7 @@ T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, au
 							return true
 						end
 					end)
-				else
+				elseif #frame.auras == 0 then
 					frame.reset()
 				end
 			end
@@ -1232,6 +1257,14 @@ T.CreateLog = function(option_page, difficulty_id, index, v, hl, role, tip, even
 		
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
+		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
 		end
 	end
 	
@@ -1472,6 +1505,14 @@ T.CreateCast = function(option_page, difficulty_id, index, v, hl, role, tip)
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
 		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
+		end
 	end
 	
 	frame.encounter_check = function(e, ...)
@@ -1643,6 +1684,14 @@ T.CreateCastingOnMe = function(option_page, difficulty_id, index, v, hl, role, t
 		
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
+		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
 		end
 	end
 	
@@ -1820,6 +1869,14 @@ T.CreateBossMsg = function(option_page, difficulty_id, index, v, hl, role, tip, 
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
 		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
+		end
 	end
 	
 	frame.encounter_check = function(e, ...)
@@ -1953,6 +2010,14 @@ T.CreateBWSpellTimer = function(option_page, difficulty_id, index, v, hl, role, 
 		
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
+		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
 		end
 	end
 
@@ -2101,6 +2166,14 @@ T.CreateBWTextTimer = function(option_page, difficulty_id, index, v, hl, role, t
 		
 		if option == "all" or option == "grow_dir" or option == "icon_space" then
 			AlertFrame.LineUpIcons()
+		end
+		
+		if option == "all" or option == "spelltext" then
+			if SoD_CDB["AlertFrame"]["show_spellname"] then
+				frame.bottomtext:Show()
+			else
+				frame.bottomtext:Hide()
+			end
 		end
 	end
 	
@@ -2424,7 +2497,7 @@ T.CreateHealthText = function(option_page, difficulty_id, index, v, role, data)
 							
 					for i, range in pairs(data.ranges) do
 						if hp_perc and (hp_perc <= range["ul"]) and (hp_perc >= range["ll"]) then
-							frame.text:SetText(string.format("%.1f", hp_perc).." "..range["tip"])
+							frame.text:SetText(string.format(range["tip"], hp_perc))
 							frame:Show()
 							show = true
 							break
@@ -2532,7 +2605,7 @@ T.CreatePowerText = function(option_page, difficulty_id, index, v, role, data)
 					
 					for i, range in pairs(data.ranges) do
 						if pp and (pp <= range["ul"]) and (pp >= range["ll"]) then
-							frame.text:SetText(pp.." "..range["tip"])
+							frame.text:SetText(string.format(range["tip"], pp))
 							frame:Show()
 							show = true
 							break
@@ -3658,7 +3731,7 @@ local function UpdateAuras(unitFrame)
 					unitFrame.icons.Aura_Icons[i] = CreateIcon(unitFrame.icons, "aura"..i)
 				end
 				UpdateAuraIcon(unitFrame.icons.Aura_Icons[i], unit, index, 'HELPFUL')
-				if G.Plate_Alerts["PlateAuras"][bspellid]["hl_np"] then
+				if G.Plate_Alerts["PlateAuras"][bspellid] and G.Plate_Alerts["PlateAuras"][bspellid]["hl_np"] then
 					last_match = bspellid
 				end
 				i = i + 1
@@ -3674,7 +3747,7 @@ local function UpdateAuras(unitFrame)
 					unitFrame.icons.Aura_Icons[i] = CreateIcon(unitFrame.icons, "aura"..i)
 				end
 				UpdateAuraIcon(unitFrame.icons.Aura_Icons[i], unit, index, 'HARMFUL')
-				if G.Plate_Alerts["PlateAuras"][dspellid]["hl_np"] then
+				if G.Plate_Alerts["PlateAuras"][dspellid] and G.Plate_Alerts["PlateAuras"][dspellid]["hl_np"] then
 					last_match = dspellid
 				end
 				i = i + 1
@@ -4913,6 +4986,6 @@ end
 ----------------------------------------------------------
 -----------------[[    Test Frame    ]]-------------------
 ----------------------------------------------------------
-T.CreateTestIcon("test_200768", "hl", 5, 1, 1, 1)
-T.CreateTestIcon("test_200630", "no", 7, 1, 1, 0)
-T.CreateTestIcon("test_200580", "no", 8, 1, 0, 0)
+T.CreateTestIcon("test_200768", "hl", 15, 1, 1, 1)
+T.CreateTestIcon("test_200630", "no", 17, 1, 1, 0)
+T.CreateTestIcon("test_200580", "no", 18, 1, 0, 0)

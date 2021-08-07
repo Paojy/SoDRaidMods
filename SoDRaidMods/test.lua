@@ -36,8 +36,8 @@ G.Encounters[100] = { -- Test
 					unit = "boss1",
 					npc_id = "91784",
 					ranges = {
-						{ ul = 90, ll = 60, tip = "Health Test 1"},--已检查
-						{ ul = 50, ll = 10, tip = "Health Test 2"},--已检查
+						{ ul = 90, ll = 60, tip = string.format(L["阶段转换"], "60")},--已检查
+						{ ul = 50, ll = 10, tip = string.format(L["阶段转换"], "10")},--已检查
 					},
 				},
 			},
@@ -47,7 +47,7 @@ G.Encounters[100] = { -- Test
 					unit = "boss1",
 					npc_id = "91784",
 					ranges = {
-						{ ul = 90, ll = 10, tip = "Power Test"},--已检查
+						{ ul = 90, ll = 10, tip = L["即将迷雾"]},--已检查
 					},
 				},
 			},

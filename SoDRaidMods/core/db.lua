@@ -23,7 +23,7 @@ local Character_default_Settings = {
 	
 	AlertFrame = {
 		enable = true,
-		show_spellname = false,
+		show_spellname = true,
 		icon_size = 65,
 		icon_space = 5,
 		grow_dir = "BOTTOM",
@@ -92,6 +92,166 @@ local Account_default_Settings = {
 	resetmode = "enable",
 }
 
+function T.UpdateDefaultSettings()
+	for index, data in pairs(G.Encounters) do
+		for Alert_Type, Alerts in T.pairsByKeys(data["alerts"]) do
+			if Alert_Type == "BossMods" then
+				for i, args in pairs(Alerts) do
+					if Character_default_Settings["BossMods"][args.spellID] == nil then
+						if SoD_DB["resetmode"] == "enable" or SoD_DB["resetmode"] == "spec" then
+							Character_default_Settings["BossMods"][args.spellID] = true
+						elseif SoD_DB["resetmode"] == "disable" then
+							Character_default_Settings["BossMods"][args.spellID] = false
+						end		
+					end
+				end
+			elseif Alert_Type == "AlertIcon" then
+				for i, args in pairs(Alerts) do -- 已改			
+					local v = args.type.."_"..args.spellID
+					
+					if Character_default_Settings["Icons"][v] == nil then
+						if SoD_DB["resetmode"] == "enable" then
+							Character_default_Settings["Icons"][v] = true
+						elseif SoD_DB["resetmode"] == "disable" then
+							Character_default_Settings["Icons"][v] = false
+						elseif SoD_DB["resetmode"] == "spec" then
+							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+								Character_default_Settings["Icons"][v] = true
+							else
+								Character_default_Settings["Icons"][v] = false
+							end
+						end
+					end
+				end
+			elseif Alert_Type == "TextAlert" then -- 已改
+				for i, args in pairs(Alerts) do
+				
+					local v
+					if args.type == "spell" or args.type == "spell_clone" then -- 法术、其他提示
+						v = args.spellID
+					else
+						v = args.type.."_"..args.data.npc_id -- 血量、能量提示
+					end
+					
+					if Character_default_Settings["Text_Alerts"][v] == nil then
+						if SoD_DB["resetmode"] == "enable" then
+							Character_default_Settings["Text_Alerts"][v] = true
+						elseif SoD_DB["resetmode"] == "disable" then
+							Character_default_Settings["Text_Alerts"][v] = false
+						elseif SoD_DB["resetmode"] == "spec" then
+							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+								Character_default_Settings["Text_Alerts"][v] = true
+							else
+								Character_default_Settings["Text_Alerts"][v] = false
+							end
+						end
+					end
+				end	
+			elseif Alert_Type == "HLOnRaid" then -- 已改
+				for i, args in pairs(Alerts) do
+					
+					local v = args.type.."_"..args.spellID..(args.Glow and "_Glow" or "")
+					
+					if Character_default_Settings[args.type][v] == nil then
+						if SoD_DB["resetmode"] == "enable" then
+							Character_default_Settings[args.type][v] = true
+						elseif SoD_DB["resetmode"] == "disable" then
+							Character_default_Settings[args.type][v] = false
+						elseif SoD_DB["resetmode"] == "spec" then
+							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+								Character_default_Settings[args.type][v] = true
+							else
+								Character_default_Settings[args.type][v] = false
+							end
+						end
+					end
+				end
+				
+			elseif Alert_Type == "PlateAlert" then -- 已改
+				for i, args in pairs(Alerts) do
+					if args.type == "PlatePower" or args.type == "PlateNpcID" then
+					
+						if Character_default_Settings[args.type][args.mobID] == nil then
+							if SoD_DB["resetmode"] == "enable" then
+								Character_default_Settings[args.type][args.mobID] = true
+							elseif SoD_DB["resetmode"] == "disable" then
+								Character_default_Settings[args.type][args.mobID] = false
+							elseif SoD_DB["resetmode"] == "spec" then
+								if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+									Character_default_Settings[args.type][args.mobID] = true
+								else
+									Character_default_Settings[args.type][args.mobID] = false
+								end
+							end
+						end
+						
+					else -- 光环或施法，有法术id
+	
+						if Character_default_Settings[args.type][args.spellID] == nil then
+							if SoD_DB["resetmode"] == "enable" then
+								Character_default_Settings[args.type][args.spellID] = true
+							elseif SoD_DB["resetmode"] == "disable" then
+								Character_default_Settings[args.type][args.spellID] = false
+							elseif SoD_DB["resetmode"] == "spec" then
+								if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+									Character_default_Settings[args.type][args.spellID] = true
+								else
+									Character_default_Settings[args.type][args.spellID] = false
+								end
+							end
+						end
+
+					end			
+				end
+			elseif Alert_Type == "ChatMsg" then -- 已改
+				for i, args in pairs(Alerts) do			
+	
+					if Character_default_Settings[args.type][args.spellID] == nil then
+						if SoD_DB["resetmode"] == "enable" then
+							Character_default_Settings[args.type][args.spellID] = true
+						elseif SoD_DB["resetmode"] == "disable" then
+							Character_default_Settings[args.type][args.spellID] = false
+						elseif SoD_DB["resetmode"] == "spec" then
+							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+								Character_default_Settings[args.type][args.spellID] = true
+							else
+								Character_default_Settings[args.type][args.spellID] = false
+							end
+						end
+					end
+
+				end
+			elseif Alert_Type == "Sound" then -- 已改
+				for i, args in pairs(Alerts) do
+				
+					local tag
+					
+					if args.event == "COMBAT_LOG_EVENT_UNFILTERED" then
+						tag = args.spellID..G.sound_suffix[args.sub_event][1]
+					else
+						tag = args.spellID..G.sound_suffix[args.event][1]
+					end
+									
+					if Character_default_Settings["Sound"][tag] == nil then
+						if SoD_DB["resetmode"] == "enable" then
+							Character_default_Settings["Sound"][tag] = true
+						elseif SoD_DB["resetmode"] == "disable" then
+							Character_default_Settings["Sound"][tag] = false
+						elseif SoD_DB["resetmode"] == "spec" then
+							if not args.role or G.Role[args.role] == SoD_DB[G.PlayerName]["spec_info"] then
+								Character_default_Settings["Sound"][tag] = true
+							else
+								Character_default_Settings["Sound"][tag] = false
+							end
+						end
+					end
+					
+				end
+			end
+		end
+	end
+end
+
 function T.LoadVariables()
 	if SoD_CDB == nil then
 		SoD_CDB = {}
@@ -104,7 +264,7 @@ function T.LoadVariables()
 		else
 			if SoD_CDB[a] == nil then
 				SoD_CDB[a] = {}
-			end
+			end		
 			for k, v in pairs(b) do
 				if SoD_CDB[a][k] == nil then
 					SoD_CDB[a][k] = v
@@ -154,10 +314,7 @@ eventframe:SetScript("OnEvent", function(self, event, ...)
 	if event == "ADDON_LOADED" then
 		local addon = ...
 		if addon ~= "SoDRaidMods" then return end
-		
-		T.LoadVariables()
-		T.LoadAccountVariables()
-		
+				
 		for index, data in pairs(G.Encounters) do
 			local option_page
 			if type(index) == "string" then
@@ -178,6 +335,11 @@ eventframe:SetScript("OnEvent", function(self, event, ...)
 				end
 			end
 		end
+		
+		SoD_DB["resetmode"] = "enable"
+		T.UpdateDefaultSettings()
+		T.LoadVariables()
+		T.LoadAccountVariables()		
 		
 		local options = T.CreateOptions(L["制作"], G.gui)
 		
@@ -242,3 +404,113 @@ eventframe:SetScript("OnEvent", function(self, event, ...)
 		end
 	end
 end)
+
+T.ExportSettings = function()
+	local str = G.addon_name.." Export".."~"..G.Version
+	for OptionCategroy, OptionTable in pairs(Character_default_Settings) do
+		if type(OptionTable) == "table" then		
+			for setting, value in pairs(OptionTable) do
+				if type(value) ~= "table" then -- 3
+					print(OptionCategroy, setting)
+					if SoD_CDB[OptionCategroy][setting] ~= value then
+						
+						local valuetext
+						if SoD_CDB[OptionCategroy][setting] == false then
+							valuetext = "false"
+						elseif SoD_CDB[OptionCategroy][setting] == true then
+							valuetext = "true"
+						else
+							valuetext = SoD_CDB[OptionCategroy][setting]
+						end
+						str = str.."^"..OptionCategroy.."~"..setting.."~"..valuetext
+						--print(OptionCategroy.."~"..setting.."~"..valuetext)
+					else
+						
+					end
+				end
+			end
+		end
+	end
+	for frame, info in pairs (SoD_CDB["FramePoints"]) do
+		for key, value in pairs(info) do
+			local f = _G[frame]
+			if f and f["point"] then
+				if info[key] ~= f["point"][key] then
+					str = str.."^FramePoints~"..frame.."~"..key.."~"..info[key]
+					--print(frame.."~"..key.."~"..info[key])
+				end
+			else -- 框体在当前配置尚未创建
+				str = str.."^FramePoints~"..frame.."~"..key.."~"..info[key]
+				--print(frame.."~"..key.."~"..info[key])
+			end
+		end
+	end
+	return str
+end
+
+T.ImportSettings = function(str)
+	local optionlines = {string.split("^", str)}
+	local addon_name, version = string.split("~", optionlines[1])
+	local sameversion
+	
+	if addon_name ~= G.addon_name.." Export" then
+		StaticPopup_Show(G.addon_name.."Cannot Import")
+	else
+		local import_str = ""
+		if version ~= G.Version then
+			import_str = import_str..format(L["版本不符合"], version, G.Version)
+		else
+			sameversion = true
+		end
+		
+		if not sameversion then
+			import_str = import_str..L["不完整导入"]
+		end
+		
+		StaticPopupDialogs[G.addon_name.."Import Confirm"].text = format(L["导入确认"]..import_str, G.addon_name)
+		StaticPopupDialogs[G.addon_name.."Import Confirm"].OnAccept = function()
+			SoD_CDB = {}
+			
+			SoD_DB["resetmode"] = "enable"
+			T.UpdateDefaultSettings()
+			T.LoadVariables()
+
+			for index, v in pairs(optionlines) do
+				if index ~= 1 then
+					local OptionCategroy, setting, arg1, arg2 = string.split("~", v)	
+					local count = select(2, string.gsub(v, "~", "~")) + 1
+					
+					if count == 3 then -- 可以直接赋值
+					
+						if tonumber(setting) and OptionCategroy ~= "PlateNpcID" and OptionCategroy ~= "PlatePower" then
+							setting = tonumber(setting)
+						end
+						
+						if SoD_CDB[OptionCategroy][setting] ~= nil then
+							if arg1 == "true" then
+								SoD_CDB[OptionCategroy][setting] = true	
+							elseif arg1 == "false" then
+								SoD_CDB[OptionCategroy][setting] = false
+							elseif tonumber(arg1) then
+								SoD_CDB[OptionCategroy][setting] = tonumber(arg1)
+							else
+								SoD_CDB[OptionCategroy][setting] = arg1
+							end
+						end
+					elseif OptionCategroy == "FramePoints" then -- 4 ^FramePoints~"..frame.."~"..key.."~"..info[key]
+						if SoD_CDB[OptionCategroy][setting] == nil then
+							SoD_CDB[OptionCategroy][setting] = {}
+						end
+						if arg1 == "x" or arg1 == "y" then
+							SoD_CDB[OptionCategroy][setting][arg1] = tonumber(arg2)
+						else
+							SoD_CDB[OptionCategroy][setting][arg1] = arg2
+						end
+					end
+				end
+			end
+			ReloadUI()
+		end
+		StaticPopup_Show(G.addon_name.."Import Confirm")
+	end
+end

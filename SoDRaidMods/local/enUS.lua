@@ -16,6 +16,12 @@ please download newest version %s|cFFFFFF00(%s)|r.]]
 L["早期版本"]				  = "Early version"
 L["更新"]					  = "Update"
 L["通用"]					  = "General"
+L["无法导入"]				  = "Cannot Import"
+L["导入确认"]				  = "Do you want to import all the %s settings?\n"
+L["版本不符合"] 			  = "\nImport Version %s（Current Version %s）"
+L["不完整导入"] 			  = "\nMay not import completely."
+L["导出"]					  = "Export"
+L["导入"]					  = "Import"
 L["复制"]					  = "Use Ctrl + c / Ctrl + v Copy download URL"
 L["启用所有"]				  = "Enable all"
 L["禁用所有"]                 = "Disable all"
@@ -109,10 +115,8 @@ L["显示图标提示BW"]			  = "Show icon for %s (Bigwigs)"
 L["显示图标提示DBMBW"]		  = "Show icon for %s (DBM Bigwigs)"
 L["显示模块"]				  = "%s Boss Mod"
 L["尺寸"]					  = "Size"
-L["血量"]					  = "Health"
-L["能量"]					  = "Energy"
 L["杂兵"]					  = "Adds"
-L["阶段转换"]				  = "Phase change"
+L["阶段转换"]				  = "Phase change %%.1f/%d"
 L["提示血量"]				  = "Show %s health"
 L["提示能量"]				  = "Show %s energy"
 L["音效提示"]				  = "Voice announce"
@@ -129,7 +133,8 @@ L["添加文本"]				  = "Add text tip for %s"
 L["首领模块"]				  = "Boss Mod"
 L["召唤音效"]				  = "Add voice announce for %s summon"
 L["距离过近"]				  = "TOO CLOSE!"
-L["距离过近三人"]			  = "Too Close: %s %s %s...%d"
+L["距离过近三人"]			  = "TOO CLOSE: %s %s %s...%d"
+L["距离过近人数"]			  = "TOO CLOSE:[%d]"
 L["加载失败"]				  = "%s NPC name load failed, please reload addons."
 
 --[[ 1 ]]--
@@ -138,7 +143,7 @@ L["TIP捕食者之嚎"]			  = "Automatically assign healer dispel debuff, and sh
 
 L["TIP贪噬迷雾读条计数"]	  = "Hungering Mist cast bar"
 
-L["即将迷雾"]			      = "Hungering Mist Incoming"
+L["即将迷雾"]			      = "Hungering Mist Incoming %d/100"
 
 --[[ 2 ]]--
 
@@ -151,7 +156,7 @@ L["debuff距离过近"]			  = "...%d man"
 
 L["TIP毁灭凝视"]			  = "Annihilating Glare castbar"
 
-L["即将射线"]			      = "Beam Incoming "
+L["即将射线"]			      = "Beam Incoming %d/100"
 
 --[[ 3 ]]--
 
@@ -168,7 +173,7 @@ L["boss177101"]				  = "|cffFF00FFSpread|r"
 L["boss177098"]				  = "|cff00FFFFSoak|r"
 L["已放技能"]				  = "Already used: "
 
-L["即将召唤"]				  = "Val'kyr Incoming "
+L["即将召唤"]				  = "Val'kyr Incoming %d/100"
 
 --[[ 4 ]]--
 
@@ -182,9 +187,9 @@ L["TIP怨恨"]				  = "Show timer for Spite, and voice countdown in 5 sec."
 L["下一次怨恨"]				  = "%s round Spite: %s"
 
 L["TIP群体驱散读条"]	      = "Show castbar and caster name for Mass Dispel."
-L["准备苦难"]				  = "Suffering incoming, kill orb."
-
 L["施法中断"]				  = "|cFFFF0000Cast Stopped|r"
+
+L["准备苦难"]				  = "Suffering incoming, kill orb. %d/100"
 
 --[[ 5 ]]--
 
@@ -207,8 +212,9 @@ L["TIP折磨烙印"]			  = "Say Brand of Torment rounds, will be reset to 1 afte
 L["折磨烙印喊话"]			  = "Brand [%s] %s"
 
 L["TIP碎裂之魂"]              = "Rendered Soul castbar"
+L["躲白圈"]					  = "Dodge [%d]"
 
-L["即将折磨喷发"]			  = "Tormented Eruptions Incoming "
+L["即将折磨喷发"]			  = "Tormented Eruptions Incoming %d/100"
 
 --[[ 6 ]]--
 
@@ -259,6 +265,7 @@ L["净化协议减伤顺序"]		  = "Protocol cooldown Order"
 L["TIP净化协议读条计数"]	  = "Show Purification Protocol cast bar and count and highlight over 3rd cast every round"
 
 L["能量核心"]				  = "Energy Core"
+L["BOSS能量"]				  = "Boss Energy %d/0"
 
 --[[ 8 ]]--
 
@@ -346,7 +353,7 @@ L["当前台子"]				  = "|cffFF0000This platform|r"
 L["下个台子"]				  = "|cffD3D3D3Next platform|r"
 L["圈数"]					  = "|cff%s[ %d round ]|r"
 
-L["即将黑暗帷幕"]			  = "INCOMING: Veil of Darkness"
+L["即将黑暗帷幕"]			  = "INCOMING: Veil of Darkness %d/100"
 L["小心脚下"]			      = "WATCH YOUR FEET"
 L["目标免疫"]			      = "TARGET IMMUNE"
 L["召唤宝珠"]				  = "ORB SUMMON"
