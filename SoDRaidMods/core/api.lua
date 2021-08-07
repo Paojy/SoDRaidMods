@@ -599,12 +599,13 @@ T.RangeCheck = function(range)
 					end								
 				end
 				if #inrange > 0 then
-					local str
-					if #inrange > 3 then
-						str = string.format(L["距离过近三人"], inrange[1], inrange[2], inrange[3], #inrange)
-					else
-						str = L["距离过近"]..": "..table.concat(inrange, " ")
-					end
+					local str = string.format(L["距离过近人数"], #inrange)
+					--if #inrange > 3 then
+					--	str = string.format(L["距离过近三人"], inrange[1], inrange[2], inrange[3], #inrange)
+					--else
+					--	str = L["距离过近"]..": "..table.concat(inrange, " ")
+					--end
+					
 					if i == 0 then
 						PlaySoundFile(G.media.sounds.."range.ogg", "Master")
 					end
