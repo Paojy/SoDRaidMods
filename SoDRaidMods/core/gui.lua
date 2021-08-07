@@ -1056,7 +1056,7 @@ end)
 local unlockbutton = T.createUIPanelButton(options.sfa, G.addon_name.."UnlockAllFramesButton", 150, 25, L["解锁框体"])
 unlockbutton:SetPoint("LEFT", resetposbutton, "RIGHT", 10, 0)
 unlockbutton:SetScript("OnClick", function()
-	T.UnlockAll()
+	T.UnlockCurrentBoss()
 end)
 
 local resetbutton = T.createUIPanelButton(options.sfa, G.addon_name.."ResetButton", 150, 25, L["重置所有设置"])

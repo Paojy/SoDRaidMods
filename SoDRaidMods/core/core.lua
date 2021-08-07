@@ -479,7 +479,7 @@ Timeline:SetScript("OnEvent", function(self, event, ...)
 		self:Show()
         self.assignment_cd = table.wipe(self.assignment_cd)
         
-        if IsAddOnLoaded("ExRT") and (_G.VExRT.Note) and (SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
+        if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
             local text = SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
             local betweenLine = false
             local count = 0
@@ -4882,6 +4882,7 @@ T.CreateBossMod = function(ef, index, v, tip, points, events, difficulty_id, wid
 	frame:SetSize(frame.width, frame.height)
 
 	frame.movingname = EJ_GetEncounterInfo(G.Encounters[index]["id"])..GetSpellInfo(v)..L["首领模块"]
+	frame.movingtag = index
 	if not points.hide then
 		frame.point = { a1 = points.a1, parent = "UIParent", a2 = points.a2, x = points.x, y = points.y }
 		T.CreateDragFrame(frame)

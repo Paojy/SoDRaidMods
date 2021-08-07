@@ -255,10 +255,25 @@ T.createUIPanelButton = function(parent, name, width, height, text)
 	end)
  	button:SetScript("OnLeave", function()
 		button.text:SetTextColor(1, 1, 1)
-		button.sd:SetBackdropColor(0, 0, 0, .3)
+		button.sd:SetBackdropColor(.05, .05, .05, .5)
 		button.sd:SetBackdropBorderColor(0, 0, 0)
 	end)
-	
+	button:SetScript("OnEnable", function()
+		if button:IsMouseOver() then
+			button.text:SetTextColor(1, 1, 0)
+			button.sd:SetBackdropColor(1, 1, 0, 0.2)
+			button.sd:SetBackdropBorderColor(1, 1, 0)
+		else
+			button.text:SetTextColor(1, 1, 1)
+			button.sd:SetBackdropColor(.05, .05, .05, .5)
+			button.sd:SetBackdropBorderColor(0, 0, 0)	
+		end
+	end)
+	button:SetScript("OnDisable", function()
+		button.text:SetTextColor(.5, .5, .5)
+		button.sd:SetBackdropColor(.5, .5, .5, .7)
+		button.sd:SetBackdropBorderColor(0, 0, 0)
+	end)
 	return button
 end
 

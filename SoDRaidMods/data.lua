@@ -1970,7 +1970,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 							return name.."??"
 						end
 					end
-					
+
 					frame.updatetext = function(counter_index)
 						if frame.assignment[counter_index] then
 							local player1, player2, player3 = "", "", ""
@@ -2088,7 +2088,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 						frame.counter = 0
 						frame.display_counter = 0
 						
-						if IsAddOnLoaded("ExRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
+						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
 							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0
@@ -2696,7 +2696,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 						frame.counter = 0
 						frame.display_counter = 1
 						
-						if IsAddOnLoaded("ExRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
+						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
 							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0
@@ -3174,7 +3174,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 						frame.counter = 1
 						frame.display_counter = 1
 						
-						if IsAddOnLoaded("ExRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
+						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
 							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0
@@ -3263,7 +3263,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					elseif event == "ENCOUNTER_START" then
 						frame.counter = 0
 						frame.order = table.wipe(frame.order)
-						if IsAddOnLoaded("ExRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
+						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
 							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0
@@ -4833,7 +4833,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 						frame.display_counter = 1
 						frame.in_cd = false
 						
-						if IsAddOnLoaded("ExRT") and (_G.VExRT.Note) and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
+						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
 							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0

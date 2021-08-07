@@ -18,7 +18,8 @@ local Character_default_Settings = {
 		tl_show_time = false,
 		tl_exp_time = true,
 		tl_advance = 60,
-		tl_dur = 5,		
+		tl_dur = 5,
+		moving_boss = 1,
 	},
 	
 	AlertFrame = {
@@ -291,8 +292,6 @@ function T.LoadAccountVariables()
 				if SoD_DB[a][k] == nil then
 					if v then
 						SoD_DB[a][k] = v
-					else
-						print(a,k)
 					end
 				end
 			end
@@ -411,7 +410,7 @@ T.ExportSettings = function()
 		if type(OptionTable) == "table" then		
 			for setting, value in pairs(OptionTable) do
 				if type(value) ~= "table" then -- 3
-					print(OptionCategroy, setting)
+					--print(OptionCategroy, setting)
 					if SoD_CDB[OptionCategroy][setting] ~= value then
 						
 						local valuetext

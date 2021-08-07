@@ -1,7 +1,18 @@
 ﻿local T, C, L, G = unpack(select(2, ...))
 
 local CurrentFrame = "NONE"
-local selected
+
+local anchors = {
+	["CENTER"] = L["中间"], 
+	["LEFT"] = L["左"], 
+	["RIGHT"] = L["右"], 
+	["TOP"] = L["上"], 
+	["BOTTOM"] = L["下"], 
+	["TOPLEFT"] = L["左上"], 
+	["TOPRIGHT"] = L["右上"], 
+	["BOTTOMLEFT"] = L["左下"], 
+	["BOTTOMRIGHT"] = L["右下"],
+}
 
 local function PlaceCurrentFrame()
 	local f = _G[CurrentFrame]
@@ -20,7 +31,6 @@ local function Reskinbox(box, name, value, ...)
 	local bd = CreateFrame("Frame", nil, box)
 	bd:SetPoint("TOPLEFT", -2, 0)
 	bd:SetPoint("BOTTOMRIGHT")
-	bd:SetFrameLevel(box:GetFrameLevel()-1)
 	T.createborder(bd)
 
 	box:SetFont(GameFontHighlight:GetFont(), 12, "OUTLINE")
@@ -53,6 +63,16 @@ local function Reskinbox(box, name, value, ...)
 		end
 		self:ClearFocus()
 	end)
+	
+	box:SetScript("OnEnable", function()
+		bd.sd:SetBackdropColor(0, 0, 0, .3)
+		bd.sd:SetBackdropBorderColor(0, 0, 0)	
+	end)
+	box:SetScript("OnDisable", function()
+		bd.sd:SetBackdropColor(.5, .5, .5, .7)
+		bd.sd:SetBackdropBorderColor(0, 0, 0)
+	end)
+	
 end
 
 local Mover = CreateFrame("Frame", G.addon_name.."Mover", UIParent)
@@ -68,122 +88,151 @@ Mover:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 Mover:SetClampedToScreen(true)
 Mover:SetMovable(true)
 Mover:EnableMouse(true)
-
 T.createborder(Mover)
 
-Mover.curframe = T.createtext(Mover, "OVERLAY", 16, "OUTLINE", "LEFT")
-Mover.curframe:SetPoint("TOP", Mover, "TOP", 0, -5)
-Mover.curframe:SetWidth(500)
-local anchors = {
-	["CENTER"] = L["中间"], 
-	["LEFT"] = L["左"], 
-	["RIGHT"] = L["右"], 
-	["TOP"] = L["上"], 
-	["BOTTOM"] = L["下"], 
-	["TOPLEFT"] = L["左上"], 
-	["TOPRIGHT"] = L["右上"], 
-	["BOTTOMLEFT"] = L["左下"], 
-	["BOTTOMRIGHT"] = L["右下"],
-}
-
-local createradiobuttongroup = function(parent, value, ...)
-	local frame = CreateFrame("Frame", G.addon_name..value.."RadioButtonGroup", parent)
+local DropDownButtons = {}
+ 
+local function CreateDropDownButton(text, dropdown_type, value, v_table, ...)
+	local frame = T.createUIPanelButton(Mover, G.addon_name.."DropDown"..value, 100, 20, "")
 	frame:SetPoint(...)
-	frame:SetSize(300, 25)
+
+	frame.name = T.createtext(frame, "OVERLAY", 12, "OUTLINE", "LEFT")
+	frame.name:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 5, 8)
+	frame.name:SetText(G.addon_c..text.."|r")
 	
-	for k, v in pairs(anchors) do
-		frame[k] = CreateFrame("CheckButton", G.addon_name..value..k.."RadioButtonGroup", frame, "UIRadioButtonTemplate")
-		
-		_G[frame[k]:GetName() .. "Text"]:SetText(v)
+	frame.buttons = {}
+	
+	for k, v in pairs(v_table) do
+		frame[k] = T.createUIPanelButton(frame, G.addon_name.."DropDown"..value..k, 90, 20, v)
+		frame[k]:SetFrameLevel(frame:GetFrameLevel()+5)
+		frame[k]:Hide()
 		
 		frame[k]:SetScript("OnClick", function(self)
-			if self:GetChecked() then
+			if dropdown_type == "anchor" then
 				SoD_CDB["FramePoints"][CurrentFrame][value] = k
+				frame.text:SetText(v_table[k])
 				PlaceCurrentFrame()
+			elseif dropdown_type == "boss" then
+				SoD_CDB["General"][value] = k
+				frame.text:SetText(v_table[k])
+				T.UnlockCurrentBoss()
 			end
-		end)
-	end
-	
-	for k, v in pairs(anchors) do
-		frame[k]:HookScript("OnClick", function(self)
-			for key, _ in pairs(anchors) do
-				frame[key]:SetChecked(SoD_CDB["FramePoints"][CurrentFrame][value] == key)
+			
+			for _, btn in pairs(frame.buttons) do
+				btn:Hide()
 			end
+			frame.bg:Hide()
 		end)
+		
+		table.insert(frame.buttons, frame[k])
 	end
-	
-	local buttons = {frame:GetChildren()}
-	for i = 1, #buttons do
+
+	for i = 1, #frame.buttons do
 		if i == 1 then
-			buttons[i]:SetPoint("LEFT", frame, "LEFT", 10, 0)
+			frame.buttons[i]:SetPoint("TOP", frame, "BOTTOM", 0, -10)
 		else
-			buttons[i]:SetPoint("LEFT", _G[buttons[i-1]:GetName() .. "Text"], "RIGHT", 5, 0)
+			frame.buttons[i]:SetPoint("TOP", frame.buttons[i-1], "BOTTOM", 0, -4)
 		end
 	end
+
+	frame.bg = CreateFrame("Frame", nil, frame)
+	frame.bg:SetPoint("TOPLEFT", frame.buttons[1], "TOPLEFT", -5, 5)
+	frame.bg:SetPoint("BOTTOMRIGHT", frame.buttons[#frame.buttons], "BOTTOMRIGHT", 5, -5)
+	frame.bg:SetFrameLevel(frame:GetFrameLevel()+2)
+	frame.bg:EnableMouse()
+	frame.bg:SetScript("OnEnter", function() end)
+	T.createborder(frame.bg)
+	frame.bg.sd:SetBackdropColor(.1, .4, .9, 1)
+	frame.bg:Hide()
 	
+	table.insert(DropDownButtons, frame)
+	
+	frame:SetScript("OnClick", function(self)
+		if frame.buttons[1]:IsShown() then
+			for _, btn in pairs(frame.buttons) do
+				btn:Hide()
+			end
+			frame.bg:Hide()
+		else
+			for _, btn in pairs(frame.buttons) do
+				btn:Show()
+			end
+			frame.bg:Show()
+		end
+		
+		for _, dropdown_btn in pairs(DropDownButtons) do
+			if dropdown_btn ~= frame then
+				for _, btn in pairs(dropdown_btn.buttons) do
+					btn:Hide()
+				end
+				dropdown_btn.bg:Hide()
+			end
+		end
+	end)
+	
+	frame:SetScript("OnHide", function(self)
+		for _, btn in pairs(frame.buttons) do
+			btn:Hide()
+		end
+		frame.bg:Hide()
+	end)
+
 	return frame
 end
+
+Mover.curframe = T.createtext(Mover, "OVERLAY", 16, "OUTLINE", "LEFT")
+Mover.curframe:SetPoint("TOP", Mover, "TOP", 0, -45)
+Mover.curframe:SetWidth(500)
 
 -- parent
 local ParentBox = CreateFrame("EditBox", G.addon_name.."MoverParentBox", Mover)
 ParentBox:SetSize(120, 20)
-Reskinbox(ParentBox, L["锚点框体"], "parent", "TOPLEFT", Mover, "TOPLEFT", 20, -50)
+Reskinbox(ParentBox, L["锚点框体"], "parent", "TOPLEFT", Mover, "TOPLEFT", 20, -90)
+
+-- a1
+local a1Box = CreateDropDownButton(L["锚点"].."1", "anchor", "a1", anchors, "LEFT", ParentBox, "RIGHT", 20, 0)
+
+-- a2
+local a2Box = CreateDropDownButton(L["锚点"].."2", "anchor", "a2", anchors, "LEFT", a1Box, "RIGHT", 20, 0)
 
 -- x
 local XBox = CreateFrame("EditBox", G.addon_name.."MoverXBox", Mover)
-XBox:SetSize(50, 20)
-Reskinbox(XBox, "X", "x", "LEFT", ParentBox, "RIGHT", 20, 0)
+XBox:SetSize(55, 20)
+Reskinbox(XBox, "X", "x", "LEFT", a2Box, "RIGHT", 20, 0)
 
 -- y
 local YBox = CreateFrame("EditBox", G.addon_name.."MoverYBox", Mover)
-YBox:SetSize(50, 20)
-Reskinbox(YBox, "Y", "y", "LEFT", XBox, "RIGHT", 10, 0)
-
--- a1
-Point1buttons_text = T.createtext(Mover, "OVERLAY", 12, "NONE", "LEFT", true)
-Point1buttons_text:SetPoint("TOPLEFT", Mover, "TOPLEFT", 20, -80)
-Point1buttons_text:SetText(L["锚点"].."1")
-Point1buttons_text:SetWidth(40)
-Point1buttons = createradiobuttongroup(Mover, "a1", "LEFT", Point1buttons_text, "RIGHT", 0, 0)
-
--- a2
-Point2buttons_text = T.createtext(Mover, "OVERLAY", 12, "NONE", "LEFT", true)
-Point2buttons_text:SetPoint("TOPLEFT", Mover, "TOPLEFT", 20, -105)
-Point2buttons_text:SetText(L["锚点"].."2")
-Point2buttons_text:SetWidth(40)
-Point2buttons = createradiobuttongroup(Mover, "a2", "LEFT", Point2buttons_text, "RIGHT", 0, 0)
+YBox:SetSize(55, 20)
+Reskinbox(YBox, "Y", "y", "LEFT", XBox, "RIGHT", 20, 0)
 
 local function DisplayCurrentFramePoint()
 	local points = SoD_CDB["FramePoints"][CurrentFrame]
-	for k, v in pairs(anchors) do
-		Point1buttons[k]:SetChecked(SoD_CDB["FramePoints"][CurrentFrame]["a1"] == k)
-		Point2buttons[k]:SetChecked(SoD_CDB["FramePoints"][CurrentFrame]["a2"] == k)
-	end
+	a1Box.text:SetText(anchors[SoD_CDB["FramePoints"][CurrentFrame]["a1"]])
+	a2Box.text:SetText(anchors[SoD_CDB["FramePoints"][CurrentFrame]["a2"]])
 	ParentBox:SetText(points.parent)
 	XBox:SetText(points.x)
 	YBox:SetText(points.y)
 end
 
 local function EnableOptions()
-	for k, v in pairs(anchors) do	
-		Point1buttons[k]:Enable()
-		Point2buttons[k]:Enable()
-	end
+	a1Box:Enable()
+	a2Box:Enable()
 	ParentBox:Enable()
 	XBox:Enable()
 	YBox:Enable()
 end
 
 local function DisableOptions()
-	for k, v in pairs(anchors) do
-		Point1buttons[k]:SetChecked(false)
-		Point2buttons[k]:SetChecked(false)
-		Point1buttons[k]:Disable()
-		Point2buttons[k]:Disable()
-	end
+	a1Box:Disable()
+	a1Box.text:SetText("")
+	a2Box:Disable()
+	a2Box.text:SetText("")
 	ParentBox:Disable()
+	ParentBox:SetText("")
 	XBox:Disable()
+	XBox:SetText("")
 	YBox:Disable()
+	YBox:SetText("")
 end
 
 -- reset
@@ -243,10 +292,7 @@ function T.CreateDragFrame(frame)
 		CurrentFrame = fname
 		Mover.curframe:SetText(L["选中的框体"].." "..G.addon_c..gsub(frame.movingname, "\n", "").."|r")
 		DisplayCurrentFramePoint()
-		if not selected then
-			EnableOptions()
-			selected = true
-		end
+		EnableOptions()
 		for i = 1, #G.dragFrameList do
 			if G.dragFrameList[i]:GetName() == fname then
 				G.dragFrameList[i].df.mask:SetBackdropBorderColor(0, 1, 1)
@@ -276,10 +322,44 @@ T.UnlockAll = function()
 	end
 end
 
+T.UnlockCurrentBoss = function()
+	if not InCombatLockdown() then
+		if CurrentFrame ~= "NONE" then
+			local frame = _G[CurrentFrame]
+			if not frame.movingtag or frame.movingtag == SoD_CDB["General"]["moving_boss"] then
+				Mover.curframe:SetText(L["选中的框体"].." "..G.addon_c..gsub(frame.movingname, "\n", "").."|r")
+				EnableOptions()
+			else
+				CurrentFrame = "NONE"
+				Mover.curframe:SetText(L["选中的框体"].." "..G.addon_c..CurrentFrame.."|r")
+				DisableOptions()
+				for i = 1, #G.dragFrameList do
+					G.dragFrameList[i].df.mask:SetBackdropBorderColor(0, 0, 0)
+				end
+			end
+		else
+			Mover.curframe:SetText(L["选中的框体"].." "..G.addon_c..CurrentFrame.."|r")
+			DisableOptions()
+		end
+		for i = 1, #G.dragFrameList do
+			local frame = G.dragFrameList[i]
+			if not frame.movingtag or frame.movingtag == SoD_CDB["General"]["moving_boss"] then
+				frame.df:Show()
+			else
+				frame.df:Hide()
+			end
+		end
+		Mover:Show()
+		G.gui:Hide()
+	else
+		Mover:RegisterEvent("PLAYER_REGEN_ENABLED")
+		T.msg(L["进入战斗锁定"])
+	end
+end
+
 T.LockAll = function()
 	CurrentFrame = "NONE"
 	DisableOptions()
-	selected = false
 	
 	for i = 1, #G.dragFrameList do
 		G.dragFrameList[i].df.mask:SetBackdropBorderColor(0, 0, 0)
@@ -339,12 +419,27 @@ Mover:SetScript("OnEvent", function(self, event, arg1)
 			T.msg(L["进入战斗锁定"])
 		end
 	elseif event == "PLAYER_REGEN_ENABLED" then
-		T.UnlockAll()
+		T.UnlockCurrentBoss()
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	elseif event == "ADDON_LOADED" then
 		if arg1 == G.addon_name then
 			T.PlaceAllFrames()
 			self:RegisterEvent("PLAYER_REGEN_DISABLED")
+			local boss_table = {}
+			for index, data in pairs(G.Encounters) do
+				if data.id then
+					boss_table[index] = EJ_GetEncounterInfo(data["id"])
+				else
+					boss_table[index] = L["杂兵"]
+				end
+			end
+			local boss_btn = CreateDropDownButton(L["当前首领"], "boss", "moving_boss", boss_table, "TOP", Mover, "TOP", 0, -10)
+			boss_btn.name:Hide()
+			boss_btn.text:SetText(boss_table[SoD_CDB["General"]["moving_boss"]])
+			boss_btn:SetSize(510, 25)
+			for _, btn in pairs(boss_btn.buttons) do
+				btn:SetSize(200, 20)
+			end
 		end
 	end
 end)
