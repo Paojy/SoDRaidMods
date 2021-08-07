@@ -69,7 +69,7 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 					unit = "boss1",
 					npc_id = "175611",
 					ranges = {
-						{ ul = 15, ll = 10.5, tip = L["阶段转换"]},
+						{ ul = 15, ll = 10.5, tip = string.format(L["阶段转换"], "10")},
 					},
 				},
 			},
@@ -195,7 +195,7 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 							if frame.IsSpellReady() and not SoD_CDB["General"]["disable_sound"] then
 								PlaySoundFile(G.media.sounds.."dispel.ogg", "Master") -- 声音 注意驱散
 								frame.playing = true
-								C_Timer.After(3, function()
+								C_Timer.After(8, function()
 									frame.playing = false
 								end)
 							end
@@ -438,8 +438,8 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 					unit = "boss1",
 					npc_id = "175725",
 					ranges = {
-						{ ul = 70, ll = 67, tip = L["阶段转换"]},
-						{ ul = 37, ll = 34, tip = L["阶段转换"]},
+						{ ul = 70, ll = 67, tip = string.format(L["阶段转换"], "66.6")},
+						{ ul = 37, ll = 34, tip = string.format(L["阶段转换"], "33.3")},
 					},
 				},
 			},
@@ -458,7 +458,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 							local pp = UnitPower("boss1")
 							local spell = GetSpellInfo(348805)
 							if pp >= 85 and not AuraUtil.FindAuraByName(spell, "boss1", "HELPFUL") then
-								self.text:SetText(L["即将射线"]..pp)
+								self.text:SetText(string.format(L["即将射线"], pp))
 								self:Show()
 							else
 								self.text:SetText("")
@@ -471,7 +471,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 							local pp = UnitPower("boss1")
 							local spell = GetSpellInfo(348805)
 							if pp >= 85 and not AuraUtil.FindAuraByName(spell, "boss1", "HELPFUL") then
-								self.text:SetText(L["即将射线"]..pp)
+								self.text:SetText(string.format(L["即将射线"], pp))
 								self:Show()
 							else
 								self.text:SetText("")
@@ -913,8 +913,8 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 							frame.bar:Show()
 						elseif event == "UNIT_SPELLCAST_CHANNEL_START" and spellID == 351413 then -- 毁灭凝视 开始引导 20s
 							
-							frame.bar:SetMinMaxValues(0, 20)
-							frame.bar.exp = GetTime() + 20					
+							frame.bar:SetMinMaxValues(0, 15)
+							frame.bar.exp = GetTime() + 15					
 									
 							frame.bar:SetScript("OnUpdate", function(self, e)
 								self.t = self.t + e
@@ -1026,8 +1026,6 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{spellID = 350202, role = "tank", event = "UNIT_SPELLCAST_START", unit = "player" }, -- 无尽之击	
 			{spellID = 350385, event = "UNIT_SPELLCAST_START"}, -- 靠近席格妮
 			{spellID = 352752, event = "UNIT_SPELLCAST_START"}, -- 靠近席格妮 待检查
-			{spellID = 350286, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_CAST_SUCCESS"}, -- 打断席格妮 待检查			
-			{spellID = 350283, role = "tank", event = "UNIT_SPELLCAST_START"}, -- 打断席格妮 待检查
 			{spellID = 350541, event = "BW_AND_DBM_SPELL", dur = 3, countdown = false, addon_only = "DBM"}, -- 准备命运残片
 			{spellID = 350542, event = "BW_AND_DBM_SPELL", dur = 3, countdown = false, addon_only = "BW"}, -- 准备命运残片
 			{spellID = 352744, event = "UNIT_SPELLCAST_START"}, -- 命运残片
@@ -1257,7 +1255,7 @@ G.Encounters[3] = { -- 九武神 已过初检
 					frame.spells = {}
 					frame.create_text = function(bossName, spellID, str)				
 						local text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")	
-						text:SetText(T.GetIconLink(spellID).." "..str)
+						text:SetText(T.GetSpellIcon(spellID).." "..str)
 						text:Hide()
 						
 						frame.texts[bossName] = text
@@ -1370,9 +1368,9 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 					unit = "boss1",
 					npc_id = "175729",
 					ranges = {
-						{ ul = 85, ll = 80.5, tip = L["阶段转换"]},
-						{ ul = 65, ll = 60.5, tip = L["阶段转换"]},
-						{ ul = 35, ll = 30.5, tip = L["阶段转换"]},
+						{ ul = 85, ll = 80.5, tip = string.format(L["阶段转换"], "80")},
+						{ ul = 65, ll = 60.5, tip = string.format(L["阶段转换"], "60")},
+						{ ul = 35, ll = 30.5, tip = string.format(L["阶段转换"], "30")},
 					},
 				},
 			},
@@ -1518,7 +1516,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30, hide_title = true},
 				width = 250,
 				height = 100,
 				init = function(frame)
@@ -1667,7 +1665,9 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 								table.insert(t, bar)
 							end
 						end
-						table.sort(t, function(a, b) return a.priority < b.priority end)
+						if #t > 1 then
+							table.sort(t, function(a, b) return a.priority < b.priority end)
+						end
 						local lastbar
 						for i, bar in pairs(t) do
 							bar:ClearAllPoints()
@@ -1876,9 +1876,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 	npc_id = "175727",
 	img = 4071442,
 	alerts = {
-		AlertIcon = {
-			{type = "cast", tip = "躲地板", hl = "hl", spellID = 350766}, -- 折磨 已检查
-			{type = "cast", tip = "地板连躲", hl = "hl", spellID = 352933}, -- 折磨喷发 已检查		
+		AlertIcon = {	
 			{type = "aura", tip = "拾起锁链", hl = "no", spellID = 350927, aura_type = "HARMFUL", unit = "player"}, -- 好战者枷锁 已检查
 			{type = "cast", tip = "处理时限", hl = "no", spellID = 350411}, -- 地狱咆哮 已检查			
 			{type = "com", role = "tank", hl = "hl", spellID = 350422}, -- 毁灭之刃 已检查
@@ -2392,7 +2390,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					local spell_name, _, icon = GetSpellInfo(351229)
 						
 					local bar = CreateFrame("StatusBar", nil, frame)
-					bar.dur = 5
+					bar.dur = 3
 					bar:SetHeight(28)
 					bar:SetWidth(250)
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
@@ -2410,7 +2408,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 						
 					bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
 					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)	
-					bar.left:SetText(spell_name)
 					
 					bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
 					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
@@ -2422,7 +2419,8 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					bar:SetMinMaxValues(0, bar.dur)
 					bar.t = 0
 					bar.update_rate = .02	
-					
+					bar.ind = 1
+
 					bar:Hide()
 					
 					frame.bar = bar
@@ -2431,20 +2429,14 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					if event == "UNIT_SPELLCAST_SUCCEEDED" then
 						local spellId = select(3, ...)
 						if spellId == frame.spell1 then
-							frame.bar.exp = 0
-						end
-					elseif event == "UNIT_SPELLCAST_START" then
-						local spellId = select(3, ...)
-						if spellId == frame.spell2 then
-							frame.bar.exp = 0
-						end
-					elseif event == "ENCOUNTER_START" then
-						frame.bar:Show()
-						frame.bar:SetAlpha(0)
-						frame.bar:SetScript("OnUpdate", function(self, e)
-							self.t = self.t + e
-							if self.t > self.update_rate then
-								if self.exp then
+							frame.bar.exp = GetTime() + 8
+							
+							frame.bar.ind = 1						
+							frame.bar.left:SetText(string.format(L["躲白圈"], frame.bar.ind))
+							
+							frame.bar:SetScript("OnUpdate", function(self, e)
+								self.t = self.t + e
+								if self.t > self.update_rate then
 									local remain = self.exp - GetTime()
 									if remain > 0 then
 										if remain <= self.dur then
@@ -2456,19 +2448,68 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 											self:SetValue(0)
 											self.right:SetText("")
 										end								
-									else		
-										self.exp = GetTime() + 10
-									end
-								end								
-								self.t = 0
-							end
-						end)
+									else
+										if self.ind == 1 then
+											self.ind = self.ind + 1
+											self.exp = GetTime() + 5
+											self.left:SetText(string.format(L["躲白圈"], self.ind))
+										else
+											self:Hide()
+											self:SetScript("OnUpdate", nil)
+										end
+									end						
+									self.t = 0
+								end
+							end)
+
+							frame.bar:SetAlpha(0)
+							frame.bar:Show()
+						end
+					elseif event == "UNIT_SPELLCAST_START" then
+						local spellId = select(3, ...)
+						if spellId == frame.spell2 then
+							frame.bar.exp = GetTime() + 8
+							
+							frame.bar.ind = 1						
+							frame.bar.left:SetText(string.format(L["躲白圈"], frame.bar.ind))
+							
+							frame.bar:SetScript("OnUpdate", function(self, e)
+								self.t = self.t + e
+								if self.t > self.update_rate then
+									local remain = self.exp - GetTime()
+									if remain > 0 then
+										if remain <= self.dur then
+											self:SetAlpha(1)
+											self:SetValue(self.dur - remain)
+											self.right:SetText(T.FormatTime(remain))
+										else
+											self:SetAlpha(0)
+											self:SetValue(0)
+											self.right:SetText("")
+										end								
+									else
+										if self.ind == 1 then
+											self.ind = self.ind + 1
+											self.exp = GetTime() + 5
+											self.left:SetText(string.format(L["躲白圈"], self.ind))
+										else
+											self:Hide()
+											self:SetScript("OnUpdate", nil)
+										end
+									end						
+									self.t = 0
+								end
+							end)
+
+							frame.bar:SetAlpha(0)
+							frame.bar:Show()
+						end
 					end
 				end,
 				reset = function(frame)
 					frame.bar:SetScript("OnUpdate", nil)
-					frame.bar.exp = false
 					frame.bar:SetValue(0)
+					frame.bar.left:SetText("")
 					frame.bar.right:SetText("")
 					frame.bar:Hide()
 				end,
@@ -2510,8 +2551,8 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 					unit = "boss1",
 					npc_id = "176523",
 					ranges = {
-						{ ul = 75, ll = 70.5, tip = L["阶段转换"]},
-						{ ul = 45, ll = 40.5, tip = L["阶段转换"]},
+						{ ul = 75, ll = 70.5, tip = string.format(L["阶段转换"], "70")},
+						{ ul = 45, ll = 40.5, tip = string.format(L["阶段转换"], "40")},
 					},
 				},
 			},
@@ -2904,7 +2945,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					unit = "boss1",
 					npc_id = "175731",
 					ranges = {
-						{ ul = 20, ll = 2, tip = L["能量"]},
+						{ ul = 20, ll = 2, tip = L["BOSS能量"]},
 					},
 				},
 				
@@ -3707,8 +3748,8 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					unit = "boss1",
 					npc_id = "175730",
 					ranges = {
-						{ ul = 75, ll = 70.5, tip = L["阶段转换"]},
-						{ ul = 45, ll = 40.5, tip = L["阶段转换"]},
+						{ ul = 75, ll = 70.5, tip = string.format(L["阶段转换"], "70")},
+						{ ul = 45, ll = 40.5, tip = string.format(L["阶段转换"], "40")},
 					},
 				},
 			},
@@ -4873,7 +4914,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 					unit = "boss1",
 					npc_id = "175559",
 					ranges = {
-						{ ul = 10, ll = 0.5, tip = L["阶段转换"]},
+						{ ul = 10, ll = 0.5, tip = string.format(L["阶段转换"], "0")},
 					},
 				},
 			},
@@ -5771,7 +5812,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					unit = "boss1",
 					npc_id = "175732",
 					ranges = {
-						{ ul = 86, ll = 84, tip = L["阶段转换"]},
+						{ ul = 86, ll = 84, tip = string.format(L["阶段转换"], "84")},
 					},
 				},
 			},
@@ -5954,7 +5995,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 								table.insert(t, bar)
 							end
 						end
-						table.sort(t, function(a, b) return a.stack > b.stack end)
+						if #t > 1 then
+							table.sort(t, function(a, b) return a.stack > b.stack end)
+						end
 						local lastbar
 						for i, bar in pairs(t) do
 							bar:ClearAllPoints()
@@ -6026,14 +6069,16 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.text_center = T.createtext(frame, "OVERLAY", 50, "OUTLINE", "LEFT")
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
-					frame.update_text = function()						
-						table.sort(frame.targets, function(a, b)
-							if a.s > b.s then
-								return true
-							elseif a.s == b.s and a.i < b.i then
-								return true
-							end
-						end)
+					frame.update_text = function()
+						if #frame.targets > 1 then
+							table.sort(frame.targets, function(a, b)
+								if a.s > b.s then
+									return true
+								elseif a.s == b.s and a.i < b.i then
+									return true
+								end
+							end)
+						end
 						
 						local str = L["右"].."\n"
 						
@@ -6203,7 +6248,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 								table.insert(t, bar)
 							end
 						end
-						table.sort(t, function(a, b) return a.stack > b.stack end)
+						if #t > 1 then
+							table.sort(t, function(a, b) return a.stack > b.stack end)
+						end
 						local lastbar
 						for i, bar in pairs(t) do
 							bar:ClearAllPoints()
@@ -6709,7 +6756,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 								table.insert(t, bar)
 							end
 						end
-						table.sort(t, function(a, b) return a.exp < b.exp end)
+						if #t > 1 then
+							table.sort(t, function(a, b) return a.exp < b.exp end)
+						end
 						local lastbar
 						for i, bar in pairs(t) do
 							bar:ClearAllPoints()
@@ -6926,7 +6975,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 								table.insert(t, bar)
 							end
 						end
-						table.sort(t, function(a, b) return a.ind < b.ind end)
+						if #t > 1 then
+							table.sort(t, function(a, b) return a.ind < b.ind end)
+						end
 						local lastbar
 						for i, bar in pairs(t) do
 							bar:ClearAllPoints()
