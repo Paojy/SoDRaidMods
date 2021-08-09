@@ -1397,9 +1397,9 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{spellID = 350489, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 快走开	
 			{spellID = 350894, role = "tank", event = "UNIT_SPELLCAST_START" }, -- 正面冲击
 			{spellID = 355123, event = "UNIT_SPELLCAST_START" }, -- 躲地板			
-			{spellID = 351073, event = "UNIT_SPELLCAST_START" }, -- P2 复制冲击
-			{spellID = 351066, event = "UNIT_SPELLCAST_START" }, -- P3 复制地板
-			{spellID = 351067, event = "UNIT_SPELLCAST_START" }, -- P4 复制击飞	
+			{spellID = 351066, event = "UNIT_SPELLCAST_START" }, -- P2 复制冲击
+			{spellID = 351067, event = "UNIT_SPELLCAST_START" }, -- P3 复制地板
+			{spellID = 351073, event = "UNIT_SPELLCAST_START" }, -- P4 复制击飞	
 		},
 		BossMods = {
 			{ -- 群体驱散 已检查
@@ -1610,6 +1610,8 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				width = 250,
 				height = 150,
 				init = function(frame)-- GetSpellCooldown(102417)
+					frame.spell1 = 350469
+					frame.spell2 = 355151
 					frame.class = {
 						["DEMONHUNTER"] = {spell = 131347, priority = 1},  -- 滑翔 无cd
 						["DRUID"] = {spell = 102401, priority = 2}, -- cd 野性冲锋 已检查
@@ -1687,7 +1689,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				update = function(frame, event, ...)
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
-						if sub_event == "SPELL_AURA_APPLIED" and spellID == 350469 then
+						if sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spell1 then
 							if UnitInRaid(destName) then -- 确认中的人在团队中
 								if not frame.bars[destGUID] then
 									frame.create_bar(destGUID)
@@ -1763,36 +1765,36 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 										C_ChatInfo.SendAddonMessage("sodpaopao", "my_movespell_cd,"..duration..","..exp_time, "RAID")
 									end)
 								end
-							elseif sub_event == "SPELL_AURA_APPLIED" and spellID == 355151 then
-								if not frame.bars[destGUID] then
-									frame.create_bar(destGUID)
-								end
-								local bar = frame.bars[destGUID]
-								bar:SetStatusBarColor(.5, .5, .5) -- 灰色
-								bar.priority = 12
-								bar.icon:SetTexture(select(3, GetSpellInfo(351073)))	
-								bar.left:SetText(L["胸甲"])							
-								bar:SetMinMaxValues(0, 21)		
-								local exp_time = GetTime() + 21							
-								bar:SetScript("OnUpdate", function(self, e)
-									self.t = self.t + e
-									if self.t > .1 then
-										local remain = exp_time - GetTime()
-										if remain > 0 then
-											bar:SetValue(21-remain)
-											bar.right:SetText(T.FormatTime(remain))
-										else										
-											bar:Hide()
-											bar:SetScript("OnUpdate", nil)
-										end									
-										self.t = 0
-									end
-								end)
-								
-								bar:Show()
-								frame.lineup()
 							end
-						elseif sub_event == "SPELL_AURA_REMOVED" and (spellID == 350469 or spellID == 355151) then
+						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spell2 then
+							if not frame.bars[destGUID] then
+								frame.create_bar(destGUID)
+							end
+							local bar = frame.bars[destGUID]
+							bar:SetStatusBarColor(.5, .5, .5) -- 灰色
+							bar.priority = 12
+							bar.icon:SetTexture(select(3, GetSpellInfo(351073)))	
+							bar.left:SetText(L["胸甲"])							
+							bar:SetMinMaxValues(0, 21)		
+							local exp_time = GetTime() + 21							
+							bar:SetScript("OnUpdate", function(self, e)
+								self.t = self.t + e
+								if self.t > .1 then
+									local remain = exp_time - GetTime()
+									if remain > 0 then
+										bar:SetValue(21-remain)
+										bar.right:SetText(T.FormatTime(remain))
+									else										
+										bar:Hide()
+										bar:SetScript("OnUpdate", nil)
+									end									
+									self.t = 0
+								end
+							end)
+							
+							bar:Show()
+							frame.lineup()							
+						elseif sub_event == "SPELL_AURA_REMOVED" and (spellID == frame.spell1 or spellID == frame.spell2) then
 							if frame.bars[destGUID] then
 								local bar = frame.bars[destGUID]
 								bar:Hide()
