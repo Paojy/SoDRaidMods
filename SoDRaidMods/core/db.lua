@@ -313,7 +313,12 @@ eventframe:SetScript("OnEvent", function(self, event, ...)
 	if event == "ADDON_LOADED" then
 		local addon = ...
 		if addon ~= "SoDRaidMods" then return end
-				
+		
+		T.LoadAccountVariables()
+		SoD_DB["resetmode"] = "enable"
+		T.UpdateDefaultSettings()
+		T.LoadVariables()
+		
 		for index, data in pairs(G.Encounters) do
 			local option_page
 			if type(index) == "string" then
@@ -334,11 +339,6 @@ eventframe:SetScript("OnEvent", function(self, event, ...)
 				end
 			end
 		end
-		
-		SoD_DB["resetmode"] = "enable"
-		T.UpdateDefaultSettings()
-		T.LoadVariables()
-		T.LoadAccountVariables()		
 		
 		local options = T.CreateOptions(L["制作"], G.gui)
 		
