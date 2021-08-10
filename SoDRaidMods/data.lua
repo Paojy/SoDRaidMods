@@ -5467,7 +5467,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 							bar.min = 500000
 							bar.max = 500000
 							bar.t = 0
-							bar.update_rate = 5
+							bar.update_rate = 2
 							bar.GUID = GUID
 							
 							bar:SetMinMaxValues(0, bar.max)
