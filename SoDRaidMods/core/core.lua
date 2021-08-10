@@ -639,8 +639,8 @@ T.CreateAlertIcon = function(v, hl, index, tip, r, g, b, role)
 	frame.cooldown = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
 	frame.cooldown:SetAllPoints()
 	frame.cooldown:SetDrawEdge(false)
-	frame.cooldown:SetHideCountdownNumbers(true)		
 	frame.cooldown:SetFrameLevel(frame:GetFrameLevel())
+	frame.cooldown:SetHideCountdownNumbers(true)
 	
 	frame.glow = frame:CreateTexture(nil, "OVERLAY")
 	frame.glow:SetPoint("TOPLEFT", -25, 25)
@@ -737,6 +737,12 @@ T.CreateTestIcon = function(v, hl, dur, r, g, b)
 			frame.bottomtext:Show()
 		else
 			frame.bottomtext:Hide()
+		end
+		
+		if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+			frame.cooldown:SetReverse(true)
+		else
+			frame.cooldown:SetReverse(false)	
 		end
 		
 		AlertFrame.LineUpIcons()
@@ -839,6 +845,14 @@ T.CreateAura = function(option_page, difficulty_id, index, v, hl, role, tip, aur
 				frame.bottomtext:Show()
 			else
 				frame.bottomtext:Hide()
+			end
+		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
 			end
 		end
 	end
@@ -1026,6 +1040,14 @@ T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, au
 				frame.bottomtext:Hide()
 			end
 		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
+			end
+		end
 	end
 	
 	frame.encounter_check = function(event, ...)
@@ -1137,7 +1159,7 @@ T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, au
 					
 					local name, count, amount, remain			
 					
-					name = T.ColorName(info.name)
+					name = T.ColorName(info.name, true)
 					
 					if info.count > 0 then
 						count = "|cffFFA500["..info.count.."]|r"
@@ -1266,6 +1288,14 @@ T.CreateLog = function(option_page, difficulty_id, index, v, hl, role, tip, even
 				frame.bottomtext:Hide()
 			end
 		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
+			end
+		end
 	end
 	
 	frame.encounter_check = function(event, ...)
@@ -1384,6 +1414,9 @@ local UpdateCastFrame = function(frame, unit, GUID, cast_type)
 	elseif cast_type == "CAST" then
 		startTimeMS, endTimeMS = select(4, UnitCastingInfo(unit))
 	elseif cast_type == "INSTANT" then
+		if UnitChannelInfo(unit) or UnitCastingInfo(unit) then
+			return 
+		end
 		startTimeMS, endTimeMS = GetTime()*1000, (GetTime()+2)*1000
 	end
 	
@@ -1513,6 +1546,14 @@ T.CreateCast = function(option_page, difficulty_id, index, v, hl, role, tip)
 				frame.bottomtext:Hide()
 			end
 		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
+			end
+		end
 	end
 	
 	frame.encounter_check = function(e, ...)
@@ -1576,6 +1617,7 @@ T.CreateCast = function(option_page, difficulty_id, index, v, hl, role, tip)
 			frame.encounter_check(e, ...)
 		elseif frame.enable then	
 			local Unit, _, SpellID = ...
+			
 			if SpellID == frame.spell_id then
 				local GUID = UnitGUID(Unit)
 				if e == "UNIT_SPELLCAST_CHANNEL_START" then -- 开始引导
@@ -1691,6 +1733,14 @@ T.CreateCastingOnMe = function(option_page, difficulty_id, index, v, hl, role, t
 				frame.bottomtext:Show()
 			else
 				frame.bottomtext:Hide()
+			end
+		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
 			end
 		end
 	end
@@ -1877,6 +1927,14 @@ T.CreateBossMsg = function(option_page, difficulty_id, index, v, hl, role, tip, 
 				frame.bottomtext:Hide()
 			end
 		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
+			end
+		end
 	end
 	
 	frame.encounter_check = function(e, ...)
@@ -2017,6 +2075,14 @@ T.CreateBWSpellTimer = function(option_page, difficulty_id, index, v, hl, role, 
 				frame.bottomtext:Show()
 			else
 				frame.bottomtext:Hide()
+			end
+		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
 			end
 		end
 	end
@@ -2173,6 +2239,14 @@ T.CreateBWTextTimer = function(option_page, difficulty_id, index, v, hl, role, t
 				frame.bottomtext:Show()
 			else
 				frame.bottomtext:Hide()
+			end
+		end
+		
+		if option == "all" or option == "cdreverse" then
+			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
+				frame.cooldown:SetReverse(true)
+			else
+				frame.cooldown:SetReverse(false)
 			end
 		end
 	end
@@ -2990,7 +3064,8 @@ local add_Icon = function(f, v, target, sourceGUID, dur, stack)
 	cooldown:SetPoint("TOPLEFT", 2, -2)
 	cooldown:SetPoint("BOTTOMRIGHT", -2, 2)
 	cooldown:SetDrawEdge(false)
-	cooldown:SetHideCountdownNumbers(true)		
+	cooldown:SetHideCountdownNumbers(true)
+	cooldown:SetReverse(true)
 	frame.cooldown = cooldown
 	
     frame.updatedebuff = function(debuff_player, count, dtype, duration, expires)	
@@ -3512,7 +3587,7 @@ local function UpdateSpellIcon(event, button, unit, spellID)
 					local remain = self.exp - GetTime()
 					if remain > 0 then
 						if UnitName(unit.."target") then
-							self.target:SetText(T.ColorUnitName(unit.."target", UnitName(unit.."target")))
+							self.target:SetText(T.ColorUnitName(unit.."target", UnitName(unit.."target"), true))
 						else
 							self.target:SetText("")
 						end
@@ -3559,7 +3634,7 @@ local function UpdateSpellIcon(event, button, unit, spellID)
 					local remain = self.exp - GetTime()
 					if remain > 0 then
 						if UnitName(unit.."target") then
-							self.target:SetText(T.ColorUnitName(unit.."target", UnitName(unit.."target")))
+							self.target:SetText(T.ColorUnitName(unit.."target", UnitName(unit.."target"), true))
 						else
 							self.target:SetText("")
 						end

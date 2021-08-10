@@ -25,6 +25,7 @@ local Character_default_Settings = {
 	AlertFrame = {
 		enable = true,
 		show_spellname = true,
+		reverse_cooldown = true,
 		icon_size = 65,
 		icon_space = 5,
 		grow_dir = "BOTTOM",

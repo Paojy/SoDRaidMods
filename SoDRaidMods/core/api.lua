@@ -60,21 +60,64 @@ T.pairsByKeys = function(t)
     return iter
 end
 
-T.GetIconLink = function(spellID)
+-- calculating the ammount of latters
+T.utf8sub = function(str, i, wrap)
+	if str then
+		local bytes = string.len(str)
+		if bytes <= i then
+			return str
+		else
+			local len, pos = 0, 1
+			while pos <= bytes do
+				len = len + 1
+				local c = string.byte(str, pos)
+				if c > 0 and c <= 127 then
+					pos = pos + 1
+				elseif c >= 192 and c <= 223 then
+					pos = pos + 2
+				elseif c >= 224 and c <= 239 then
+					pos = pos + 3
+					len = len + 1
+				elseif c >= 240 and c <= 247 then
+					pos = pos + 4
+					len = len + 1
+				end
+				if len == i then break end
+			end
+			if len == i and pos <= bytes then
+				if wrap then
+					return string.sub(str, 1, pos - 1).."\n"..T.utf8sub(string.sub(str, pos, bytes), i, true)
+				else
+					return string.sub(str, 1, pos - 1)
+				end
+			else
+				return str
+			end
+		end
+	end
+end
+
+T.GetIconLink = function(spellID, short)
 	if not GetSpellInfo(spellID) then
 		print(spellID.."出错 请检查")
 		return ""
 	end
 	local name, _, icon = GetSpellInfo(spellID)
+	if short then
+		name = T.utf8sub(name, 4)
+	end
 	return "|T"..icon..":12:12:0:0:64:64:4:60:4:60|t|cff71d5ff["..name.."]|r"
 end
 
-T.GetIconLinkRed = function(spellID)
+T.GetIconLinkRed = function(spellID, short)
 	if not GetSpellInfo(spellID) then
 		print(spellID.."出错 请检查")
 		return ""
 	end
 	local name, _, icon = GetSpellInfo(spellID)
+	if short then
+		name = T.utf8sub(name, 4)
+	end
 	return "|T"..icon..":12:12:0:0:64:64:4:60:4:60|t|cffff0000["..name.."]|r"
 end
 
@@ -99,8 +142,16 @@ local RTIconsList = {
 }
 G.RTIconsList = RTIconsList
 
-T.ColorUnitName = function(unit, name, nort)	
+T.ColorUnitName = function(unit, name, short, nort)
+	local name_text
+	if short then
+		name_text = T.utf8sub(name, 4)
+	else
+		name_text = name
+	end
+	
 	local r, g, b = 1, 1, 1
+	
 	if UnitIsPlayer(unit) then
 		local _, class = UnitClass(unit)
 		r, g, b = G.Ccolors[class].r, G.Ccolors[class].g, G.Ccolors[class].b
@@ -111,19 +162,24 @@ T.ColorUnitName = function(unit, name, nort)
 		end
 	end
 	local rt = GetRaidTargetIndex(unit)
-	
 	if nort or not rt then
-		return ('|cff%02x%02x%02x%s|r'):format(r * 255, g * 255, b * 255, name)
+		return ('|cff%02x%02x%02x%s|r'):format(r * 255, g * 255, b * 255, name_text)
 	else
-		return (RTIconsList[rt]..'|cff%02x%02x%02x%s|r'):format(r * 255, g * 255, b * 255, name)
+		return (RTIconsList[rt]..'|cff%02x%02x%02x%s|r'):format(r * 255, g * 255, b * 255, name_text)
 	end
 end
 
-T.ColorName = function(name)
-	if UnitClass(name) then
-		return ("|c%s%s|r"):format(G.Ccolors[select(2, UnitClass(name))]["colorStr"], name)
+T.ColorName = function(name, short)
+	local name_text
+	if short then
+		name_text = T.utf8sub(name, 4)
 	else
-		return name
+		name_text = name
+	end
+	if UnitClass(name) then
+		return ("|c%s%s|r"):format(G.Ccolors[select(2, UnitClass(name))]["colorStr"], name_text)
+	else
+		return name_text
 	end
 end
 

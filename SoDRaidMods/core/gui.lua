@@ -1118,6 +1118,9 @@ options.AlertFrame_enable.apply = function() T.EditAlertFrame("enable") end
 options.AlertFrame_spellname = createcheckbutton(options.sfa, 210, -160, L["显示法术名字"], "AlertFrame", false, "show_spellname")
 options.AlertFrame_spellname.apply = function() T.EditAlertFrame("spelltext") end
 
+options.AlertFrame_cdreverse = createcheckbutton(options.sfa, 370, -160, L["反转冷却"], "AlertFrame", false, "reverse_cooldown")
+options.AlertFrame_cdreverse.apply = function() T.EditAlertFrame("cdreverse") end
+
 local growdirection_group = {
 	{"RIGHT",  L["左"]},	
 	{"LEFT",   L["右"]},

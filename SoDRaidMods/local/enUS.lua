@@ -70,6 +70,7 @@ L["提前时间"]				  = "Warning time in advance"
 L["持续时间"]				  = "Warning time Duration"
 L["图标提示"]				  = "Icons"
 L["显示法术名字"]			  = "Show spell name"
+L["反转冷却"]		  	      = "Reverse the direction of the cooldown animation"
 L["图标大小"] 				  = "Icon size"
 L["图标间距"]				  = "Icon space"
 L["排列方向"]                 = "Grow"
@@ -228,6 +229,7 @@ TrapOrder
 end]]
 L["陷阱数量"]				  = "|cffFFFF00[%d round]|rTrap count: |cff%s[%d]|r"
 L["陷阱顺序"]				  = "Flameclasp Trap order"
+L["陷阱出现"]				  = "Trap Incoming"
 
 L["TIP尖刺"]				  = "Spikes announce wich voice"
 

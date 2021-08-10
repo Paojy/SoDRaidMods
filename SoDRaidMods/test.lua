@@ -64,7 +64,7 @@ G.Encounters[100] = { -- Test
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 						local _, sub_event, _, sourceGUID, sourceName, _, _, destGUID, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 						if sub_event == "SPELL_CAST_SUCCESS" and spellID == 139 then
-							local player_name = T.ColorName(sourceName)
+							local player_name = T.ColorName(sourceName, true)
 							self.Clone(player_name..SUMMONS..destName, true)
 						end
 					end

@@ -163,9 +163,9 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 						for target, healer in pairs(frame.targets) do						
 							local line
 							if healer == "pp_none" then							
-								line = T.ColorName(target).."\n"
+								line = T.ColorName(target, true).."\n"
 							else
-								line = T.ColorName(target).."(驱散:"..T.ColorName(healer)..")\n"
+								line = T.ColorName(target, true).."(驱散:"..T.ColorName(healer, true)..")\n"
 							end
 							str = str..line
 						end
@@ -579,7 +579,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 								if name then
 									num = num + 1
 									if num <= 3 then
-										local coloredName = T.ColorName(name)
+										local coloredName = T.ColorName(name, true)
 										str = str.." "..coloredName
 									end
 								end
@@ -1461,7 +1461,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 						if sub_event == "SPELL_CAST_START" and spellID == frame.spellID then -- 群体驱散 开始读条
 							local source = string.split("-", sourceName)
 							frame.bar.left:SetText(frame.spellName)
-							frame.bar.mid:SetText(T.ColorName(source))
+							frame.bar.mid:SetText(T.ColorName(source, true))
 							
 							if not SoD_CDB["General"]["disable_sound"] then
 								PlaySoundFile(G.media.sounds.."RemnantofNerzhul\\massdispel.ogg", "Master") -- 语音 群体驱散
@@ -1960,13 +1960,13 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame.updatestatus = function(name)
 						if UnitInRaid(name) then
 							if UnitIsDeadOrGhost(name) then -- 死了
-								return T.ColorName(name).."|cffFF0000(X)|r"
+								return T.ColorName(name, true).."|cffFF0000(X)|r"
 							elseif AuraUtil.FindAuraByName(frame.aura, name, "HARMFUL") then -- 有灵魂镣铐
-								return T.ColorName(name).."|cffC0C0C0(X)|r"
+								return T.ColorName(name, true).."|cffC0C0C0(X)|r"
 							elseif AuraUtil.FindAuraByName(frame.aura2, name, "HARMFUL") then -- 有好战者枷锁
-								return T.ColorName(name).."|cff00FF00(O)|r"
+								return T.ColorName(name, true).."|cff00FF00(O)|r"
 							else
-								return T.ColorName(name)
+								return T.ColorName(name, true)
 							end
 						else
 							return name.."??"
@@ -1993,7 +1993,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 						end
 						if frame.assignment_cd[counter_index] then
 							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text2:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", T.GetIconLink):gsub("{spellred:(%d+)}", T.GetIconLinkRed))
+								frame.text2:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
 							else
 								frame.text2:SetText("")
 							end
@@ -2593,8 +2593,46 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 				width = 250,
 				height = 100,
 				init = function(frame)
+					frame.spellID = 348456
+					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
+					
+					local bar = CreateFrame("StatusBar", nil, frame)
+					bar:SetHeight(28)
+					bar:SetWidth(200)
+					bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 35, 0)
+					T.createborder(bar)
+					
+					bar:SetStatusBarTexture(G.media.blank)
+					bar:SetStatusBarColor(1,1,0)
+					
+					bar.icon = bar:CreateTexture(nil, "OVERLAY")
+					bar.icon:SetTexCoord( .1, .9, .1, .9)
+					bar.icon:SetSize(28, 28)
+					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+					bar.icon:SetTexture(frame.iconTexture)				
+					T.createbdframe(bar.icon)
+										
+					bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+					bar.left:SetText(L["陷阱出现"])
+					
+					bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+
+					bar:GetStatusBarTexture():SetHorizTile(false)
+					bar:GetStatusBarTexture():SetVertTile(false)
+					bar:SetOrientation("HORIZONTAL")	
+					
+					bar:SetMinMaxValues(0, 5)	
+					
+					bar.t = 0
+					bar.update_rate = .02
+					bar:Hide()
+					
+					frame.bar = bar
+					
 					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
-					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -5)
+					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -35)
 					
 					frame.color = {"00FF00", "FFFF00", "FFA500", "FF0000"}
 					
@@ -2621,7 +2659,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 						
 						if frame.assignment_cd[counter_index] then
 							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text2:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", T.GetIconLink):gsub("{spellred:(%d+)}", T.GetIconLinkRed))
+								frame.text2:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
 							else
 								frame.text2:SetText("")
 							end
@@ -2637,7 +2675,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 				update = function(frame, event, ...)
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 						local timestamp, sub_event, _, sourceGUID, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-						if sub_event == "SPELL_AURA_REMOVED" and (spellID == 348456) then
+						if sub_event == "SPELL_AURA_REMOVED" and (spellID == frame.spellID) then
 							frame:Show()
 							frame.trap = frame.trap + 1
 							frame.updatetext(frame.display_counter)
@@ -2656,10 +2694,28 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 							end
 						elseif sub_event == "UNIT_DIED" then
 							frame.update_anchor()
-						elseif sub_event == "SPELL_AURA_APPLIED" and (spellID == 348456) then -- 施放陷阱
+						elseif sub_event == "SPELL_AURA_APPLIED" and (spellID == frame.spellID) then -- 施放陷阱
 							if GetTime() - frame.prev > 5 then -- 新的一轮
 								frame.prev = GetTime()
 								frame.counter = frame.counter + 1
+								
+								frame.bar.exp = GetTime() + 5
+								frame.bar:SetScript("OnUpdate", function(self, e)
+									self.t = self.t + e
+									if self.t > self.update_rate then
+										local remain = self.exp - GetTime()
+										if remain > 0 then
+											self:SetValue(5 - remain)
+											self.right:SetText(T.FormatTime(remain))
+										else
+											self:Hide()	
+											self:SetScript("OnUpdate", nil)
+										end
+										self.t = 0
+									end
+								end)
+								
+								frame.bar:Show()
 								--print("轮数+1")
 							end
 						end
@@ -2692,7 +2748,6 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 						end
 					elseif event == "ENCOUNTER_START" then
 						frame.update_anchor()
-						
 						frame.assignment_cd = table.wipe(frame.assignment_cd)
 						frame.prev = 0 -- 时间戳
 						frame.counter = 0
@@ -3127,7 +3182,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					frame.updatetext = function(counter_index)		
 						if frame.assignment_cd[counter_index] then
 							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", T.GetIconLink):gsub("{spellred:(%d+)}", T.GetIconLinkRed))
+								frame.text:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
 							else
 								frame.text:SetText("")
 							end
@@ -3355,7 +3410,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 								local mark, name
 								rm = frame.marks[frame.current_core][i][1]
 								mark = frame.marks[frame.current_core][i][2]
-								name = T.ColorName(target)
+								name = T.ColorName(target, true)
 								
 								str = str..string.format("|T132177:12:12:0:0:64:64:4:60:4:60|t %s - %s\n", name, mark)
 								
@@ -3388,7 +3443,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 							end
 						else -- 3个都炸完哩
 							for i, target in pairs(frame.targets) do
-								local name = T.ColorName(target)
+								local name = T.ColorName(target, true)
 								
 								str = str..string.format("%s\n", name)
 								
@@ -4778,7 +4833,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					frame.updatetext = function(counter_index)		
 						if frame.assignment_cd[counter_index] then
 							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", T.GetIconLink):gsub("{spellred:(%d+)}", T.GetIconLinkRed))
+								frame.text:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
 							else
 								frame.text:SetText("")
 							end
@@ -4945,6 +5000,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 				type = "spell",
 				role="dps",
 				spellID = 352355,
+				dif = {[15] = true, [16] = true},
 				color = {0, 1, 1},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
@@ -4955,11 +5011,15 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 						if sub_event == "SPELL_CAST_START" and spellID == 352293 then -- 进P2
 							self.text:SetText(L["击杀大怪"])
 							C_Timer.After(34, function()
-								self:Show()
-								C_Timer.After(11, function()			
-									self:Hide()
-								end)
+								if UnitCastingInfo("boss1") then
+									local spellid = select(9, UnitCastingInfo("boss1"))
+									if spellid and spellid == 352293 then
+										self:Show()
+									end
+								end
 							end)
+						elseif (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE") and spellID == 352051 then -- 进P1
+							self:Hide()
 						end
 					end
 				end,
@@ -5959,7 +6019,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 						bar.stack = 0
 						T.createbdframe(bar.icon)
 						
-						bar.name = T.ColorName(player)
+						bar.name = T.ColorName(player, true)
 						
 						bar.text = T.createtext(bar, "OVERLAY", 15, "OUTLINE", "LEFT")
 						bar.text:SetPoint("LEFT", bar, "LEFT", 5, 0)
@@ -6218,7 +6278,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 						bar.stack = 0
 						T.createbdframe(bar.icon)
 						
-						bar.name = T.ColorName(player)
+						bar.name = T.ColorName(player, true)
 						
 						bar.text = T.createtext(bar, "OVERLAY", 15, "OUTLINE", "LEFT")
 						bar.text:SetPoint("LEFT", bar, "LEFT", 5, 0)
@@ -6696,7 +6756,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					end
 				
 					frame.updatebar = function(bar, dur, exp_time)
-						bar.left:SetText(T.ColorName(bar.name).."|cffFFFF00["..frame.ind.."]|r")
+						bar.left:SetText(T.ColorName(bar.name, true).."|cffFFFF00["..frame.ind.."]|r")
 						bar.ind = frame.ind
 						bar.exp = exp_time
 						bar.count_down = 0
@@ -6928,7 +6988,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					end
 				
 					frame.updatebar = function(bar, dur, exp_time)
-						bar.left:SetText(T.ColorName(bar.name).."|cffFFFF00["..frame.ind.."]|r")
+						bar.left:SetText(T.ColorName(bar.name, true).."|cffFFFF00["..frame.ind.."]|r")
 						bar.ind = frame.ind
 						bar.exp = exp_time
 						bar.count_down = 0
