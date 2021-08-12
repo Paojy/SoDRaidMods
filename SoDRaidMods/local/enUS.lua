@@ -138,7 +138,11 @@ L["距离过近"]				  = "TOO CLOSE!"
 L["距离过近三人"]			  = "TOO CLOSE: %s %s %s...%d"
 L["距离过近人数"]			  = "TOO CLOSE:[%d]"
 L["加载失败"]				  = "%s NPC name load failed, please reload addons."
-
+L["保命技能"]				  = "Defense Cooldown Alert"
+L["注意自保血量"]			  = "WATCH HEALTH HP:%d%%"
+L["注意自保"]				  = "WATCH HEALTH"
+L["颜色随血量渐变"]			  = "Color Gradiant"
+L["显示血量百分比"]			  = "Show HP Percentage"
 --[[ 1 ]]--
 
 L["TIP捕食者之嚎"]			  = "Automatically assign healer dispel debuff, and show on RaidFrames"
@@ -205,6 +209,10 @@ end]]
 L["下一轮锁链"]				  = "Shackles|cFF00FFFF[%d]|r |cFFFFFF00[LEFT]|r%s |cFFFFFF00[CENTER]|r%s |cFFFFFF00[RIGHT]|r%s"
 L["锁链顺序"]				  = "Shackles order"
 L["去拉锁链"]				  = "GO SNAP |cffFF0000[%s]|r Shackle"
+L["死了"]					  = "|cffFF0000(Dead)|r"
+L["已断"]					  = "|cffC0C0C0(Broken)|r"
+L["在拉"]					  = "|cff00FF00(Pulling)|r"
+L["烙印"]					  = "|cffFF0000(Brand)|r"
 
 L["TIP折磨"]				  = "Show timer for Torment and Tormented Eruptions."
 

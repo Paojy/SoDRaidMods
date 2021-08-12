@@ -31,6 +31,7 @@ G.media = {
 	gradient = "Interface\\AddOns\\SoDRaidMods\\media\\gradient",
 	logo = "Interface\\AddOns\\SoDRaidMods\\media\\logo",
 	ring = "Interface\\AddOns\\SoDRaidMods\\media\\ring",
+	circle = "Interface\\AddOns\\SoDRaidMods\\media\\circle",
 }
 
 G.Client = GetLocale()

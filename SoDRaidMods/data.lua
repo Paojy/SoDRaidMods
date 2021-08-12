@@ -416,9 +416,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{type = "aura", tip = "减速", hl = "no", spellID = 350713, aura_type = "HARMFUL", unit = "player"}, -- 倦怠腐化
 			{type = "aura", tip = "出去放圈", hl = "no", spellID = 351827, aura_type = "HARMFUL", unit = "player"}, -- 蔓延痛苦
 			{type = "aura", tip = "别踩", hl = "hl", spellID = 350809, aura_type = "HARMFUL", unit = "player"}, -- 典狱长的痛苦	
-			{type = "aura", tip = "躲开队友", hl = "hl", spellID = 350604, dif = {[16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 绝望倦怠 待检查		
-			{type = "aura", tip = "忿怒点你", hl = "hl", spellID = 355245, dif = {[16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 忿怒 待检查
-			{type = "aura", tip = "轻蔑点你", hl = "hl", spellID = 355240, dif = {[16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 轻蔑 待检查
+			{type = "aura", tip = "躲开队友", hl = "hl", spellID = 350604, dif = {[16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 绝望倦怠 待检查
 		},
 		HLOnRaid = {
 			{type = "HLCast", spellID = 350828}, -- 死亡锁链
@@ -508,6 +506,9 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{spellID = 350606, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 快走开 待检查
 			{spellID = 355245, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 忿怒点你 待检查
 			{spellID = 355240, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 轻蔑点你 待检查
+		},
+		HP_Watch = {
+			{sub_event = "SPELL_CAST_START", spellID = 349030}, -- 死亡泰坦凝视
 		},
 		BossMods = {
 			{ -- 轻蔑与忿怒
@@ -1018,7 +1019,7 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{type = "ChatMsgRange", range_event = "SPELL_AURA_APPLIED", spellID = 351139, range = 5}, -- 布琳佳的悲恸挽歌
 			{type = "ChatMsgAuraCountdown", spellID = 350039, playername = true, spellname = true, icon = 3}, -- 阿尔苏拉的粉碎凝视
 			{type = "ChatMsgAuraRepeat", spellID = 350542, playername = true, spellname = false, icon = 6}, -- 命运残片 待检查
-		},		
+		},
 		Sound = {	
 			{spellID = 350365, event = "UNIT_SPELLCAST_START"}, -- 远离基拉	
 			{spellID = 352756, event = "UNIT_SPELLCAST_START"}, -- 远离基拉 待检查
@@ -1036,6 +1037,9 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{spellID = 350483, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 规避伤害
 			{spellID = 350475, role = "tank", event = "UNIT_SPELLCAST_START", unit = "player"}, -- 灵魂穿透
 			{spellID = 355294, event = "UNIT_SPELLCAST_START"}, -- 全团AE			
+		},
+		HP_Watch = {
+			{sub_event = "SPELL_AURA_APPLIED", on_me = true, spellID = 350542}, -- 命运残片
 		},
 		BossMods = {
 			{ -- 命运残片驱散
@@ -1400,6 +1404,11 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{spellID = 351066, event = "UNIT_SPELLCAST_START" }, -- P2 复制冲击
 			{spellID = 351067, event = "UNIT_SPELLCAST_START" }, -- P3 复制地板
 			{spellID = 351073, event = "UNIT_SPELLCAST_START" }, -- P4 复制击飞	
+		},
+		HP_Watch = {
+			{sub_event = "SPELL_CAST_START", spellID = 351066}, -- 碎裂
+			{sub_event = "SPELL_CAST_START", spellID = 351067}, -- 碎裂
+			{sub_event = "SPELL_CAST_START", spellID = 351073}, -- 碎裂		
 		},
 		BossMods = {
 			{ -- 群体驱散 已检查
@@ -1924,6 +1933,10 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{spellID = 352066, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_CAST_SUCCESS"}, -- 躲开白圈		
 			{spellID = 350851, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 快走开		
 		},
+		HP_Watch = {
+			{sub_event = "SPELL_AURA_APPLIED", spellID = 350415}, -- 开始拉锁链
+			{sub_event = "SPELL_AURA_APPLIED_DOSE", spellID = 350415}, -- 开始拉锁链
+		},
 		BossMods = {
 			{ -- 锁链
 				spellID = 350415,
@@ -1938,17 +1951,130 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 				width = 250,
 				height = 100,
 				init = function(frame)
-					frame.aura = GetSpellInfo(354231) -- 灵魂镣铐
-					frame.aura2 = GetSpellInfo(348987) -- 好战者枷锁
+					frame.spellID = 348987 -- 好战者枷锁 
+					frame.spellID2 = 354231 -- 灵魂镣铐 
+					frame.spellID3 = 350647 -- 折磨烙印 
+					frame.debuff, _, frame.icon = GetSpellInfo(frame.spellID)
+					frame.debuff2 = GetSpellInfo(frame.spellID2)
+					frame.debuff3 = GetSpellInfo(frame.spellID3)
 					
-					frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")
+					frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT") -- 显示拉锁链人员
 					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -5)
 					
-					frame.text2 = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")
+					frame.text2 = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT") -- 显示减伤
 					frame.text2:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
 					
-					frame.text3 = T.createtext(frame, "OVERLAY", 30, "OUTLINE", "LEFT")
-					frame.text3:SetPoint("TOPLEFT", frame.text2, "BOTTOMLEFT", 0, -5)
+					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT") -- 点我的时候显示
+					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
+					
+					frame.bars = {}
+					frame.ind = 0
+					frame.exp = 0
+					
+					frame:SetScript("OnUpdate", function(self, e)
+						self.t = self.t + e
+						if self.t > 1 then
+							local remain = self.exp - GetTime()
+							if remain <= 0 and self.ind ~= 0 then
+								self.ind = 0
+							end
+							self.t = 0
+						end
+					end)
+					
+					frame.create_bar = function(tag, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(.5, .5, .5)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.icon)
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+						
+						bar.center = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "CENTER")
+						bar.center:SetPoint("CENTER", bar, "CENTER", 0, 0)
+						
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						
+						bar:Hide()
+										
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, dur, exp_time)
+						if dur and exp_time then
+							bar.left:SetText(T.ColorName(bar.name, true).."|cffFFFF00["..frame.ind.."]|r")
+							bar.ind = frame.ind
+							bar.exp = exp_time					
+							bar:SetMinMaxValues(0 , dur)
+							bar:SetScript("OnUpdate", function(self, e)
+								self.t = self.t + e
+								if self.t > self.update_rate then		
+									local remain = exp_time - GetTime()
+									if remain > 0 then
+										self.right:SetText(T.FormatTime(remain))
+										self:SetValue(dur - remain)
+									else			
+										self:Hide()
+										self:SetScript("OnUpdate", nil)
+									end
+									self.t = 0
+								end
+							end)
+							bar:Show()
+						end
+						
+						if AuraUtil.FindAuraByName(frame.debuff3, bar.name, G.Test_Mod and "HELPFUL" or "HARMFUL") then -- 有折磨烙印
+							bar.center:SetText(L["烙印"])
+						else
+							bar.center:SetText("")
+						end
+						
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) return a.exp < b.exp end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame.text2, "BOTTOMLEFT", 35, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end
 					
 					frame.index_str = {L["左"], L["中间"], L["右"]}
 					
@@ -1960,16 +2086,16 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame.updatestatus = function(name)
 						if UnitInRaid(name) then
 							if UnitIsDeadOrGhost(name) then -- 死了
-								return T.ColorName(name, true).."|cffFF0000(X)|r"
-							elseif AuraUtil.FindAuraByName(frame.aura, name, "HARMFUL") then -- 有灵魂镣铐
-								return T.ColorName(name, true).."|cffC0C0C0(X)|r"
-							elseif AuraUtil.FindAuraByName(frame.aura2, name, "HARMFUL") then -- 有好战者枷锁
-								return T.ColorName(name, true).."|cff00FF00(O)|r"
+								return T.ColorName(name, true)..L["死了"]
+							elseif AuraUtil.FindAuraByName(frame.debuff2, name, G.Test_Mod and "HELPFUL" or "HARMFUL") then -- 有灵魂镣铐
+								return T.ColorName(name, true)..L["已断"]
+							elseif AuraUtil.FindAuraByName(frame.debuff, name, G.Test_Mod and "HELPFUL" or "HARMFUL") then -- 有好战者枷锁
+								return T.ColorName(name, true)..L["在拉"]
 							else
 								return T.ColorName(name, true)
 							end
 						else
-							return name.."??"
+							return T.ColorCustomName(name, true)
 						end
 					end
 
@@ -2005,12 +2131,12 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 				end,
 				update = function(frame, event, ...)
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-						local timestamp, sub_event, _, sourceGUID, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
+						local timestamp, sub_event, _, sourceGUID, sourceName, _, _, destGUID, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 						if sub_event == "SPELL_CAST_SUCCESS" and spellID == 357776 then -- 本轮拉锁链结束
 							
 							local next_counter = frame.counter+1
 							frame.updatetext(next_counter)
-							frame.text3:SetText("")
+							frame.text_center:SetText("")
 							
 							if frame.assignment[next_counter] and frame.assignment[next_counter][G.PlayerName] then -- 下一轮有我
 								if not SoD_CDB["General"]["disable_sound"] then
@@ -2018,33 +2144,71 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 								end
 							end
 							
-						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == 348987 then -- 玩家拾起锁链
+						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spellID then -- 玩家拾起锁链
 							frame.updatetext(frame.display_counter)
 							local dest = string.split("-", destName)
+							
+							if destGUID and AuraUtil.FindAuraByName(frame.debuff, dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								
+								local dur, exp_time = select(5, AuraUtil.FindAuraByName(frame.debuff, dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								
+								frame.ind = frame.ind + 1
+								if frame.exp < exp_time then
+									frame.exp = exp_time
+								end
+								
+								if not frame.bars[destGUID] then
+									frame.create_bar(destGUID, dest)
+								end
+								
+								local bar = frame.bars[destGUID]
+								frame.updatebar(bar, dur, exp_time)
+								
+								frame.lineup()
+							end
+							
 							if dest == G.PlayerName then
-								frame.text3:SetText("")
+								frame.text_center:SetText("")
+								if not SoD_CDB["General"]["disable_sound"] then
+									PlaySoundFile(G.media.sounds.."bip.ogg", "Master") -- 声音 bip
+								end
+							end							
+						elseif sub_event == "SPELL_AURA_REMOVED" and spellID == frame.spellID then -- 玩家拉断锁链
+							frame.updatetext(frame.display_counter)
+							local dest = string.split("-", destName)
+							
+							if destGUID and frame.bars[destGUID] then
+								local bar = frame.bars[destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								frame.lineup()
+							end
+							
+							if dest == G.PlayerName then
 								if not SoD_CDB["General"]["disable_sound"] then
 									PlaySoundFile(G.media.sounds.."bip.ogg", "Master") -- 声音 bip
 								end
 							end
-						elseif sub_event == "SPELL_AURA_REMOVED" and spellID == 348987 then -- 玩家拉断锁链
+						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spellID2 then -- 灵魂镣铐出现
 							frame.updatetext(frame.display_counter)
-							local dest = string.split("-", destName)
-							if dest == G.PlayerName then
-								if not SoD_CDB["General"]["disable_sound"] then
-									PlaySoundFile(G.media.sounds.."bip.ogg", "Master") -- 声音 bip
-								end
+						elseif sub_event == "SPELL_AURA_REMOVED" and spellID == frame.spellID2 then -- 灵魂镣铐消失
+							frame.updatetext(frame.display_counter)
+						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spellID3 then -- 折磨烙印出现
+							if destGUID and frame.bars[destGUID] then
+								local bar = frame.bars[destGUID]
+								frame.updatebar(bar)
 							end
-						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == 354231 then -- 玩家拉断锁链
-							frame.updatetext(frame.display_counter)
-						elseif sub_event == "SPELL_AURA_REMOVED" and spellID == 354231 then -- 灵魂镣铐消失
-							frame.updatetext(frame.display_counter)
+						elseif sub_event == "SPELL_AURA_REMOVED" and spellID == frame.spellID3 then -- 折磨烙印消失
+							if destGUID and frame.bars[destGUID] then
+								local bar = frame.bars[destGUID]
+								frame.updatebar(bar)
+							end
 						elseif (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE") and spellID == 350415 then -- 开始拉锁链
 							frame.counter = frame.counter + 1
 							
 							if frame.assignment[frame.counter] and frame.assignment[frame.counter][G.PlayerName] then -- 这次我要拉锁链
 								local index = frame.assignment[frame.counter][G.PlayerName]
-								frame.text3:SetText(format(L["去拉锁链"], frame.index_str[index]))
+								frame.text_center:SetText(format(L["去拉锁链"], frame.index_str[index]))
 								if not SoD_CDB["General"]["disable_sound"] then
 									PlaySoundFile(G.media.sounds.."SoulrenderDormazain\\chain"..frame.assignment[frame.counter][G.PlayerName]..".ogg", "Master") -- 声音
 								end
@@ -2122,7 +2286,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 						end
 						
 						frame.updatetext(frame.counter+1)
-						frame.text3:SetText("")
+						frame.text_center:SetText("")
 						
 						if frame.assignment[frame.counter+1] and frame.assignment[frame.counter+1][G.PlayerName] then -- 下一轮有我
 							if not SoD_CDB["General"]["disable_sound"] then
@@ -2135,8 +2299,16 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame:Hide()
 					frame.text:SetText("")
 					frame.text2:SetText("")
-					frame.text3:SetText("")
+					frame.text_center:SetText("")
 					
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+					end
+					frame.bars = table.wipe(frame.bars)
+
+					frame.ind = 0
 					frame.assignment = table.wipe(frame.assignment)
 					frame.counter = 0
 					frame.display_counter = 0
@@ -2579,6 +2751,11 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{spellID = 355525, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_REMOVED"}, -- 阶段转换		
 			{spellID = 355536, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_SUMMON"}, -- 小怪出现
 		},
+		HP_Watch = {
+			{sub_event = "SPELL_CAST_START", spellID = 355571, dur = 4}, -- 十字斧
+			{sub_event = "SPELL_CAST_START", spellID = 348513, dur = 4}, -- 振荡铁锤
+			{sub_event = "SPELL_CAST_START", spellID = 355787, dur = 4}, -- 双刃镰刀
+		},
 		BossMods = {
 			{ -- 烈焰陷阱爆炸 待检查
 				spellID = 348456,
@@ -2634,6 +2811,9 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
 					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -35)
 					
+					frame.cd_tex = T.CreateCircleCD(frame, 50, 1, 1, 0)
+					frame.cd_tex:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+					
 					frame.color = {"00FF00", "FFFF00", "FFA500", "FF0000"}
 					
 					frame.update_anchor = function()
@@ -2679,6 +2859,10 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 							frame:Show()
 							frame.trap = frame.trap + 1
 							frame.updatetext(frame.display_counter)
+							
+							if dest == G.PlayerName then
+								frame.cd_tex:SetCooldown(0, 0)
+							end
 						elseif (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE") and (spellID == 356870)  then
 							local dest = string.split("-", destName)
 							if UnitIsUnit(dest, frame.anchor) then -- 避免重复
@@ -2716,6 +2900,11 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 								end)
 								
 								frame.bar:Show()
+								
+								local dest = string.split("-", destName)
+								if dest == G.PlayerName then
+									frame.cd_tex:SetCooldown(GetTime(), 5)
+								end
 								--print("轮数+1")
 							end
 						end
@@ -3021,6 +3210,10 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{spellID = 352385, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED"}, -- 能量链接		
 			{spellID = 352394, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED", unit = "player"}, -- 安全安全
 			{spellID = 352589, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_CAST_START"}, -- 熔毁
+		},
+		HP_Watch = {
+			{sub_event = "SPELL_CAST_START", spellID = 352538}, -- 净化协议
+			{sub_event = "SPELL_AURA_APPLIED", on_me = true, spellID = 350496}, -- 净除威胁
 		},
 		BossMods = {
 			{ -- 净化协议读条计数 已检查
@@ -3376,8 +3569,11 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")
 					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 					
-					frame.text_center = T.createtext(frame, "OVERLAY", 50, "OUTLINE", "LEFT")
+					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT")
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
+					
+					frame.cd_tex = T.CreateCircleCD(frame, 50, 1, 1, 0)
+					frame.cd_tex:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 					
 					frame.marks = {
 						{
@@ -3432,7 +3628,9 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 											self.t = 0
 										end
 									end)
-												
+									
+									frame.cd_tex:SetCooldown(GetTime(), 4)
+									
 									if not SoD_CDB["General"]["disable_sound"] then
 										local sound_ind = frame.marks[frame.current_core][i][3]
 										PlaySoundFile(G.media.sounds.."mark\\mark"..sound_ind..".ogg", "Master") -- 声音 标记
@@ -3463,7 +3661,9 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 											self.t = 0
 										end
 									end)
-
+									
+									frame.cd_tex:SetCooldown(GetTime(), 4)
+									
 									if not SoD_CDB["General"]["disable_sound"] then
 										PlaySoundFile(G.media.sounds.."getout.ogg", "Master") -- 离开人群
 									end
@@ -3828,6 +4028,9 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{spellID = 350568, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player", countdown = true}, -- 贴边放圈
 			{spellID = 353162, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 注意自保
 		},
+		HP_Watch = {
+			{sub_event = "SPELL_AURA_APPLIED", spellID = 351680, delay = 5}, -- 祈求宿命
+		},
 		BossMods = {
 			{ -- 符文亲和 已检查
 				spellID = 354964,
@@ -3858,13 +4061,13 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 						local ring = frame:CreateTexture("sod_ring"..ind, "ARTWORK", nil, 9-ind*2)
 						ring:SetSize(ind*28, ind*28)
 						ring:SetPoint("CENTER", frame, "TOP", 0, -100)
-						ring:SetTexture(G.media.ring)
+						ring:SetTexture(G.media.circle)
 						ring:SetVertexColor(.5, .5, .5)
 						
 						local ringbg = frame:CreateTexture("sod_ring"..ind, "ARTWORK", nil, 8-ind*2)
 						ringbg:SetSize(ind*28+2, ind*28+2)
 						ringbg:SetPoint("CENTER", frame, "TOP", 0, -100)
-						ringbg:SetTexture(G.media.ring)
+						ringbg:SetTexture(G.media.circle)
 						ringbg:SetVertexColor(0, 0, 0)
 						
 						if ind >= 2 then
@@ -4060,7 +4263,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					frame.colorName = function(name) -- 人死了上标记
 						if name then
 							if UnitIsDead(name) then
-								return T.ColorName(name).."|cffFF0000(X)|r"
+								return T.ColorName(name)..L["死了"]
 							else
 								return T.ColorName(name)
 							end
@@ -4122,7 +4325,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 											frame.my_index = ind
 											frame.lightring(ind)
 											frame.helpbtn:Enable()
-											T.SendChatMsg("{rt"..ind.."}"..ind..ind..ind.."{rt"..ind.."}", 2) -- 喊话3次
+											T.SendChatMsg("{rt"..ind.."}"..ind..ind..ind.."{rt"..ind.."}", 10) -- 喊话11次
 											if not SoD_CDB["General"]["disable_sound"] then
 												PlaySoundFile(G.media.sounds.."FatescribeRohKalo\\assign"..ind..".ogg", "Master") -- 声音
 											end
@@ -4186,7 +4389,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 													frame.my_index = passed
 													frame.lightring(passed)
 													frame.helpbtn:Enable()
-													T.SendChatMsg("{rt"..passed.."}"..passed..passed..passed.."{rt"..passed.."}", 2) -- 喊话3次
+													T.SendChatMsg("{rt"..passed.."}"..passed..passed..passed.."{rt"..passed.."}", 10) -- 喊话11次
 													if not SoD_CDB["General"]["disable_sound"] then
 														PlaySoundFile(G.media.sounds.."FatescribeRohKalo\\assign"..passed..".ogg", "Master") -- 声音
 													end
@@ -5045,6 +5248,9 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{spellID = 352348, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_SUMMON"}, -- 召唤大怪
 			{spellID = 354639, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED" , unit = "player"}, -- 快走开
 		},
+		HP_Watch = {
+			{sub_event = "SPELL_AURA_APPLIED", on_me = true, spellID = 348760, delay = 3}, -- 冰霜冲击
+		},
 		BossMods = {
 			{ -- 小怪复活计时条 已检查
 				spellID = 358679,
@@ -5426,7 +5632,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 						[1] = 1, -- star
 					}
 								
-					frame.text_center = T.createtext(frame, "OVERLAY", 50, "OUTLINE", "LEFT")
+					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT")
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
 					frame.subEvents = {
@@ -5988,6 +6194,10 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{spellID = 354147, event = "UNIT_SPELLCAST_START"}, -- 换台子
 			{spellID = 358434, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED", unit = "player"}, -- 飞刀点你
 		},
+		HP_Watch = {
+			{sub_event = "SPELL_CAST_START", spellID = 347609}, -- 哀恸箭
+			{sub_event = "SPELL_CAST_START", spellID = 354142}, -- 黑暗帷幕 P3
+		},
 		BossMods = {
 			{ -- 全团倒刺之箭层数监视 已检查
 				spellID = 347807,
@@ -6128,7 +6338,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.text = T.createtext(frame, "OVERLAY", 15, "OUTLINE", "LEFT")
 					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 					
-					frame.text_center = T.createtext(frame, "OVERLAY", 50, "OUTLINE", "LEFT")
+					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT")
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
 					frame.update_text = function()
@@ -6680,7 +6890,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 				width = 250,
 				height = 100,
 				init = function(frame)
-					frame.aura_spell_id = 348064
+					frame.aura_spell_id = 139 --348064
 					frame.aura = GetSpellInfo(frame.aura_spell_id)
 					frame.icon = select(3, GetSpellInfo(frame.aura_spell_id))
 					
@@ -6699,9 +6909,12 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 						end
 					end)
 					
-					frame.text_center = T.createtext(frame, "OVERLAY", 50, "OUTLINE", "LEFT")
+					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT")
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
+					frame.cd_tex = T.CreateCircleCD(frame, 50, 0, 1, 0)
+					frame.cd_tex:SetPoint("CENTER", UIParent, "CENTER", 0, 0)					
+
 					frame.create_bar = function(tag, player)
 						local bar = CreateFrame("StatusBar", nil, frame)
 						bar:SetHeight(30)
@@ -6762,6 +6975,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 						bar.count_down = 0
 						bar.anim_played = false
 						bar:SetMinMaxValues(0 , dur)
+						
 						bar:SetScript("OnUpdate", function(self, e)
 							self.t = self.t + e
 							if self.t > self.update_rate then		
@@ -6772,6 +6986,14 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 									
 									if bar.name == G.PlayerName then
 										frame.text_center:SetText(string.format(L["你被点"], frame.aura, bar.ind, remain))
+										
+										if remain < 2 then
+											frame.cd_tex.color(1, 0, 0)
+										elseif remain < 5 then										
+											frame.cd_tex.color(1, 1, 0)
+										else
+											frame.cd_tex.color(0, 1, 0)
+										end
 									end
 									
 									if remain < 5 then -- 预警时间
@@ -6807,8 +7029,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 								end
 								self.t = 0
 							end
-						end)											
+						end)
+						
 						bar:Show()
+						
+						if bar.name == G.PlayerName then
+							frame.cd_tex:SetCooldown(GetTime(), dur)
+						end
 					end
 					
 					frame.lineup = function()
@@ -6826,7 +7053,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 							bar:ClearAllPoints()
 							if bar:IsVisible() then
 								if not lastbar then
-									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 25, -5)
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
 									lastbar = bar
 								else
 									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
@@ -6871,6 +7098,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 								bar.glow:Hide()
 								if bar.name == G.PlayerName then
 									frame.text_center:SetText(L["等待伤害"])
+									frame.cd_tex:SetCooldown(0, 0)
 									frame.said = false
 								end				
 								frame.lineup()
@@ -6911,6 +7139,8 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 						bar.glow:Hide()
 					end
 					frame.text_center:SetText("")
+					frame.cd_tex:SetCooldown(0, 0)
+					frame.cd_tex.color(0, 1, 0)
 					frame.bars = table.wipe(frame.bars)
 					frame:Hide()
 					frame.ind = 0
@@ -6949,7 +7179,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 						end
 					end)
 					
-					frame.text_center = T.createtext(frame, "OVERLAY", 50, "OUTLINE", "LEFT")
+					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT")
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
 					frame.create_bar = function(tag, player)
@@ -7045,7 +7275,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 							bar:ClearAllPoints()
 							if bar:IsVisible() then
 								if not lastbar then
-									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 25, -5)
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
 									lastbar = bar
 								else
 									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)

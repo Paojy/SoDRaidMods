@@ -68,9 +68,13 @@ local createcheckbutton = function(parent, x, y, name, t1, t2, value, role, dif)
 		bu = CreateFrame("CheckButton", addon_name..t1..value.."Button", parent, "InterfaceOptionsCheckButtonTemplate")	
 	end
 	ReskinCheck(bu)
+	bu:SetFrameLevel(parent:GetFrameLevel()+4)
 	bu:SetPoint("TOPLEFT", x, y)
+	if parent.bgtex then
+		parent.bgtex:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, y-40)
+	end
 	bu:SetHitRectInsets(0, -50, 0, 0)
-	
+
 	local difstr = ""
 	if dif then
 		if dif["all"] then
@@ -165,6 +169,7 @@ local createslider = function(parent, x, y, name, t1, t2, value, min, max, step)
 	else
 		slider = CreateFrame("Slider", addon_name..t1..value.."Slider", parent, "OptionsSliderTemplate")
 	end
+	slider:SetFrameLevel(parent:GetFrameLevel()+4)
 	slider:SetPoint("TOPLEFT", x, y)
 	slider:SetWidth(200)
 	ReskinSlider(slider)
@@ -185,7 +190,6 @@ local createslider = function(parent, x, y, name, t1, t2, value, min, max, step)
 
 	slider:SetValueStep(step)
 	
-
 	slider:SetScript("OnShow", function(self)
 		if t2 then
 			self:SetValue(SoD_CDB[t1][t2][value])
@@ -248,10 +252,11 @@ local createradiobuttongroup = function(parent, x, y, name, t1, t2, value, group
 	else
 		frame = CreateFrame("Frame", addon_name..t1..value.."RadioButtonGroup", parent)
 	end
+	frame:SetFrameLevel(parent:GetFrameLevel()+4)
 	frame:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
 	frame:SetSize(150, 30)
 	
-	frame.text = T.createtext(frame, "OVERLAY", 12, "NONE", "LEFT")
+	frame.text = T.createtext(frame, "OVERLAY", 12, "OUTLINE", "LEFT")
 	frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT")
 	frame.text:SetText(name)
 	
@@ -327,33 +332,46 @@ local createradiobuttongroup = function(parent, x, y, name, t1, t2, value, group
 	return frame
 end
 
-T.CreateTitle = function(options, text, y, pos)
-	if y then
-		local title = T.createtext(options, "OVERLAY", 15, "OUTLINE", "CENTER")
-		title:SetText(text)
-		
-		local line = options:CreateTexture(nil, "ARTWORK")
-		
-		title:SetPoint("TOP", options, "TOP", 0, y)
-		line:SetSize(options:GetWidth()-50, 1)
-		line:SetPoint("TOPLEFT", options, "TOPLEFT", 20, y-20)
-		line:SetColorTexture(1, 1, 1, .5)
-	end
+T.CreateTitle = function(options, text, start_pos, end_pos)
+	local title = T.createtext(options, "OVERLAY", 15, "OUTLINE", "LEFT")
+	title:SetPoint("TOPLEFT", options, "TOPLEFT", 30, start_pos)
+	title:SetTextColor(1, 1, 0)
+	title:SetText(text)
+	
+	local line = options:CreateTexture(nil, "BACKGROUND")
+	line:SetPoint("TOPLEFT", options, "TOPLEFT", 20, start_pos-18)
+	line:SetPoint("BOTTOMRIGHT", options, "TOPRIGHT", 0, start_pos-20)
+	line:SetTexture(G.media.blank)
+	line:SetGradientAlpha("HORIZONTAL", 1, 1, 0, .8, 1, 0, 0, 0)
+	
+	local bgtex = options:CreateTexture(nil, "BACKGROUND")
+	bgtex:SetPoint("TOPLEFT", options, "TOPLEFT", 20, start_pos-20)
+	bgtex:SetPoint("BOTTOMRIGHT", options, "TOPRIGHT", 0, end_pos)
+	bgtex:SetColorTexture(.4, .6, .9, .8)
 end
 
 local CreateSubTitle = function(parent, text)
-	parent.option_num = parent.option_num + 1
+	if parent.option_num > 0 then
+		parent.option_num = parent.option_num + 1
+	end
+	local start_pos = - 70 - 30*parent.option_num
 	local title = T.createtext(parent, "OVERLAY", 14, "OUTLINE", "LEFT")
-	title:SetPoint("TOPLEFT", parent, "TOPLEFT", 30,  - 70 - 30*parent.option_num)
+	title:SetPoint("TOPLEFT", parent, "TOPLEFT", 30,  start_pos)
 	title:SetTextColor(1, 1, 0)
 	title:SetText(text)
-
-	local line = parent:CreateTexture(nil, "ARTWORK")	
-	line:SetSize(parent:GetWidth()-50, 1)
-	line:SetPoint("TOPLEFT", title, "BOTTOMLEFT", -10, -5)
-	line:SetColorTexture(1, 1, 1, .5)
+	
+	local line = parent:CreateTexture(nil, "BACKGROUND")
+	line:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, start_pos-18)
+	line:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, start_pos-20)
+	line:SetTexture(G.media.blank)
+	line:SetGradientAlpha("HORIZONTAL", 1, 1, 0, .8, 1, 0, 0, 0)
+	
+	local bgtex = parent:CreateTexture(nil, "ARTWORK")	
+	bgtex:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, start_pos-20)
+	bgtex:SetColorTexture(.4, .6, .9, .8)
 		
 	parent.option_num = parent.option_num + 1
+	parent.bgtex = bgtex
 end
 
 local ReskinScroll = function(f)
@@ -1041,7 +1059,7 @@ end
 
 local options = T.CreateOptions(L["通用"], gui, true)
 
-T.CreateTitle(options.sfa, L["通用"], -20)
+T.CreateTitle(options.sfa, L["通用"], -20, -120)
 
 local resetposbutton = T.createUIPanelButton(options.sfa, addon_name.."ResetPosButton", 150, 25, L["重置位置"])
 resetposbutton:SetPoint("TOPLEFT", options.sfa, "TOPLEFT", 50, -50)
@@ -1110,7 +1128,7 @@ options.Mark_enable = createcheckbutton(options.sfa, 370, -90, L["禁用团队�
 options.Minimapbutton_enable = createcheckbutton(options.sfa, 530, -90, L["隐藏小地图图标"], "General", false, "hide_minimap")
 options.Minimapbutton_enable.apply = function() T.ToggleMinimapButton() end
 
-T.CreateTitle(options.sfa, L["图标提示"], -130)
+T.CreateTitle(options.sfa, L["图标提示"], -130, -330)
 
 options.AlertFrame_enable = createcheckbutton(options.sfa, 50, -160, L["启用"], "AlertFrame", false, "enable")
 options.AlertFrame_enable.apply = function() T.EditAlertFrame("enable") end
@@ -1143,7 +1161,7 @@ options.AlertFrame_ifont_size.apply = function() T.EditAlertFrame("ifont_size") 
 options.AlertFrame_grow_dir = createradiobuttongroup(options.sfa, 50, -290, L["排列方向"], "AlertFrame", false, "grow_dir", growdirection_group)
 options.AlertFrame_grow_dir.apply = function() T.EditAlertFrame("grow_dir") end
 
-T.CreateTitle(options.sfa, L["团队高亮图标"], -340)
+T.CreateTitle(options.sfa, L["团队高亮图标"], -340, -490)
 
 options.HL_Frame_enable = createcheckbutton(options.sfa, 50, -370, L["启用"], "HL_Frame", false, "enable")
 
@@ -1166,7 +1184,7 @@ local anchors = {
 options.HL_Frame_position = createradiobuttongroup(options.sfa, 50, -460, L["锚点"], "HL_Frame", false, "position", anchors)
 options.HL_Frame_position.apply = function() T.EditHL() end
 
-T.CreateTitle(options.sfa, L["姓名板图标"], -500)
+T.CreateTitle(options.sfa, L["姓名板图标"], -500, -660)
 
 options.PlateAlerts_enable = createcheckbutton(options.sfa, 50, -530, L["启用"], "PlateAlerts", false, "enable")
 options.PlateAlerts_enable.apply = function() T.EditPlateIcons("enable") end
@@ -1180,7 +1198,7 @@ options.PlateAlerts_fsize.apply = function() T.EditPlateIcons("font_size") end
 options.PlateAlerts_y = createslider(options.sfa, 80, -620, L["垂直距离"], "PlateAlerts", false, "y", -50, 50, 1)
 options.PlateAlerts_y.apply = function() T.EditPlateIcons("y") end
 
-T.CreateTitle(options.sfa, L["文字提示"], -670)
+T.CreateTitle(options.sfa, L["文字提示"], -670, -790)
 
 options.PlateAlerts_enable = createcheckbutton(options.sfa, 50, -700, L["启用"], "TextFrame", false, "enable")
 options.PlateAlerts_enable.apply = function() T.EditTextFrame("enable") end
@@ -1188,7 +1206,7 @@ options.PlateAlerts_enable.apply = function() T.EditTextFrame("enable") end
 options.TextFrame_font_size = createslider(options.sfa, 80, -750, L["字体大小"], "TextFrame", false, "font_size", 20, 80, 1)
 options.TextFrame_font_size.apply = function() T.EditTextFrame("font_size") end
 
-T.CreateTitle(options.sfa, L["喊话提示"], -800)
+T.CreateTitle(options.sfa, L["喊话提示"], -800, -920)
 
 options.ChatMsg_enable = createcheckbutton(options.sfa, 50, -830, L["启用"], "ChatMsg", false, "enable")
 options.ChatMsg_customfontsize = createcheckbutton(options.sfa, 210, -830, L["变更字体大小"], "ChatMsg", false, "custom_fsize")
@@ -1203,7 +1221,7 @@ end
 options.ChatMsg_fsize = createslider(options.sfa, 80, -880, L["字体大小"], "ChatMsg", false, "fsize", 10, 30, 2)
 
 
-T.CreateTitle(options.sfa, L["首领模块"], -930)
+T.CreateTitle(options.sfa, L["首领模块"], -930, -1060)
 
 options.BossMods_enable = createcheckbutton(options.sfa, 50, -960, L["启用"], "BM", false, "enable")
 options.BossMods_enable.apply = function() T.EditBossModsFrame("enable") end
@@ -1232,44 +1250,64 @@ end)
 ----------------------------------------------------------
 local tool_options = T.CreateOptions(L["小工具"], gui, true)
 
-T.CreateTitle(tool_options.sfa, L["团队标记提示"], -20)
+T.CreateTitle(tool_options.sfa, L["团队标记提示"], -20, -110)
 
 tool_options.rm_enable = createcheckbutton(tool_options.sfa, 50, -50, L["启用"], "General", false, "rm")
 
 tool_options.rm_sound = createcheckbutton(tool_options.sfa, 250, -50, L["播放语音"], "General", false, "rm_sound")
 
-T.CreateTitle(tool_options.sfa, L["焦点传送门可交互提示"], -90)
+T.CreateTitle(tool_options.sfa, L["焦点传送门可交互提示"], -120, -210)
 
-tool_options.ts_enable = createcheckbutton(tool_options.sfa, 50, -120, L["启用"], "General", false, "trans")
+tool_options.ts_enable = createcheckbutton(tool_options.sfa, 50, -150, L["启用"], "General", false, "trans")
 tool_options.ts_enable.apply = function()
 	G.TransFrame.Update(G.TransFrame, "SOD_UPDATE_DB")
 end
 
-tool_options.ts_sound = createcheckbutton(tool_options.sfa, 250, -120, L["播放语音"], "General", false, "trans_sound")
+tool_options.ts_sound = createcheckbutton(tool_options.sfa, 250, -150, L["播放语音"], "General", false, "trans_sound")
 
-T.CreateTitle(tool_options.sfa, L["动态战术板"], -160)
+T.CreateTitle(tool_options.sfa, L["动态战术板"], -220, -450)
 		
-tool_options.tl_enable = createcheckbutton(tool_options.sfa, 50, -190, L["启用"], "General", false, "tl")
+tool_options.tl_enable = createcheckbutton(tool_options.sfa, 50, -250, L["启用"], "General", false, "tl")
 tool_options.tl_enable.apply = function() T.EditTimeline("enable") end
 
 local tl_source = {
 	{"self", L["个人战术板"]}, 
 	{"raid", L["团队战术板"]},
 }
-tool_options.tl_use_self = createradiobuttongroup(tool_options.sfa, 250, -195, L["来源"], "General", false, "tl_use_self", tl_source)
+tool_options.tl_use_self = createradiobuttongroup(tool_options.sfa, 250, -255, L["来源"], "General", false, "tl_use_self", tl_source)
 
-tool_options.tl_show_time = createcheckbutton(tool_options.sfa, 50, -230, L["显示战术板时间"], "General", false, "tl_show_time")
+tool_options.tl_show_time = createcheckbutton(tool_options.sfa, 50, -290, L["显示战术板时间"], "General", false, "tl_show_time")
 tool_options.tl_show_time.apply = function() T.EditTimeline("format") end
 
-tool_options.tl_exp_time = createcheckbutton(tool_options.sfa, 250, -230, L["显示倒数时间"], "General", false, "tl_exp_time")
+tool_options.tl_exp_time = createcheckbutton(tool_options.sfa, 250, -290, L["显示倒数时间"], "General", false, "tl_exp_time")
 tool_options.tl_exp_time.apply = function() T.EditTimeline("format") end
 
-tool_options.tl_font_size = createslider(tool_options.sfa, 80, -280, L["字体大小"], "General", false, "tl_font_size", 10, 30, 1)
+tool_options.tl_font_size = createslider(tool_options.sfa, 80, -340, L["字体大小"], "General", false, "tl_font_size", 10, 30, 1)
 tool_options.tl_font_size.apply = function() T.EditTimeline("font_size") end
 
-tool_options.tl_advance = createslider(tool_options.sfa, 400, -280, L["提前时间"], "General", false, "tl_advance", 2, 120, 1)
+tool_options.tl_advance = createslider(tool_options.sfa, 400, -340, L["提前时间"], "General", false, "tl_advance", 2, 120, 1)
 
-tool_options.tl_dur = createslider(tool_options.sfa, 80, -330, L["持续时间"], "General", false, "tl_dur", 2, 20, 1)
+tool_options.tl_dur = createslider(tool_options.sfa, 80, -390, L["持续时间"], "General", false, "tl_dur", 2, 20, 1)
+
+T.CreateTitle(tool_options.sfa, L["保命技能"], -460, -640)
+
+tool_options.ds_enable = createcheckbutton(tool_options.sfa, 50, -490, L["启用"], "General", false, "ds")
+tool_options.ds_enable.apply = function() T.EditDSFrame("enable") end
+
+tool_options.ds_test = createcheckbutton(tool_options.sfa, 250, -490, L["测试"], "General", false, "ds_test")
+tool_options.ds_test.apply = function() T.EditDSFrame("enable") end
+
+tool_options.ds_show_hp = createcheckbutton(tool_options.sfa, 50, -530, L["显示血量百分比"], "General", false, "ds_show_hp")
+tool_options.ds_show_hp.apply = function() T.EditDSFrame("show_hp") end
+
+tool_options.ds_color_gradiant = createcheckbutton(tool_options.sfa, 250, -530, L["颜色随血量渐变"], "General", false, "ds_color_gradiant")
+tool_options.ds_color_gradiant.apply = function() T.EditDSFrame("color_gradiant") end
+
+tool_options.ds_icon_size = createslider(tool_options.sfa, 80, -580, L["图标大小"], "General", false, "ds_icon_size", 25, 50, 1)
+tool_options.ds_icon_size.apply = function() T.EditDSFrame("icon_size") end
+	
+tool_options.ds_font_size = createslider(tool_options.sfa, 400, -580, L["字体大小"], "General", false, "ds_font_size", 30, 60, 1)
+tool_options.ds_font_size.apply = function() T.EditDSFrame("font_size") end
 
 
 ----------------------------------------------------------

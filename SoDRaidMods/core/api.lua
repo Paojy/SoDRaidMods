@@ -183,6 +183,16 @@ T.ColorName = function(name, short)
 	end
 end
 
+T.ColorCustomName = function(name, short)
+	local name_text
+	if short then
+		name_text = T.utf8sub(name, 4)
+	else
+		name_text = name
+	end
+	return ("|cffC0C0C0%s?|r"):format(name_text)
+end
+
 T.SetRaidTarget = function(unit, rm)
 	if not SoD_CDB["General"]["disable_rmark"] then
 		SetRaidTarget(unit, rm) -- 上标记
@@ -243,7 +253,7 @@ T.createborder = function(f, r, g, b, a)
 	f.sd:SetPoint("TOPLEFT", f, -3, 3)
 	f.sd:SetPoint("BOTTOMRIGHT", f, 3, -3)
 	if not (r and g and b) then
-		f.sd:SetBackdropColor(.05, .05, .05, .5)
+		f.sd:SetBackdropColor(.05, .05, .05, .7)
 		f.sd:SetBackdropBorderColor(0, 0, 0)
 	else
 		f.sd:SetBackdropColor(r, g, b, a)
@@ -685,4 +695,33 @@ T.RangeCheck = function(range)
 			end
 		end)
 	end
+end
+
+T.CreateCircleCD = function(frame, size, r, g, b)
+	local cd = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
+	cd:ClearAllPoints()
+	cd:SetSize(size, size)					
+	cd:SetUseCircularEdge(true)
+	cd:SetSwipeTexture(G.media.ring)
+	cd:SetDrawBling(false)
+	cd:SetReverse(true)
+	
+	cd.bg = cd:CreateTexture(nil, "BACKGROUND")
+	cd.bg:SetTexture(G.media.circle)
+	cd.bg:SetAllPoints()
+	
+	if r and g and b then
+		cd:SetSwipeColor(r, g, b)
+		cd.bg:SetVertexColor(r, g, b, .35)		
+	else
+		cd:SetSwipeColor(1, 1, 0)
+		cd.bg:SetVertexColor(1, 1, 0, .35)
+	end
+	
+	cd.color = function(R, G, B)
+		cd:SetSwipeColor(R, G, B)
+		cd.bg:SetVertexColor(R, G, B, .35)
+	end
+	
+	return cd
 end

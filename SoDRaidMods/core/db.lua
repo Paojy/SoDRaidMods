@@ -20,6 +20,12 @@ local Character_default_Settings = {
 		tl_advance = 60,
 		tl_dur = 5,
 		moving_boss = 1,
+		ds = true,
+		ds_test = false,
+		ds_icon_size = 35,
+		ds_font_size = 35,
+		ds_color_gradiant = true,
+		ds_show_hp = true,
 	},
 	
 	AlertFrame = {
@@ -48,7 +54,7 @@ local Character_default_Settings = {
 	PlateAlerts = {
 		enable = true,
 		fsize = 7,
-		size = 30,
+		size = 25,
 		y = 30,
 	},
 	
@@ -313,7 +319,7 @@ eventframe:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventframe:SetScript("OnEvent", function(self, event, ...)
 	if event == "ADDON_LOADED" then
 		local addon = ...
-		if addon ~= "SoDRaidMods" then return end
+		if addon ~= G.addon_name then return end
 		
 		T.LoadAccountVariables()
 		SoD_DB["resetmode"] = "enable"

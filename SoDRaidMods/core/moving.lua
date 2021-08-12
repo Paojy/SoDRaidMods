@@ -142,7 +142,7 @@ local function CreateDropDownButton(text, dropdown_type, value, v_table, ...)
 	frame.bg:EnableMouse()
 	frame.bg:SetScript("OnEnter", function() end)
 	T.createborder(frame.bg)
-	frame.bg.sd:SetBackdropColor(.1, .4, .9, 1)
+	frame.bg.sd:SetBackdropColor(.4, .6, .9, .8)
 	frame.bg:Hide()
 	
 	table.insert(DropDownButtons, frame)

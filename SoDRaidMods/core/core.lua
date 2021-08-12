@@ -59,6 +59,7 @@ T.UpdateAll = function()
 	T.EditPlateIcons("enable")
 	T.EditBossModsFrame("all")
 	T.EditTimeline("all")
+	T.EditDSFrame("all")
 end
 
 FrameHolder:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -361,7 +362,9 @@ Timeline.LineUpIcons = function()
 			table.insert(t, line)
 		end
 	end
-	table.sort(t, function(a, b) return a.ind <= b.ind end)
+	if #t > 1 then
+		table.sort(t, function(a, b) return a.ind < b.ind end)
+	end
 	local lastline
 	for i, line in pairs(t) do
 		line:ClearAllPoints()
@@ -538,6 +541,422 @@ Timeline:SetScript("OnEvent", function(self, event, ...)
 				end
 			end
         end     
+    end
+end)
+
+----------------------------------------------------------
+------------[[    Defense spell icons    ]]---------------
+----------------------------------------------------------
+local DSFrame = CreateFrame("Frame", addon_name.."DSFrame", FrameHolder)
+DSFrame:SetSize(400,70)
+
+DSFrame.movingname = L["保命技能"]
+DSFrame.point = { a1 = "BOTTOM", parent = "UIParent", a2 = "CENTER", x = 0, y = 100 }
+T.CreateDragFrame(DSFrame)
+
+DSFrame.text = T.createtext(DSFrame, "OVERLAY", 35, "OUTLINE", "LEFT")
+DSFrame.text:SetPoint("TOP", DSFrame, "TOP", 0, 0)
+
+DSFrame.anim = DSFrame:CreateAnimationGroup()
+DSFrame.anim:SetLooping("BOUNCE")
+DSFrame.timer = DSFrame.anim:CreateAnimation()
+DSFrame.timer.t = 0
+DSFrame.timer:SetDuration(.5)
+DSFrame.anim:Play()
+
+DSFrame.ActiveIcons = {}
+DSFrame.WatchSpells = {}
+
+T.EditDSFrame = function(option)
+	if option == "all" or option == "enable" then
+		if SoD_CDB["General"]["ds"] then
+			DSFrame:RegisterEvent("UNIT_HEALTH")
+			DSFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			if SoD_CDB["General"]["ds_test"] then				
+				local perc = UnitHealth("player")/UnitHealthMax("player")
+				if SoD_CDB["General"]["ds_color_gradiant"] then
+					DSFrame.text:SetTextColor(1, perc, 0)
+				else
+					DSFrame.text:SetTextColor(1, 0, 0)
+				end
+				if SoD_CDB["General"]["ds_show_hp"] then
+					DSFrame.text:SetText(string.format(L["注意自保血量"], perc*100))
+				else
+					DSFrame.text:SetText(L["注意自保"])
+				end		
+				for k, frame in pairs(DSFrame.ActiveIcons) do
+					frame.update()
+				end
+				
+				DSFrame:Show()
+			else
+				DSFrame:Hide()
+			end
+		else
+			DSFrame:UnregisterEvent("UNIT_HEALTH")
+			DSFrame:Hide()
+		end
+	end
+	
+	for k, frame in pairs(DSFrame.ActiveIcons) do
+		frame.update_onedit(option)
+	end
+	
+	if option == "all" or option == "icon_size" then
+		DSFrame:SetSize(400, SoD_CDB["General"]["ds_icon_size"]+SoD_CDB["General"]["ds_font_size"]+5)
+		DSFrame.LineUpIcons()
+	end
+	
+	if option == "all" or option == "font_size" then
+		DSFrame:SetSize(400, SoD_CDB["General"]["ds_icon_size"]+SoD_CDB["General"]["ds_font_size"]+5)
+		DSFrame.text:SetFont(G.Font, SoD_CDB["General"]["ds_font_size"], "OUTLINE")
+	end
+	
+	if option == "all" or option == "color_gradiant" then
+		if SoD_CDB["General"]["ds_color_gradiant"] then
+			local perc = UnitHealth("player")/UnitHealthMax("player")
+			DSFrame.text:SetTextColor(1, perc, 0)
+		else
+			DSFrame.text:SetTextColor(1, 0, 0)
+		end
+	end
+	
+	if option == "all" or option == "show_hp" then
+		if SoD_CDB["General"]["ds_show_hp"] then
+			local perc = UnitHealth("player")/UnitHealthMax("player")
+			DSFrame.text:SetText(string.format(L["注意自保血量"], perc*100))
+		else
+			DSFrame.text:SetText(L["注意自保"])
+		end
+	end
+end
+
+DSFrame.LineUpIcons = function()
+	local t = {}
+	for tag, icon in pairs(DSFrame.ActiveIcons) do
+		if icon and icon:IsVisible() then
+			table.insert(t, icon)
+		end
+	end
+	if #t > 1 then
+		table.sort(t, function(a, b) return a.ind > b.ind end)
+	end
+	local lasticon
+	for i, icon in pairs(t) do
+		icon:ClearAllPoints()
+		if icon:IsVisible() then
+			if not lasticon then
+				icon:SetPoint("BOTTOMLEFT", DSFrame, "BOTTOM", -((SoD_CDB["General"]["ds_icon_size"]+10)*#t-10)/2,0)
+			else
+				icon:SetPoint("LEFT", lasticon, "RIGHT", 10, 0)	
+			end
+			lasticon = icon
+		end
+	end
+end
+
+local function MySpellCheck(spellID)
+	if not IsSpellKnown(spellID) and not IsSpellKnown(FindBaseSpellByID(spellID)) then			
+		return 
+	end
+	local hascharges = GetSpellCharges(spellID)
+	if hascharges then
+		local charges = GetSpellCharges(spellID)
+		if charges > 0 then
+			return true
+		end
+	else
+		local start, duration = GetSpellCooldown(spellID)
+		if start and duration < 2 then
+			return true
+		end
+	end
+end
+
+local function MyItemCheck(itemID)
+	local itemType = select(6, GetItemInfoInstant(itemID))
+	if itemType == 2 or itemType == 4 then -- 武器或护甲
+		if IsEquippedItem(itemID) then
+			local start, duration, enable = GetItemCooldown(itemID)
+			if enable == 1 and start and duration < 2 then
+				return true
+			end
+		end
+	elseif itemType == 0 then -- 消耗品
+		if GetItemCount(itemID) > 0 then
+			local start, duration, enable = GetItemCooldown(itemID)
+			if enable == 1 and start and duration < 2 then
+				return true
+			end
+		end
+	end
+end
+
+DSFrame.CreateIcon = function(cd_type, arg1, ind)
+	local frame = CreateFrame("Frame", nil, DSFrame)
+	frame:SetSize(35, 35)
+	T.createborder(frame)
+	
+	frame.cd_type = cd_type
+	frame.ind = ind
+	
+	if cd_type == "spell" then
+		frame.spell_id = arg1
+		frame.spell, _, frame.icon_tex = GetSpellInfo(arg1)
+		frame.aura = GetSpellInfo(arg1)
+	elseif cd_type == "item" then
+		frame.item_id = arg1
+		frame.item,  _, _, _, frame.icon_tex = GetItemInfoInstant(arg1)
+	end
+	
+	frame.cooldown = CreateFrame("Cooldown", nil, frame, "CooldownFrameTemplate")
+	frame.cooldown:SetAllPoints()
+	frame.cooldown:SetDrawEdge(false)
+	frame.cooldown:SetFrameLevel(frame:GetFrameLevel())
+	frame.cooldown:SetHideCountdownNumbers(true)
+	
+	frame.glow = frame:CreateTexture(nil, "OVERLAY")
+	frame.glow:SetPoint("TOPLEFT", -15, 15)
+	frame.glow:SetPoint("BOTTOMRIGHT", 15, -15)
+	frame.glow:SetTexture([[Interface\SpellActivationOverlay\IconAlert]])
+	frame.glow:SetTexCoord(0.00781250, 0.50781250, 0.27734375, 0.52734375)
+	frame.glow:Hide()
+	
+	frame.texture = frame:CreateTexture(nil, "BORDER", nil, 1)
+	frame.texture:SetTexCoord( .1, .9, .1, .9)
+	frame.texture:SetAllPoints()
+	frame.texture:SetTexture(frame.icon_tex)
+	
+	frame.update_onedit = function(option)	
+		if option == "all" or option == "enable" then
+			if SoD_CDB["General"]["ds"] then				
+				if cd_type == "spell" then
+					frame:RegisterEvent("UNIT_AURA")
+					frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+				elseif cd_type == "item" then
+					frame:RegisterEvent("BAG_UPDATE_COOLDOWN")
+				end
+			else
+				frame:UnregisterAllEvents()
+			end
+		end
+		
+		if option == "all" or option == "icon_size" then
+			frame:SetSize(SoD_CDB["General"]["ds_icon_size"], SoD_CDB["General"]["ds_icon_size"])
+		end
+	end
+	
+	frame.update = function()
+		if cd_type == "spell" then
+			if AuraUtil.FindAuraByName(frame.aura, "player", "HELPFUL") then
+				if not frame.glow:IsVisible() then
+					local dur, exp_time = select(5, AuraUtil.FindAuraByName(frame.aura, "player", "HELPFUL"))
+					if dur then
+						local start = exp_time - dur
+						frame.cooldown:SetCooldown(start, dur)
+					end
+					frame.glow:Show()
+				end
+				frame:Show()
+			else
+				if frame.glow:IsVisible() then
+					frame.cooldown:SetCooldown(0, 0)
+					frame.glow:Hide()
+				end
+				if MySpellCheck(frame.spell_id) then
+					frame:Show()	
+				else
+					frame:Hide()
+				end
+			end
+		elseif cd_type == "item" then
+			if MyItemCheck(frame.item_id) then
+				frame:Show()
+			else
+				frame:Hide()
+			end
+		end
+	end
+	
+	frame:SetScript("OnEvent", function(self, event, arg1)
+		if event == "UNIT_AURA" and arg1 == "player" then
+			self.update()
+		elseif event == "SPELL_UPDATE_COOLDOWN" then
+			self.update()
+		elseif event == "BAG_UPDATE_COOLDOWN" then
+			self.update()
+		end
+	end)
+	
+	local tag = cd_type..arg1
+	
+	DSFrame.ActiveIcons[tag] = frame
+	DSFrame.LineUpIcons()
+	
+	frame:HookScript("OnShow", function()	
+		DSFrame.LineUpIcons()
+	end)
+	
+	frame:HookScript("OnHide", function()
+		DSFrame.LineUpIcons()
+	end)	
+end
+
+local Defense_spell_class = {
+	PRIEST = { 
+        [19236]   = 1, -- 绝望祷言
+		[33206]   = 2, -- 痛苦压制
+		[47788]   = 3, -- 守护之魂
+		[47585]   = 4, -- 消散
+	},
+	DRUID = {
+		[22812]   = 1, -- 树皮术
+	    [102342]  = 2, -- 铁木树皮
+		[61336]   = 3, -- 生存本能
+		[22842]   = 4, -- 狂暴回复
+	},
+	SHAMAN = { 
+		[108271]  = 1, -- 星界转移
+	},
+	PALADIN = {
+        [498]     = 1, -- 圣佑术
+		[642]     = 2, -- 圣盾术
+	},
+	WARRIOR = { 
+		[12975]   = 1, -- 破釜沉舟
+		[871]     = 2, -- 盾墙
+		[184364]  = 3, -- 狂怒回复
+		[118038]  = 4, -- 剑在人在
+	},
+	MAGE = { 
+		[45438]   = 1, -- 寒冰屏障
+	},
+	WARLOCK = { 
+		[104773]  = 1, -- 不灭决心
+	},
+	HUNTER = { 
+		[186265]  = 1, -- 灵龟守护
+	},
+	ROGUE = { 
+		[31224]  = 1, -- 暗影斗篷
+		[1966]   = 2, -- 佯攻
+	},
+	DEATHKNIGHT = {
+		[48707]  = 1, -- 反魔法护罩
+		[48792]  = 2, -- 冰封之韧
+	},
+	MONK = {
+		[116849]  = 1, -- 作茧缚命
+		[115203]  = 2, -- 壮胆酒
+		[122470]  = 3, -- 业报之触
+		[122783]  = 4, -- 散魔功
+	},
+	DEMONHUNTER = {
+		[196555]  = 1, -- 虚空行走 浩劫
+		[187827]  = 2, -- 恶魔变形
+		[212084]  = 3, -- 邪能毁灭
+		[204021]  = 4, -- 烈火烙印
+		[203720]  = 5, -- 恶魔尖刺
+	},
+}
+
+local Defense_spell_common = {
+	[324867] = 10, -- 血肉铸造
+}
+
+local Defense_item_common = {
+	[177278] = 20, -- 静谧之瓶
+	[171267] = 21, -- 灵魂治疗药水
+	[5512] = 22, -- 治疗石
+}
+
+local MyDS = {
+	spell = {},
+	item = {},
+}
+
+for k, v in pairs(Defense_spell_class[G.myClass]) do
+	MyDS["spell"][k] = v
+end
+for k, v in pairs(Defense_spell_common) do
+	MyDS["spell"][k] = v
+end
+for k, v in pairs(Defense_item_common) do
+	MyDS["item"][k] = v
+end
+
+DSFrame.t = 0
+DSFrame:SetScript("OnUpdate", function(self, e)
+	self.t = self.t + e
+	if self.t > update_rate then
+		if SoD_CDB["General"]["ds_test"] then
+			self.text:SetAlpha(DSFrame.timer:GetProgress())
+		else		
+			local remain = self.exp - GetTime()
+			if remain > 0 then
+				self.text:SetAlpha(DSFrame.timer:GetProgress())
+			else
+				DSFrame:Hide()
+			end
+		end
+		self.t = 0
+	end
+end)
+
+DSFrame:RegisterEvent("ADDON_LOADED")
+DSFrame:SetScript("OnEvent", function(self, event, arg1)
+	if event == "UNIT_HEALTH" and arg1 == "player" then
+		local perc = UnitHealth("player")/UnitHealthMax("player")
+		if SoD_CDB["General"]["ds_color_gradiant"] then
+			DSFrame.text:SetTextColor(1, perc, 0)
+		end
+		if SoD_CDB["General"]["ds_show_hp"] then
+			DSFrame.text:SetText(string.format(L["注意自保血量"], perc*100))
+		end
+	elseif event == "ADDON_LOADED" and arg1 == G.addon_name then
+		for tag, t in pairs(MyDS) do
+			for k, v in pairs(t) do
+				if k and v then
+					DSFrame.CreateIcon(tag, k, v)
+				end
+			end
+		end
+		for index, data in pairs(G.Encounters) do
+			if data["alerts"]["HP_Watch"] then
+				for i, args in pairs(data["alerts"]["HP_Watch"]) do
+					if not DSFrame.WatchSpells[args.sub_event] then
+						DSFrame.WatchSpells[args.sub_event] = {}
+					end
+					DSFrame.WatchSpells[args.sub_event][args.spellID] = {delay = args.delay, dur = args.dur or 3, on_me = args.on_me}
+				end
+			end
+		end
+		DSFrame:UnregisterEvent("ADDON_LOADED")
+	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		if SoD_CDB["General"]["ds_test"] then return end
+		local Time_stamp, Event_type, _, SourceGUID, SourceName, _, _, DestGUID, DestName, _, _, SpellID, SpellName = CombatLogGetCurrentEventInfo()
+		if DSFrame.WatchSpells[Event_type] and DSFrame.WatchSpells[Event_type][SpellID] then
+			local on_me = DSFrame.WatchSpells[Event_type][SpellID]["on_me"]
+			local delay = DSFrame.WatchSpells[Event_type][SpellID]["delay"]
+			local dest = DestName and string.split("-", DestName) or ""
+			if not on_me or dest == G.PlayerName then
+				if delay then
+					C_Timer.After(delay, function()
+						for k, frame in pairs(DSFrame.ActiveIcons) do
+							frame.update()
+						end
+						DSFrame:Show()
+						DSFrame.exp = GetTime() + DSFrame.WatchSpells[Event_type][SpellID]["dur"]
+					end)
+				else
+					for k, frame in pairs(DSFrame.ActiveIcons) do
+						frame.update()
+					end
+					DSFrame:Show()
+					DSFrame.exp = GetTime() + DSFrame.WatchSpells[Event_type][SpellID]["dur"]
+				end
+			end
+		end
     end
 end)
 ----------------------------------------------------------
@@ -3531,30 +3950,36 @@ local function UpdateNPC_Highlight(unit, alert_type, tag)
 	if SoD_CDB["General"]["disable_all"] or not (unit and SoD_CDB["PlateAlerts"]["enable"]) then return end
 	local frame = LGF.GetUnitNameplate(unit)
 	if frame then
+		if IsAddOnLoaded("TidyPlates") and TidyPlatesOptions["ActiveTheme"] == "Neon" and not frame.anchor_frame then
+			frame.anchor_frame = CreateFrame("Frame", nil, frame)
+			local width, height = frame:GetSize()
+			frame.anchor_frame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -10)
+			frame.anchor_frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 10)
+		end
 		if alert_type == "PlateNpcID" then
 			local npcID = select(6, strsplit("-", UnitGUID(unit)))
 			if npcID and G.Plate_Alerts[alert_type][npcID] and SoD_CDB["PlateNpcID"][npcID] then
-				LCG.PixelGlow_Start(frame, G.Plate_Alerts[alert_type][npcID]["color"], 12, .25, nil, 3, 3, 3, true, "npc")
+				LCG.PixelGlow_Start(frame.anchor_frame or frame, G.Plate_Alerts[alert_type][npcID]["color"], 12, .25, nil, 3, 3, 3, true, "npc")
 			else
-				LCG.PixelGlow_Stop(frame, "npc")
+				LCG.PixelGlow_Stop(frame.anchor_frame or frame, "npc")
 			end
 		elseif alert_type == "PlayerAuraSource" then
 			if tag and G.Plate_Alerts[alert_type][tag] then
-				LCG.PixelGlow_Start(frame, G.Plate_Alerts[alert_type][tag]["color"], 12, .25, nil, 3, 3, 3, true, "sourceaura")
+				LCG.PixelGlow_Start(frame.anchor_frame or frame, G.Plate_Alerts[alert_type][tag]["color"], 12, .25, nil, 3, 3, 3, true, "sourceaura")
 			else
-				LCG.PixelGlow_Stop(frame, "sourceaura")
+				LCG.PixelGlow_Stop(frame.anchor_frame or frame, "sourceaura")
 			end
 		elseif alert_type == "PlateAuras" then
 			if tag and G.Plate_Alerts[alert_type][tag] then
-				LCG.PixelGlow_Start(frame, G.Plate_Alerts[alert_type][tag]["color"], 12, .25, nil, 3, 3, 3, true, "aura")
+				LCG.PixelGlow_Start(frame.anchor_frame or frame, G.Plate_Alerts[alert_type][tag]["color"], 12, .25, nil, 3, 3, 3, true, "aura")
 			else
-				LCG.PixelGlow_Stop(frame, "aura")
+				LCG.PixelGlow_Stop(frame.anchor_frame or frame, "aura")
 			end
 		elseif alert_type == "PlateSpells" then
 			if tag and G.Plate_Alerts[alert_type][tag] then
-				LCG.PixelGlow_Start(frame, G.Plate_Alerts[alert_type][tag]["color"], 12, .25, nil, 3, 3, 3, true, "spell")
+				LCG.PixelGlow_Start(frame.anchor_frame or frame, G.Plate_Alerts[alert_type][tag]["color"], 12, .25, nil, 3, 3, 3, true, "spell")
 			else
-				LCG.PixelGlow_Stop(frame, "spell")
+				LCG.PixelGlow_Stop(frame.anchor_frame or frame, "spell")
 			end
 		end
 	end
@@ -3959,7 +4384,7 @@ end
 
 local function NamePlates_UpdateAllNamePlates()
 	for i, namePlate in ipairs(C_NamePlate.GetNamePlates()) do
-		local unitFrame = namePlate.suf
+		local unitFrame = namePlate.soduf
 		UpdateAuras(unitFrame)
 		UpdateSourceAuras(unitFrame)
 		UpdatePower(unitFrame)
@@ -3969,31 +4394,30 @@ local function NamePlates_UpdateAllNamePlates()
 end
 
 local function OnNamePlateCreated(namePlate)
-	namePlate.suf = CreateFrame("Button", "$parent_DRM_UnitFrame", namePlate)
-	namePlate.suf:SetAllPoints(namePlate)
-	namePlate.suf:SetFrameLevel(namePlate:GetFrameLevel())
+	namePlate.soduf = CreateFrame("Button", "$parent_SOD_UnitFrame", namePlate)
+	namePlate.soduf:SetSize(1,1)
+	namePlate.soduf:SetPoint("BOTTOM", namePlate, "TOP", 0, SoD_CDB["PlateAlerts"]["y"])
+	namePlate.soduf:SetFrameLevel(namePlate:GetFrameLevel())
 	
-	namePlate.suf.icons = CreateFrame("Frame", nil, namePlate.suf)
-	namePlate.suf.icons:SetPoint("BOTTOM", namePlate.suf, "TOP", 0, SoD_CDB["PlateAlerts"]["y"])
-	namePlate.suf.icons:SetWidth(90)
-	namePlate.suf.icons:SetHeight(30)
-	namePlate.suf.icons:SetFrameLevel(namePlate:GetFrameLevel()+1)
+	namePlate.soduf.icons = CreateFrame("Frame", nil, namePlate.soduf)
+	namePlate.soduf.icons:SetAllPoints(namePlate.soduf)
+	namePlate.soduf.icons:SetFrameLevel(namePlate:GetFrameLevel()+1)
 
-	namePlate.suf.icons.Aura_Icons = {}
-	namePlate.suf.icons.SourceAura_Icons = {}
-	namePlate.suf.icons.Spell_Icons = {}	
+	namePlate.soduf.icons.Aura_Icons = {}
+	namePlate.soduf.icons.SourceAura_Icons = {}
+	namePlate.soduf.icons.Spell_Icons = {}	
 	
-	namePlate.suf.icons.ActiveIcons = {}
-	namePlate.suf.icons.LineUpIcons = function()
+	namePlate.soduf.icons.ActiveIcons = {}
+	namePlate.soduf.icons.LineUpIcons = function()
 		local lastframe
-		for v, frame in T.pairsByKeys(namePlate.suf.icons.ActiveIcons) do
+		for v, frame in T.pairsByKeys(namePlate.soduf.icons.ActiveIcons) do
 			frame:ClearAllPoints()
 			if not lastframe then
 				local num = 0
-				for k, j in pairs(namePlate.suf.icons.ActiveIcons) do
+				for k, j in pairs(namePlate.soduf.icons.ActiveIcons) do
 					num = num + 1
 				end
-				frame:SetPoint("LEFT", namePlate.suf.icons, "CENTER", -((SoD_CDB["PlateAlerts"]["size"]+4)*num-4)/2,0)
+				frame:SetPoint("LEFT", namePlate.soduf.icons, "CENTER", -((SoD_CDB["PlateAlerts"]["size"]+4)*num-4)/2,0)
 			else
 				frame:SetPoint("LEFT", lastframe, "RIGHT", 3, 0)
 			end
@@ -4002,28 +4426,28 @@ local function OnNamePlateCreated(namePlate)
 		end
 	end
 	
-	namePlate.suf.icons.QueueIcon = function(frame, tag)
+	namePlate.soduf.icons.QueueIcon = function(frame, tag)
 		frame.v = tag
 		
 		frame:HookScript("OnShow", function()
-			namePlate.suf.icons.ActiveIcons[frame.v] = frame
-			namePlate.suf.icons.LineUpIcons()
+			namePlate.soduf.icons.ActiveIcons[frame.v] = frame
+			namePlate.soduf.icons.LineUpIcons()
 		end)
 		
 		frame:HookScript("OnHide", function()
-			namePlate.suf.icons.ActiveIcons[frame.v] = nil
-			namePlate.suf.icons.LineUpIcons()
+			namePlate.soduf.icons.ActiveIcons[frame.v] = nil
+			namePlate.soduf.icons.LineUpIcons()
 		end)
 	end
 	
-	table.insert(G.Plate_IconHolders, namePlate.suf.icons)
+	table.insert(G.Plate_IconHolders, namePlate.soduf.icons)
 	
-	namePlate.suf:EnableMouse(false)
+	namePlate.soduf:EnableMouse(false)
 end
 
 local function OnNamePlateAdded(unit)
 	local namePlate = C_NamePlate.GetNamePlateForUnit(unit)
-	local unitFrame = namePlate.suf
+	local unitFrame = namePlate.soduf
 	SetUnit(unitFrame, unit)
 	UpdateAuras(unitFrame)
 	UpdateSourceAuras(unitFrame)
@@ -4034,13 +4458,14 @@ end
 
 local function OnNamePlateRemoved(unit)
 	local namePlate = C_NamePlate.GetNamePlateForUnit(unit)
-	local unitFrame = namePlate.suf
+	local unitFrame = namePlate.soduf
 	SetUnit(unitFrame)
 	UpdateAuras(unitFrame)
 	UpdateSourceAuras(unitFrame)
 	UpdatePower(unitFrame)
 	UpdateSpells(unitFrame, "ALL", unitFrame.unit)
 	UpdateNPC_Highlight(unit, "PlateNpcID")
+	UpdateNPC_Highlight(unit, "PlateSpells")
 end
 
 local function NamePlates_OnEvent(self, event, ...) 
