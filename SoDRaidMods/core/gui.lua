@@ -1062,6 +1062,7 @@ local options = T.CreateOptions(L["通用"], gui, true)
 T.CreateTitle(options.sfa, L["通用"], -20, -120)
 
 local resetposbutton = T.createUIPanelButton(options.sfa, addon_name.."ResetPosButton", 150, 25, L["重置位置"])
+resetposbutton:SetFrameLevel(options.sfa:GetFrameLevel()+4)
 resetposbutton:SetPoint("TOPLEFT", options.sfa, "TOPLEFT", 50, -50)
 resetposbutton:SetScript("OnClick", function()
 	StaticPopupDialogs[G.addon_name.."Reset Positions Confirm"].text = L["重置位置确认"]
@@ -1072,12 +1073,14 @@ resetposbutton:SetScript("OnClick", function()
 end)
 
 local unlockbutton = T.createUIPanelButton(options.sfa, G.addon_name.."UnlockAllFramesButton", 150, 25, L["解锁框体"])
+unlockbutton:SetFrameLevel(options.sfa:GetFrameLevel()+4)
 unlockbutton:SetPoint("LEFT", resetposbutton, "RIGHT", 10, 0)
 unlockbutton:SetScript("OnClick", function()
 	T.UnlockCurrentBoss()
 end)
 
 local resetbutton = T.createUIPanelButton(options.sfa, G.addon_name.."ResetButton", 150, 25, L["重置所有设置"])
+resetbutton:SetFrameLevel(options.sfa:GetFrameLevel()+4)
 resetbutton:SetPoint("LEFT", unlockbutton, "RIGHT", 10, 0)
 resetbutton:SetScript("OnClick", function()
 	StaticPopupDialogs[G.addon_name.."Reset Settings Confirm"].text = L["重置所有设置确认"]
@@ -1111,6 +1114,7 @@ resetbutton:SetScript("OnClick", function()
 end)
 
 local testbutton = T.createUIPanelButton(options.sfa, G.addon_name.."TestButton", 150, 25, L["测试"])
+testbutton:SetFrameLevel(options.sfa:GetFrameLevel()+4)
 testbutton:SetPoint("LEFT", resetbutton, "RIGHT", 10, 0)
 testbutton:SetScript("OnClick", function()
 	for k, frame in pairs(G.Test) do
