@@ -2514,7 +2514,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					
 					frame.update_plate_auras = function()
 						for i, namePlate in ipairs(C_NamePlate.GetNamePlates()) do
-							local unitFrame = namePlate.suf
+							local unitFrame = namePlate.soduf
 							G.UpdateAuras(unitFrame)
 						end
 					end
@@ -4242,9 +4242,9 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 								local remain = self.exp - GetTime()
 								if remain > 0 then
 									local v = math.fmod(remain, .5)*2
-									self.rings[ind]:SetVertexColor(1*v, .2*v, .2*v)
+									frame.rings[ind]:SetVertexColor(1*v, .2*v, .2*v)
 								else
-									self.rings[ind]:SetVertexColor(1, .2, .2)
+									frame.rings[ind]:SetVertexColor(1, .2, .2)
 									self:SetScript("OnUpdate", nil)
 								end
 								self.t = 0
@@ -4253,7 +4253,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 						frame.helpbtn.preparetext:SetText(format(L["帮忙"], ind.."|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_"..ind..":0|t"))
 						frame.lightring(ind)
 						if not SoD_CDB["General"]["disable_sound"] then
-							PlaySoundFile(G.media.sounds.."FatescribeRohKalo\\help"..mark_index..".ogg", "Master") -- 声音
+							PlaySoundFile(G.media.sounds.."FatescribeRohKalo\\help"..ind..".ogg", "Master") -- 声音
 						end
 					end
 					
