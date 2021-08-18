@@ -350,24 +350,24 @@ T.CreateTitle = function(options, text, start_pos, end_pos)
 	bgtex:SetColorTexture(.4, .6, .9, .8)
 end
 
-local CreateSubTitle = function(parent, text)
+local CreateSubTitle = function(parent, text, start_x, start_y)
 	if parent.option_num > 0 then
 		parent.option_num = parent.option_num + 1
 	end
-	local start_pos = - 70 - 30*parent.option_num
+	local start_pos = (start_y or -70) - 30*parent.option_num
 	local title = T.createtext(parent, "OVERLAY", 14, "OUTLINE", "LEFT")
-	title:SetPoint("TOPLEFT", parent, "TOPLEFT", 30,  start_pos)
+	title:SetPoint("TOPLEFT", parent, "TOPLEFT", start_x or 30,  start_pos)
 	title:SetTextColor(1, 1, 0)
 	title:SetText(text)
 	
 	local line = parent:CreateTexture(nil, "BACKGROUND")
-	line:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, start_pos-18)
+	line:SetPoint("TOPLEFT", parent, "TOPLEFT", start_x or 20, start_pos-18)
 	line:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, start_pos-20)
 	line:SetTexture(G.media.blank)
 	line:SetGradientAlpha("HORIZONTAL", 1, 1, 0, .8, 1, 0, 0, 0)
 	
 	local bgtex = parent:CreateTexture(nil, "ARTWORK")	
-	bgtex:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, start_pos-20)
+	bgtex:SetPoint("TOPLEFT", parent, "TOPLEFT", start_x or 20, start_pos-20)
 	bgtex:SetColorTexture(.4, .6, .9, .8)
 		
 	parent.option_num = parent.option_num + 1
@@ -805,6 +805,56 @@ T.Create_BossMod_Options = function(parent, dif, v, tip)
 	return bu
 end
 
+-- 自保技能
+T.Create_DefenseSpell_Options = function(parent, spell)
+	if not parent.DefenseSpell_Options then
+		CreateSubTitle(parent, L["保命技能"])
+		parent.DefenseSpell_Options = true
+	end
+
+	local bu_str = T.createtext(parent, "OVERLAY", 14, "OUTLINE", "LEFT")
+	bu_str:SetPoint("TOPLEFT", parent, "TOPLEFT", 30, - 70 - 30*parent.option_num)
+	bu_str:SetText(T.GetIconLink(spell))
+	
+	if parent.bgtex then
+		parent.bgtex:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, - 110 - 30*parent.option_num)
+	end
+	
+	parent.option_num = parent.option_num + 1
+end
+
+-- 时间轴
+local Sub_Events = {
+	["SPELL_AURA_APPLIED"] = L["获得光环"],
+	["SPELL_AURA_REMOVED"] = L["光环消失"],
+	["SPELL_CAST_START"] = L["开始施法"],
+	["SPELL_CAST_SUCCESS"] = L["施法成功"],
+}
+
+T.Create_Phase_Options = function(parent, index, empty, subevent, spell)
+	if not parent.Phase_Options then
+		CreateSubTitle(parent, L["转阶段"])
+		parent.Phase_Options = true
+	end
+	
+	local str
+	if empty then
+		str = string.format(L["转阶段空"], index)
+	else
+		str = string.format(L["转阶段技能"], index, T.GetIconLink(spell), Sub_Events[subevent])
+	end
+	
+	local bu_str = T.createtext(parent, "OVERLAY", 14, "OUTLINE", "LEFT")
+	bu_str:SetPoint("TOPLEFT", parent, "TOPLEFT", 30, - 70 - 30*parent.option_num)
+	bu_str:SetText(str)
+	
+	if parent.bgtex then
+		parent.bgtex:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, - 110 - 30*parent.option_num)
+	end
+	
+	parent.option_num = parent.option_num + 1
+end
+
 G.boss_msg_spell = {}
 G.bw_sound_keyword = {}
 
@@ -834,7 +884,7 @@ T.CreateEncounterOptions = function(parent, index, data)
 	for Alert_Type, Alerts in T.pairsByKeys(data["alerts"]) do
 		if Alert_Type == "BossMods" then -- 已改
 			for i, args in pairs(Alerts) do
-				local points = args.points or {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400, hide = false, hide_title = true}
+				local points = args.points or {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400, hide = false}
 				T.CreateBossMod(ef, index, args.spellID, args.tip, points, args.events, args.difficulty_id, args.width, args.height, args.init, args.reset, args.update, args.update_onframe, args.update_rate)
 			end
 		elseif Alert_Type == "AlertIcon" then
@@ -990,6 +1040,14 @@ T.CreateEncounterOptions = function(parent, index, data)
 				end
 				
 				T.Create_Sound_Options(ef, tag, args.role, args.event, args.sub_event, args.spellID, args.addon_only)
+			end
+		elseif Alert_Type == "HP_Watch" then -- 已改
+			for i, args in pairs(Alerts) do
+				T.Create_DefenseSpell_Options(ef, args.spellID)
+			end
+		elseif Alert_Type == "Phase_Change" then -- 已改
+			for i, args in pairs(Alerts) do
+				T.Create_Phase_Options(ef, i, args.empty, args.sub_event, args.spellID)
 			end
 		end
 	end
@@ -1269,7 +1327,7 @@ end
 
 tool_options.ts_sound = createcheckbutton(tool_options.sfa, 250, -150, L["播放语音"], "General", false, "trans_sound")
 
-T.CreateTitle(tool_options.sfa, L["动态战术板"], -220, -450)
+T.CreateTitle(tool_options.sfa, L["动态战术板"], -220, -630)
 		
 tool_options.tl_enable = createcheckbutton(tool_options.sfa, 50, -250, L["启用"], "General", false, "tl")
 tool_options.tl_enable.apply = function() T.EditTimeline("enable") end
@@ -1293,24 +1351,175 @@ tool_options.tl_advance = createslider(tool_options.sfa, 400, -340, L["提前时
 
 tool_options.tl_dur = createslider(tool_options.sfa, 80, -390, L["持续时间"], "General", false, "tl_dur", 2, 20, 1)
 
-T.CreateTitle(tool_options.sfa, L["保命技能"], -460, -640)
+tool_options.tl_show_bar = createcheckbutton(tool_options.sfa, 50, -430, L["显示计时条"], "General", false, "tl_show_bar")
+tool_options.tl_show_bar.apply = function() T.EditTimeline("bar") end
 
-tool_options.ds_enable = createcheckbutton(tool_options.sfa, 50, -490, L["启用"], "General", false, "ds")
+
+tool_options.tl_only_my_bar = createcheckbutton(tool_options.sfa, 250, -430, L["只显示我的计时条"], "General", false, "tl_only_my_bar")
+
+tool_options.tl_bar_sound = createcheckbutton(tool_options.sfa, 470, -430, L["语音提示我的技能"], "General", false, "tl_bar_sound")
+
+tool_options.tl_my_name = T.createUIPanelButton(tool_options.sfa, addon_name.."tl_my_name Button", 18, 18, "")
+tool_options.tl_my_name:SetPoint("TOPLEFT", tool_options.sfa, "TOPLEFT", 55, -473)
+
+tool_options.tl_my_name.tex = tool_options.tl_my_name:CreateTexture(nil, "OVERLAY")
+tool_options.tl_my_name.tex:SetAllPoints()
+tool_options.tl_my_name.tex:SetTexture(134520)
+tool_options.tl_my_name.tex:SetTexCoord(.1, .9, .1, .9)
+
+tool_options.tl_my_name.text = T.createtext(tool_options.tl_my_name, "OVERLAY", 14, "OUTLINE", "LEFT")
+tool_options.tl_my_name.text:SetPoint("LEFT", tool_options.tl_my_name, "RIGHT", 3, 0)
+
+tool_options.tl_my_name.update_names = function()
+	local storename = {string.split(" ", SoD_CDB["General"]["tl_bar_mynickname"])}
+	local nickname = {}
+	for i, name in pairs(storename) do
+		if name ~= "" then
+			table.insert(nickname, name)
+		end
+	end
+	local str
+	if #nickname > 0 then
+		str = T.utf8sub(table.concat(nickname, " "), 25, nil, true)
+	else
+		str = L["无昵称"]
+	end
+	tool_options.tl_my_name.text:SetText(string.format(L["我的昵称"], str))
+end
+
+tool_options.tl_my_name:SetScript("OnShow", tool_options.tl_my_name.update_names)
+tool_options.tl_my_name:SetScript("OnClick", function()
+	StaticPopupDialogs[G.addon_name.."My Nick Name"].OnAccept = function(self)
+		SoD_CDB["General"]["tl_bar_mynickname"] = self.editBox:GetText()
+		tool_options.tl_my_name.update_names()
+		T.EditTimeline("name")
+	end
+	
+	StaticPopup_Show(G.addon_name.."My Nick Name")
+end)
+
+tool_options.view_support_spell = T.createUIPanelButton(tool_options.sfa, addon_name.."view_support_spell Button", 18, 18, "")
+tool_options.view_support_spell:SetPoint("TOPLEFT", tool_options.sfa, "TOPLEFT", 475, -473)
+
+tool_options.view_support_spell.tex = tool_options.view_support_spell:CreateTexture(nil, "OVERLAY")
+tool_options.view_support_spell.tex:SetAllPoints()
+tool_options.view_support_spell.tex:SetTexture(237586)
+tool_options.view_support_spell.tex:SetTexCoord(.1, .9, .1, .9)
+
+tool_options.view_support_spell.text = T.createtext(tool_options.view_support_spell, "OVERLAY", 14, "OUTLINE", "LEFT")
+tool_options.view_support_spell.text:SetPoint("LEFT", tool_options.view_support_spell, "RIGHT", 3, 0)
+tool_options.view_support_spell.text:SetText(L["查看支持的技能"])
+
+tool_options.view_support_spell.frame = CreateFrame("Frame", nil, gui)
+tool_options.view_support_spell.frame:SetPoint("TOPRIGHT", gui, "TOPLEFT", -5, 0)
+tool_options.view_support_spell.frame:SetPoint("BOTTOMLEFT", gui, "BOTTOMLEFT", -350, 0)
+T.createborder(tool_options.view_support_spell.frame)
+tool_options.view_support_spell.frame:Hide()
+
+tool_options.view_support_spell.frame.sf = CreateFrame("ScrollFrame", G.addon_name.."view_support_spell ScrollFrame", tool_options.view_support_spell.frame, "UIPanelScrollFrameTemplate")
+tool_options.view_support_spell.frame.sf:SetPoint("TOPLEFT", tool_options.view_support_spell.frame, "TOPLEFT", 10, -10)
+tool_options.view_support_spell.frame.sf:SetPoint("BOTTOMRIGHT", tool_options.view_support_spell.frame, "BOTTOMRIGHT", -30, 10)
+tool_options.view_support_spell.frame.sf:SetFrameLevel(tool_options.view_support_spell.frame:GetFrameLevel()+1)
+
+tool_options.view_support_spell.frame.sfa = CreateFrame("Frame", G.addon_name.."view_support_spell ScrollAnchor", tool_options.view_support_spell.frame.sf)
+tool_options.view_support_spell.frame.sfa:SetPoint("TOPLEFT", tool_options.view_support_spell.frame.sf, "TOPLEFT", 0, -3)
+tool_options.view_support_spell.frame.sfa:SetWidth(tool_options.view_support_spell.frame.sf:GetWidth()-10)
+tool_options.view_support_spell.frame.sfa:SetHeight(tool_options.view_support_spell.frame.sf:GetHeight())
+tool_options.view_support_spell.frame.sfa:SetFrameLevel(tool_options.view_support_spell.frame.sf:GetFrameLevel()+1)
+
+tool_options.view_support_spell.frame.sf:SetScrollChild(tool_options.view_support_spell.frame.sfa)
+tool_options.view_support_spell.frame.sfa.option_num = 0
+
+local spell_type_order = {"RAIDCD", "DAMAGE", "TANK", "HEALING", "BREZ", "IMMUNITY", "HARDCC", "SOFTCC", "STHARDCC", "STSOFTCC", "INTERRUPT", "DISPEL", "COVENANT", "PERSONAL", "EXTERNAL", "UTILITY"}
+local function CreateSupportSpellList(parent)
+	for _, spell_type in pairs(spell_type_order) do
+		local t = G.spells[spell_type]
+		CreateSubTitle(parent, L[spell_type], 5, -10)
+		
+		for spell, v in pairs(t) do
+			local bu = CreateFrame("Frame", nil, parent)
+			bu:SetPoint("TOPLEFT", parent, "TOPLEFT", 15, - 10 - 30*parent.option_num)
+			bu:SetSize(265, 30)
+	
+			bu.left = T.createtext(bu, "OVERLAY", 14, "OUTLINE", "LEFT")
+			bu.left:SetPoint("LEFT", bu, "LEFT", 0, 0)
+			
+			bu.right = T.createtext(bu, "OVERLAY", 14, "OUTLINE", "RIGHT")
+			bu.right:SetPoint("RIGHT", bu, "RIGHT", 0, 0)
+			
+			local spellID = tonumber(spell)
+			if spellID then
+				bu.left:SetText(T.GetIconLink(spell))
+				bu.right:SetText(spellID)
+			elseif G.sharedConfigSpellIDs[spell] then
+				bu.left:SetText(T.GetIconLink(G.sharedConfigSpellIDs[spell][1]))
+				local spellIDs = table.concat(G.sharedConfigSpellIDs[spell], ",")
+				bu.right:SetText(T.utf8sub(spellIDs, 10, nil, true))
+				bu.tip = spellIDs
+			end
+			
+			if bu.tip then
+				bu:SetScript("OnEnter", function(self) 
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT",  -20, 10)
+					GameTooltip:AddLine("spellID:"..self.tip, .8, .5, 1)
+					GameTooltip:Show() 
+				end)
+				bu:SetScript("OnLeave", function(self)
+					GameTooltip:Hide()
+				end)
+			end
+			
+			if parent.bgtex then
+				parent.bgtex:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, - 50 - 30*parent.option_num)
+			end
+			
+			parent.option_num = parent.option_num + 1
+		end
+	end
+end
+
+CreateSupportSpellList(tool_options.view_support_spell.frame.sfa)
+
+ReskinScroll(_G[G.addon_name.."view_support_spell ScrollFrameScrollBar"])
+
+tool_options.view_support_spell:SetScript("OnHide", function(self)
+	self.frame:Hide()
+end)
+
+tool_options.view_support_spell:SetScript("OnClick", function(self)
+	if self.frame:IsShown() then
+		self.frame:Hide()
+	else
+		self.frame:Show()
+	end
+end)
+
+tool_options.tl_bar_width = createslider(tool_options.sfa, 80, -520, L["计时条高度"], "General", false, "tl_bar_width", 200, 800, 5)
+tool_options.tl_bar_width.apply = function() T.EditTimeline("bar") end
+
+tool_options.tl_bar_height = createslider(tool_options.sfa, 400, -520, L["计时条宽度"], "General", false, "tl_bar_height", 10, 40, 1)
+tool_options.tl_bar_height.apply = function() T.EditTimeline("bar") end
+
+tool_options.tl_bar_sound_dur = createslider(tool_options.sfa, 80, -570, L["语音提示时间"], "General", false, "tl_bar_sound_dur", 2, 10, 1)
+
+T.CreateTitle(tool_options.sfa, L["保命技能"], -640, -820)
+
+tool_options.ds_enable = createcheckbutton(tool_options.sfa, 50, -670, L["启用"], "General", false, "ds")
 tool_options.ds_enable.apply = function() T.EditDSFrame("enable") end
 
-tool_options.ds_test = createcheckbutton(tool_options.sfa, 250, -490, L["测试"], "General", false, "ds_test")
+tool_options.ds_test = createcheckbutton(tool_options.sfa, 250, -670, L["测试"], "General", false, "ds_test")
 tool_options.ds_test.apply = function() T.EditDSFrame("enable") end
 
-tool_options.ds_show_hp = createcheckbutton(tool_options.sfa, 50, -530, L["显示血量百分比"], "General", false, "ds_show_hp")
+tool_options.ds_show_hp = createcheckbutton(tool_options.sfa, 50, -710, L["显示血量百分比"], "General", false, "ds_show_hp")
 tool_options.ds_show_hp.apply = function() T.EditDSFrame("show_hp") end
 
-tool_options.ds_color_gradiant = createcheckbutton(tool_options.sfa, 250, -530, L["颜色随血量渐变"], "General", false, "ds_color_gradiant")
+tool_options.ds_color_gradiant = createcheckbutton(tool_options.sfa, 250, -710, L["颜色随血量渐变"], "General", false, "ds_color_gradiant")
 tool_options.ds_color_gradiant.apply = function() T.EditDSFrame("color_gradiant") end
 
-tool_options.ds_icon_size = createslider(tool_options.sfa, 80, -580, L["图标大小"], "General", false, "ds_icon_size", 25, 50, 1)
+tool_options.ds_icon_size = createslider(tool_options.sfa, 80, -760, L["图标大小"], "General", false, "ds_icon_size", 25, 50, 1)
 tool_options.ds_icon_size.apply = function() T.EditDSFrame("icon_size") end
 	
-tool_options.ds_font_size = createslider(tool_options.sfa, 400, -580, L["字体大小"], "General", false, "ds_font_size", 30, 60, 1)
+tool_options.ds_font_size = createslider(tool_options.sfa, 400, -760, L["字体大小"], "General", false, "ds_font_size", 30, 60, 1)
 tool_options.ds_font_size.apply = function() T.EditDSFrame("font_size") end
 
 

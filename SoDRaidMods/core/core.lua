@@ -311,6 +311,7 @@ end)
 local Timeline = CreateFrame("Frame", addon_name.."TLFrame", FrameHolder)
 Timeline:SetSize(300,100)
 Timeline.assignment_cd = {}
+Timeline.phase_cd = {}
 Timeline.start = 0
 Timeline:Hide()
 
@@ -330,32 +331,56 @@ T.createbdframe(Timeline.whiteline)
 Timeline.clock:SetPoint("TOPLEFT", Timeline, "TOPLEFT", 0, 0)
 
 Timeline.ActiveLines = {}
-		
+Timeline.ActiveBars = {}
+Timeline.MyNames = {}
+	
 T.EditTimeline = function(option)
 	if option == "all" or option == "enable" then
 		if SoD_CDB["General"]["tl"] then			
 			Timeline:RegisterEvent("ENCOUNTER_START")
 			Timeline:RegisterEvent("ENCOUNTER_END")
-			--Timeline:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			Timeline:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 			Timeline:RegisterEvent("CHAT_MSG_ADDON")
 		else
-			Timeline:UnregisterAllEvents()
+			Timeline:UnregisterEvent("ENCOUNTER_START")
+			Timeline:UnregisterEvent("ENCOUNTER_END")
+			Timeline:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			Timeline:UnregisterEvent("CHAT_MSG_ADDON")
 			Timeline:Hide()
 		end
 	end
-
+	
+	if option == "all" or option == "name" then
+		Timeline.MyNames = table.wipe(Timeline.MyNames)
+		table.insert(Timeline.MyNames, G.PlayerName)
+		local storename = {string.split(" ", SoD_CDB["General"]["tl_bar_mynickname"])}
+		for i, name in pairs(storename) do
+			if name ~= "" then
+				table.insert(Timeline.MyNames, name)
+			end
+		end
+	end
+	
+	if option == "all" or option == "bar" then
+		Timeline.BarParent:SetSize(SoD_CDB["General"]["tl_bar_width"], SoD_CDB["General"]["tl_bar_height"])
+	end
+	
 	for k, line in pairs(Timeline.ActiveLines) do
+		line.update_onedit(option)
+	end
+	
+	for k, bar in pairs(Timeline.ActiveBars) do
 		line.update_onedit(option)
 	end
 	
 	if option == "all" or option == "font_size" then
 		Timeline.clock:SetFont(G.Font, SoD_CDB["General"]["tl_font_size"], "OUTLINE")
 		Timeline.whiteline:SetSize(8*SoD_CDB["General"]["tl_font_size"], 1)
-		Timeline.LineUpIcons()
+		Timeline.LineUpLines()
 	end
 end
 
-Timeline.LineUpIcons = function()
+Timeline.LineUpLines = function()
 	local t = {}
 	for i, line in pairs(Timeline.ActiveLines) do
 		if line and line:IsVisible() then
@@ -380,10 +405,12 @@ Timeline.LineUpIcons = function()
 	end
 end
 
-Timeline.CreateLine = function(ind, str, exp_time, dur)
+Timeline.CreateLine = function(ind, str, exp_time, row_time)
 	local frame = CreateFrame("Frame", nil, Timeline)
 	frame:SetSize(300, SoD_CDB["General"]["tl_font_size"])
 	frame:SetPoint("TOPLEFT", Timeline.whiteline, "BOTTOMLEFT", 0, -5)
+	frame.exp_time = exp_time
+	frame.row_time = row_time
 	
 	frame.ind = ind
 	
@@ -423,7 +450,7 @@ Timeline.CreateLine = function(ind, str, exp_time, dur)
 		end
 		
 		if option == "all" or option == "format" then
-			local remain = exp_time - GetTime()
+			local remain = frame.exp_time - GetTime()
 			frame.update_str(remain)
 		end
 	end
@@ -432,56 +459,233 @@ Timeline.CreateLine = function(ind, str, exp_time, dur)
 	frame:SetScript("OnUpdate", function(self, e)
 		self.t = self.t + e
 		if self.t > update_rate then
-			local remain = exp_time - GetTime()
+			local remain = self.exp_time - GetTime()
 			if remain > 0 then
 				self.update_str(remain)
-				if remain < 1 and not frame.fade then
-					frame.fade = true
-					T.UIFrameFadeOut(self, remain, frame:GetAlpha(), 0)
+				if remain < 1 and not self.fade then
+					self.fade = true
+					T.UIFrameFadeOut(self, remain, self:GetAlpha(), 0)
 				end
 			else
-				self:SetScript("OnUpdate", nil)		
+				self:SetScript("OnUpdate", nil)
 				self:Hide()
 				Timeline.ActiveLines[ind] = nil
-				Timeline.LineUpIcons()
+				Timeline.LineUpLines()
 			end
 			self.t = 0
 		end
 	end)
 	
 	Timeline.ActiveLines[ind] = frame
-	Timeline.LineUpIcons()
+	Timeline.LineUpLines()
 	
 	frame:SetAlpha(0)
 	T.UIFrameFadeIn(frame, 1, frame:GetAlpha(), 1)
 end
 
+Timeline.BarParent = CreateFrame("Frame", addon_name.."TLFrame Bar", FrameHolder)
+Timeline.BarParent:SetSize(400,25)
+
+Timeline.BarParent.movingname = L["动态战术板计时条"]
+Timeline.BarParent.point = { a1 = "BOTTOM", parent = "UIParent", a2 = "CENTER", x = 0, y = 350 }
+T.CreateDragFrame(Timeline.BarParent)
+
+Timeline.BarParent.soundexp = 0
+
+Timeline.LineUpBars = function()
+	local t = {}
+	for i, bar in pairs(Timeline.ActiveBars) do
+		if bar and bar:IsVisible() then
+			table.insert(t, bar)
+		end
+	end
+	if #t > 1 then
+		table.sort(t, function(a, b) return a.ind < b.ind end)
+	end
+	local lastbar
+	for i, bar in pairs(t) do
+		bar:ClearAllPoints()
+		if bar:IsVisible() then
+			if not lastbar then
+				bar:SetPoint("TOP", Timeline.BarParent, "TOP", 0, 0)
+				lastbar = bar
+			else
+				bar:SetPoint("TOP", lastbar, "BOTTOM", 0, -5)
+				lastbar = bar
+			end
+		end
+	end
+end
+	
+Timeline.CreateBar = function(ind, str, exp_time, row_time)
+	local frame = CreateFrame("StatusBar", nil, Timeline.BarParent)
+	frame:SetSize(SoD_CDB["General"]["tl_bar_width"], SoD_CDB["General"]["tl_bar_height"])
+	frame:SetPoint("TOP", Timeline.BarParent, "TOP", 0, 0)	
+	T.createborder(frame)
+	
+	frame.exp_time = exp_time
+	frame.row_time = row_time	
+	frame.ind = ind
+	
+	frame:SetStatusBarTexture(G.media.blank)
+	frame:SetStatusBarColor(0, 1, .7)
+	frame:GetStatusBarTexture():SetHorizTile(false)
+	frame:GetStatusBarTexture():SetVertTile(false)
+	frame:SetOrientation("HORIZONTAL")
+	frame:SetMinMaxValues(0, 10)
+	frame:SetValue(0)
+	
+	frame.left = T.createtext(frame, "OVERLAY", SoD_CDB["General"]["tl_bar_height"]-4, "OUTLINE", "LEFT")	
+	frame.left:SetPoint("LEFT", frame, "LEFT", 5, 0)
+	frame.left:SetText(str:gsub("%d+:%d+", ""):gsub("{spell:(%d+)}", T.GetSpellIcon))
+	
+	frame.right = T.createtext(frame, "OVERLAY", SoD_CDB["General"]["tl_bar_height"]-4, "OUTLINE", "RIGHT")	
+	frame.right:SetPoint("RIGHT", frame, "RIGHT", -5, 0)
+	
+	frame.tex = frame:CreateTexture(nil, "OVERLAY", 1)
+	frame.tex:SetTexture("Interface\\Buttons\\WHITE8x8")
+	frame.tex:SetVertexColor(0, 0, 0)
+	frame.tex:SetSize(2, SoD_CDB["General"]["tl_bar_height"])
+	frame.tex:SetPoint("LEFT", frame:GetStatusBarTexture(), "RIGHT", 0, 0)
+	
+	frame.tex2 = frame:CreateTexture(nil, "BACKGROUND", 1)
+	frame.tex2:SetTexture("Interface\\AddOns\\SoDRaidMods\\media\\arrow")
+	frame.tex2:SetDesaturated(true)
+	frame.tex2:SetVertexColor(1, 1, 0)
+	frame.tex2:SetSize(SoD_CDB["General"]["tl_bar_height"], SoD_CDB["General"]["tl_bar_height"])
+	frame.tex2:SetPoint("BOTTOM", frame:GetStatusBarTexture(), "TOPRIGHT", 0, 3)
+
+	frame.update_onedit = function(option)
+		if option == "all" or option == "bar" then
+			if not SoD_CDB["General"]["tl_show_bar"] then
+				frame:Hide()
+				frame:SetScript("OnUpdate", nil)
+				Timeline.ActiveBars[ind] = nil
+			else
+				frame:SetSize(SoD_CDB["General"]["tl_bar_width"], SoD_CDB["General"]["tl_bar_height"])
+				frame.left:SetFont(G.Font, SoD_CDB["General"]["tl_bar_height"]-2, "OUTLINE")
+				frame.right:SetFont(G.Font, SoD_CDB["General"]["tl_bar_height"]-2, "OUTLINE")
+			end
+		end
+	end
+	
+	frame.Play = function()
+		if not frame.played and not SoD_CDB["General"]["disable_sound"] and SoD_CDB["General"]["tl_bar_sound"] then
+			if GetTime() > Timeline.BarParent.soundexp then
+				--print(ind)
+				local spell_voice = {}
+				local spell_voice_id_tag = {}
+				for i, name in pairs(Timeline.MyNames) do
+					local pos = 1
+					while strfind(str, name, pos) do
+						local target_pos, target_end = strfind(str, name, pos)
+						local str_after = strsub(str, target_end+1)
+						local last_spell = last_spell or 1
+						for spellID in str_after:gmatch("{spell:(%d+)}") do
+							local spell_str = string.format("{spell:%d}", spellID)
+							local spell_start, spell_end = strfind(str_after, spell_str, pos)
+							local between = strsub(str_after, last_spell, spell_start - 1):gsub(" ", ""):gsub("|r", "")
+							if between == "" then -- 去掉空格和|r后什么都没有							
+								if not spell_voice_id_tag[spellID] then -- 避免重复
+									table.insert(spell_voice, spellID)
+									spell_voice_id_tag[spellID] = true
+								end
+							end
+							last_spell = spell_end + 1
+						end
+						pos = target_end -- 看看后面这个人还出现没
+					end
+				end
+				for i, spell in pairs(spell_voice) do
+					if i == 1 then
+						PlaySoundFile(G.media.spellsounds..spell..".ogg", "Master") -- 声音
+						--print(GetSpellInfo(spell))
+					else
+						local wait = i-1
+						C_Timer.After(wait, function()
+							PlaySoundFile(G.media.spellsounds..spell..".ogg", "Master") -- 声音
+							--print(GetSpellInfo(spell))
+						end)
+					end
+				end
+				frame.played = true
+				Timeline.BarParent.soundexp = GetTime() + #spell_voice
+			end
+		end
+	end
+	--frame.Play()
+	
+	frame.t = 0
+	frame:SetScript("OnUpdate", function(self, e)		
+		self.t = self.t + e
+		if self.t > 0.02 then	
+			local remain = self.exp_time - GetTime()	
+			if remain > 0 then				
+				if remain < SoD_CDB["General"]["tl_bar_sound_dur"] then
+					local min_ind
+					for i, bar in pairs(Timeline.ActiveBars) do
+						if not frame.played then
+							if not min_ind then
+								min_ind = bar.ind
+							else
+								min_ind = min(min_ind, bar.ind)
+							end
+						end
+					end
+					if frame.ind == min_ind then
+						self.Play()
+					end
+				end
+				self.right:SetText(T.FormatTime(remain))
+				self:SetValue(10 - remain)
+			else
+				self:SetScript("OnUpdate", nil)
+				self:Hide()
+				Timeline.ActiveBars[ind] = nil
+				Timeline.LineUpBars()
+			end
+			self.t = 0
+		end
+	end)
+	
+	Timeline.ActiveBars[ind] = frame
+	Timeline.LineUpBars()
+end
+
 Timeline.t = 0
+Timeline.t_offset = 0
 Timeline:SetScript("OnUpdate", function(self, e)
 	self.t = self.t + e
 	if self.t > update_rate then
 		if self.start > 0 then
 			local dur = GetTime() - self.start
 			local passed = floor(dur)
+			local fake_passed = floor(dur + self.t_offset) 
 			if self.last ~= passed then
 				--print(passed)
-				C_ChatInfo.SendAddonMessage("sodpaopao", "timeline_"..passed, "WHISPER", G.PlayerName)
+				C_ChatInfo.SendAddonMessage("sodpaopao", "timeline_"..fake_passed, "WHISPER", G.PlayerName)
 				self.last = passed
 			end
 			
 			local str = date("|T134376:12:12:0:0:64:64:4:60:4:60|t %M:%S", dur)
-			self.clock:SetText(str)
+			local fake_str = date("|T1391675:12:12:0:0:64:64:4:60:4:60|t %M:%S", fake_passed)
+			self.clock:SetText(str.." ["..fake_str.."]")
 		end
 		self.t = 0
 	end
 end)
 
+Timeline.PhaseTable = {}
+
+Timeline:RegisterEvent("ADDON_LOADED")
 Timeline:SetScript("OnEvent", function(self, event, ...)
 	if event == "ENCOUNTER_START" then
+		self.t_offset = 0
 		self.start = GetTime()
 		self:Show()
         self.assignment_cd = table.wipe(self.assignment_cd)
-        
+        self.phase_cd = table.wipe(self.phase_cd)
+		
         if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
             local text = SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
             local betweenLine = false
@@ -492,20 +696,39 @@ Timeline:SetScript("OnEvent", function(self, event, ...)
                 end
                 if betweenLine then                
                     local str = line:gsub("||", "|")
-                    local m, s = string.match(str, "(%d+):(%d+)")
-                    
-                    if m and s then
-                        count = count + 1
-                        local r = tonumber(m)*60+tonumber(s)
-                        local t = max(r - SoD_CDB["General"]["tl_advance"], 0)
-                        
-                        --print(count, str, r, t)
-                        self.assignment_cd[count] = {}
-                        self.assignment_cd[count]["cd_str"] = str
-                        self.assignment_cd[count]["row_time"] = r
-                        self.assignment_cd[count]["time"] = t
-                    end
-                    
+					local phase_str, reset_m, reset_s = string.match(str, "P(%d+) (%d+):(%d+)")
+					if phase_str then
+						local reset_phase = tonumber(phase_str)
+						if reset_phase > 1 and reset_m and reset_s then
+							local engageID = ...
+							if Timeline.PhaseTable[engageID] and Timeline.PhaseTable[engageID]["phase"..phase_str] then				
+								if not self.phase_cd["phase"..phase_str] then
+									self.phase_cd["phase"..phase_str] = {}
+									self.phase_cd["phase"..phase_str]["to_time"] = {}					
+									self.phase_cd["phase"..phase_str]["sub_event"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["sub_event"]
+									self.phase_cd["phase"..phase_str]["spellID"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["spellID"]
+									self.phase_cd["phase"..phase_str]["current"] = 1
+								end
+								local r = tonumber(reset_m)*60+tonumber(reset_s)
+								table.insert(self.phase_cd["phase"..phase_str]["to_time"], r)
+							end
+						end
+					else
+						local m, s = string.match(str, "(%d+):(%d+)")
+						
+						if m and s then
+							count = count + 1
+							local r = tonumber(m)*60+tonumber(s)
+							local t = max(r - SoD_CDB["General"]["tl_advance"], 0)
+							
+							--print(count, str, r, t)
+							self.assignment_cd[count] = {}
+							self.assignment_cd[count]["cd_str"] = str
+							self.assignment_cd[count]["row_time"] = r
+							self.assignment_cd[count]["show_time"] = t
+							self.assignment_cd[count]["hide_time"] = r + SoD_CDB["General"]["tl_dur"]
+						end
+					end
                 end
                 if line:match(L["时间轴"]) then
                     betweenLine = true
@@ -515,14 +738,37 @@ Timeline:SetScript("OnEvent", function(self, event, ...)
         
     elseif event == "ENCOUNTER_END" then
 		self.start = 0
+		
 		self:Hide()
 		
 		for ind, line in pairs(Timeline.ActiveLines) do
 			Timeline.ActiveLines[ind]:Hide()
+			Timeline.ActiveLines[ind]:SetScript("OnUpdate", nil)
 			Timeline.ActiveLines[ind] = nil
-			Timeline.LineUpIcons()
+			Timeline.LineUpLines()
 		end
-        
+		for ind, bar in pairs(Timeline.ActiveBars) do
+			Timeline.ActiveBars[ind]:Hide()
+			Timeline.ActiveBars[ind]:SetScript("OnUpdate", nil)
+			Timeline.ActiveBars[ind] = nil
+			Timeline.LineUpBars()
+		end
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+		local _, sub_event, _, _, _, _, _, _, _, _, _, spellID = CombatLogGetCurrentEventInfo()
+		for i, t in pairs(self.phase_cd) do
+			if string.find(sub_event, t.sub_event) and t.spellID == spellID then
+				if t.to_time[t.current] then
+					self.t_offset = t.to_time[t.current] - (GetTime() - self.start)
+					for ind, frame in pairs(Timeline.ActiveLines) do
+						frame.exp_time = self.start + frame.row_time + SoD_CDB["General"]["tl_dur"] - self.t_offset
+					end
+					for ind, frame in pairs(Timeline.ActiveBars) do
+						frame.exp_time = self.start + frame.row_time - self.t_offset
+					end
+					t.current = t.current + 1
+				end
+			end
+		end
     elseif event == "CHAT_MSG_ADDON" then
         local prefix, message, channel, sender = ...
 
@@ -530,17 +776,51 @@ Timeline:SetScript("OnEvent", function(self, event, ...)
 			local mark, passed = string.split("_", message)
 			if mark and mark == "timeline" then
 				--print("战斗计时", passed)
+				passed = tonumber(passed)
 				for i, t in pairs (self.assignment_cd) do
-					passed = tonumber(passed)
-					if (t.time == passed) then
-						--print(passed, i, t.time, t.row_time, t.cd_str)
-						local exp_time = GetTime() + SoD_CDB["General"]["tl_dur"] + min(SoD_CDB["General"]["tl_advance"], t.row_time)
-						local dur = SoD_CDB["General"]["tl_dur"] + min(SoD_CDB["General"]["tl_advance"], t.row_time)
-						Timeline.CreateLine(i, t.cd_str, exp_time, dur)	
+					if t.show_time <= passed and t.hide_time > passed then	
+						if not Timeline.ActiveLines[i] then
+							local exp_time = self.start + t.row_time + SoD_CDB["General"]["tl_dur"] - self.t_offset
+							Timeline.CreateLine(i, t.cd_str, exp_time, t.row_time)
+						end
+					end
+					if SoD_CDB["General"]["tl_show_bar"] then
+						if t.row_time - 10 <= passed and t.row_time > passed then
+							if not Timeline.ActiveBars[i] then
+								if SoD_CDB["General"]["tl_only_my_bar"] then
+									for _, name in pairs(Timeline.MyNames) do
+										if strfind(t.cd_str, name) then
+											local exp_time = self.start + t.row_time - self.t_offset
+											Timeline.CreateBar(i, t.cd_str, exp_time, t.row_time)
+											break
+										end
+									end
+								else
+									local exp_time = self.start + t.row_time - self.t_offset
+									Timeline.CreateBar(i, t.cd_str, exp_time, t.row_time)
+								end
+							end
+						end
 					end
 				end
 			end
-        end     
+        end
+	elseif event == "ADDON_LOADED" then
+		local addon = ...
+		if addon == G.addon_name then
+			for index, data in pairs(G.Encounters) do
+				if data["alerts"]["Phase_Change"] then
+					Timeline.PhaseTable[data.engage_id] = {}
+					
+					for i, args in pairs(data["alerts"]["Phase_Change"]) do
+						if not args.empty then
+							Timeline.PhaseTable[data.engage_id]["phase"..i] = {sub_event = args.sub_event, spellID = args.spellID}
+						end
+					end
+				end
+			end
+			self:UnregisterEvent("ADDON_LOADED")
+		end
     end
 end)
 
@@ -572,6 +852,7 @@ T.EditDSFrame = function(option)
 		if SoD_CDB["General"]["ds"] then
 			DSFrame:RegisterEvent("UNIT_HEALTH")
 			DSFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			DSFrame:RegisterEvent("ENCOUNTER_END")
 			if SoD_CDB["General"]["ds_test"] then				
 				local perc = UnitHealth("player")/UnitHealthMax("player")
 				if SoD_CDB["General"]["ds_color_gradiant"] then
@@ -957,6 +1238,8 @@ DSFrame:SetScript("OnEvent", function(self, event, arg1)
 				end
 			end
 		end
+	elseif event == "ENCOUNTER_END" then
+		DSFrame:Hide()
     end
 end)
 ----------------------------------------------------------
@@ -3759,6 +4042,7 @@ T.Create_HL_EventFrame = function(parent, difficulty_id, index, v, role, stack)
 				return true
 			end
 		elseif event == "ENCOUNTER_END" then
+			T.GlowRaidFrame_HideAll() -- 隐藏所有高亮
 			return false
 		elseif event == "PLAYER_ENTERING_WORLD" then	
 			if type(index) == "string" then
@@ -5388,13 +5672,6 @@ T.CreateBossMod = function(ef, index, v, tip, points, events, difficulty_id, wid
 		T.CreateDragFrame(frame)
 	else
 		frame:SetPoint("CENTER", UIParent, "CENTER")
-	end
-	
-	frame.title = T.createtext(frame, "OVERLAY", 15, "OUTLINE", "LEFT")
-	frame.title:SetPoint("TOPLEFT", 0, 33)
-	frame.title:SetText(EJ_GetEncounterInfo(G.Encounters[index]["id"]).."\n"..GetSpellLink(v)..L["首领模块"])
-	if points.hide_title then
-		frame.title:Hide()
 	end
 	
 	frame.update_onedit = function(option)

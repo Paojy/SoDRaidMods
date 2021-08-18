@@ -61,7 +61,7 @@ T.pairsByKeys = function(t)
 end
 
 -- calculating the ammount of latters
-T.utf8sub = function(str, i, wrap)
+T.utf8sub = function(str, i, wrap, etc)
 	if str then
 		local bytes = string.len(str)
 		if bytes <= i then
@@ -88,7 +88,7 @@ T.utf8sub = function(str, i, wrap)
 				if wrap then
 					return string.sub(str, 1, pos - 1).."\n"..T.utf8sub(string.sub(str, pos, bytes), i, true)
 				else
-					return string.sub(str, 1, pos - 1)
+					return string.sub(str, 1, pos - 1)..(etc and "..." or "")
 				end
 			else
 				return str
@@ -321,7 +321,7 @@ T.createUIPanelButton = function(parent, name, width, height, text)
 	end)
  	button:SetScript("OnLeave", function()
 		button.text:SetTextColor(1, 1, 1)
-		button.sd:SetBackdropColor(.05, .05, .05, .5)
+		button.sd:SetBackdropColor(.05, .05, .05, .7)
 		button.sd:SetBackdropBorderColor(0, 0, 0)
 	end)
 	button:SetScript("OnEnable", function()
@@ -331,7 +331,7 @@ T.createUIPanelButton = function(parent, name, width, height, text)
 			button.sd:SetBackdropBorderColor(1, 1, 0)
 		else
 			button.text:SetTextColor(1, 1, 1)
-			button.sd:SetBackdropColor(.05, .05, .05, .5)
+			button.sd:SetBackdropColor(.05, .05, .05, .7)
 			button.sd:SetBackdropBorderColor(0, 0, 0)	
 		end
 	end)

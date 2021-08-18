@@ -6,7 +6,7 @@ local LCG = LibStub("LibCustomGlow-1.0")
 local LGF = LibStub("LibGetFrame-1.0")
 --[[
 
-points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 0, hide = true, hide_title = true},
+points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 0, hide = true},
 points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400}
 
 , tip = ""
@@ -102,6 +102,10 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 			{spellID = 347490, event = "UNIT_SPELLCAST_START"}, -- 准备驱散
 			{spellID = 347490, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED", unit = "boss1"}, -- 驱散BOSS
 			{spellID = 348313, event = "UNIT_SPELLCAST_START"}, -- 注意自保	
+		},
+		Phase_Change = {
+			{empty = true},
+			{sub_event = "SPELL_CAST_START", spellID = 348313}, -- 典狱长的凝视
 		},
 		BossMods = {
 			{ -- 捕食者之嚎
@@ -297,7 +301,7 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 			{ -- 贪噬迷雾读条计数
 				spellID = 354080,
 				tip = L["TIP贪噬迷雾读条计数"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -510,11 +514,16 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 		HP_Watch = {
 			{sub_event = "SPELL_CAST_START", spellID = 349030}, -- 死亡泰坦凝视
 		},
+		Phase_Change = {
+			{sub_event = "SPELL_AURA_REMOVED", spellID = 348805}, -- 冥暗护盾消失
+			{sub_event = "SPELL_AURA_APPLIED", spellID = 348805}, -- 冥暗护盾获得
+			{sub_event = "SPELL_CAST_START", spellID = 348974}, -- 即刻屠灭
+		},
 		BossMods = {
 			{ -- 轻蔑与忿怒
 				spellID = 355232,
 				tip = L["TIP轻蔑与忿怒"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 250, hide_title = true},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 250},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true
 				},
@@ -773,7 +782,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{ -- 血量对比监视
 				spellID = 351994,
 				tip = L["TIP垂死苦难"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300, hide_title = true},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300},
 				events = {
 					["UNIT_HEALTH"] = true,
 				},
@@ -842,7 +851,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{ -- 毁灭凝视
 				spellID = 351413,
 				tip = L["TIP毁灭凝视"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["UNIT_SPELLCAST_START"] = true,
 					["UNIT_SPELLCAST_CHANNEL_START"] = true,
@@ -1041,6 +1050,10 @@ G.Encounters[3] = { -- 九武神 已过初检
 		HP_Watch = {
 			{sub_event = "SPELL_AURA_APPLIED", on_me = true, spellID = 350542}, -- 命运残片
 		},
+		Phase_Change = {
+			{empty = true},
+			{sub_event = "SPELL_CAST_SUCCESS", spellID = 350745}, -- 斯凯亚的攻势
+		},
 		BossMods = {
 			{ -- 命运残片驱散
 				spellID = 350542,
@@ -1171,7 +1184,7 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{ -- 血量对比监视
 				spellID = 350745,
 				tip = L["TIP斯凯亚"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300, hide_title = true},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300},
 				events = {
 					["UNIT_HEALTH"] = true,
 				},
@@ -1410,11 +1423,17 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{sub_event = "SPELL_CAST_START", spellID = 351067}, -- 碎裂
 			{sub_event = "SPELL_CAST_START", spellID = 351073}, -- 碎裂		
 		},
+		Phase_Change = {
+			{empty = true},
+			{sub_event = "SPELL_CAST_START", spellID = 351066}, -- 碎裂
+			{sub_event = "SPELL_CAST_START", spellID = 351067}, -- 碎裂
+			{sub_event = "SPELL_CAST_START", spellID = 351073}, -- 碎裂		
+		},
 		BossMods = {
 			{ -- 群体驱散 已检查
 				spellID = 32375,
 				tip = L["TIP群体驱散读条"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -1525,7 +1544,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30, hide_title = true},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30},
 				width = 250,
 				height = 100,
 				init = function(frame)
@@ -2317,7 +2336,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{ -- 折磨
 				spellID = 350217,
 				tip = L["TIP折磨"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["UNIT_SPELLCAST_SUCCEEDED"] = true,
 				},
@@ -2547,7 +2566,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{ -- 碎裂之魂计时
 				spellID = 351229,
 				tip = L["TIP碎裂之魂"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
 				events = {
 					["UNIT_SPELLCAST_SUCCEEDED"] = true,
 					["UNIT_SPELLCAST_START"] = true,
@@ -2755,6 +2774,10 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{sub_event = "SPELL_CAST_START", spellID = 355571, dur = 4}, -- 十字斧
 			{sub_event = "SPELL_CAST_START", spellID = 348513, dur = 4}, -- 振荡铁锤
 			{sub_event = "SPELL_CAST_START", spellID = 355787, dur = 4}, -- 双刃镰刀
+		},
+		Phase_Change = {
+			{sub_event = "SPELL_AURA_REMOVED", spellID = 355525}, -- 锻造武器消失
+			{sub_event = "SPELL_AURA_APPLIED", spellID = 355525}, -- 锻造武器开始
 		},
 		BossMods = {
 			{ -- 烈焰陷阱爆炸 待检查
@@ -2985,7 +3008,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = -40, hide_title = true},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = -40},
 				difficulty_id = {
 					["all"] = true,
 				},
@@ -3068,7 +3091,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{ -- 熔炉烈焰 
 				spellID = 359033,
 				tip = L["TIP熔炉烈焰"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -3219,7 +3242,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 净化协议读条计数 已检查
 				spellID = 352538,
 				tip = L["TIP净化协议读条计数"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -3823,7 +3846,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 读条 湮灭 破甲 分解 熔毁
 				spellID = 352589,
 				tip = L["TIP湮灭计时条"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -4030,6 +4053,10 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 		},
 		HP_Watch = {
 			{sub_event = "SPELL_AURA_APPLIED", spellID = 351680, delay = 5}, -- 祈求宿命
+		},
+		Phase_Change = {
+			{sub_event = "SPELL_AURA_REMOVED", spellID = 357739}, -- 命运重构消失
+			{sub_event = "SPELL_AURA_APPLIED", spellID = 357739}, -- 命运重构开始
 		},
 		BossMods = {
 			{ -- 符文亲和 已检查
@@ -4527,7 +4554,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 随演命运选择按钮
 				spellID = 353195,
 				tip = L["TIP随演命运"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = 0, y = 0, hide_title = true},
+				points = {a1 = "CENTER", a2 = "CENTER", x = 0, y = 0},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["CHAT_MSG_ADDON"] = true,
@@ -4672,7 +4699,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 绝望距离检查
 				spellID = 357144,
 				tip = L["TIP绝望距离检查"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -4860,7 +4887,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 宿命联结
 				spellID = 350421,
 				tip = L["TIP宿命联结"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -5250,6 +5277,10 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 		},
 		HP_Watch = {
 			{sub_event = "SPELL_AURA_APPLIED", on_me = true, spellID = 348760, delay = 3}, -- 冰霜冲击
+		},
+		Phase_Change = {
+			{sub_event = "SPELL_AURA_APPLIED", spellID = 352051}, -- 通灵涌动
+			{sub_event = "SPELL_CAST_START", spellID = 352293}, -- 复仇毁灭		
 		},
 		BossMods = {
 			{ -- 小怪复活计时条 已检查
@@ -5856,7 +5887,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{ -- 内场读条 腐溃之风 冻结冲击 冰川之风 亡灵之怒
 				spellID = 352379,
 				tip = L["TIP冻结冲击计时条"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -6198,11 +6229,16 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{sub_event = "SPELL_CAST_START", spellID = 347609}, -- 哀恸箭
 			{sub_event = "SPELL_CAST_START", spellID = 354142}, -- 黑暗帷幕 P3
 		},
+		Phase_Change = {
+			{empty = true},
+			{sub_event = "SPELL_CAST_START", spellID = 352843}, -- 引导寒冰
+			{sub_event = "SPELL_CAST_SUCCESS", spellID = 357102}, -- 团队副本传送门：奥利波斯		
+		},
 		BossMods = {
 			{ -- 全团倒刺之箭层数监视 已检查
 				spellID = 347807,
 				tip = L["TIP倒刺之箭"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250, hide_title = true},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -6314,7 +6350,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 锁链时倒刺之箭情况 已检查
 				spellID = 349419,
 				tip = L["TIP统御锁链"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400, hide_title = true},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["UNIT_AURA"] = true,
@@ -6461,7 +6497,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 全团女妖的灾厄层数监视 已检查
 				spellID = 353929,
 				tip = L["TIP女妖的灾厄"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250, hide_title = true},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -6567,7 +6603,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 女妖之怒时高亮框架 已检查
 				spellID = 354068,
 				tip = L["TIP女妖之怒"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -6761,7 +6797,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 黑暗帷幕读条计数 已检查
 				spellID = 347726,
 				tip = L["TIP黑暗帷幕读条计数"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
 				events = {	
 					["CHAT_MSG_RAID_BOSS_EMOTE"] = true,
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
@@ -6880,7 +6916,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 哀痛箭/黑蚀箭 已检查
 				spellID = 348064,
 				tip = L["TIP哀痛箭"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, hide_title = true},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -7150,7 +7186,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 死亡飞刀 待检查
 				spellID = 358434,
 				tip = L["TIP死亡飞刀"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, hide_title = true},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -7337,7 +7373,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 读条 造桥 妖魂索命 传送奥利波斯 劈裂 女妖哀嚎 女妖尖啸 毁灭 破城箭 已检查
 				spellID = 352842,
 				tip = L["TIP造桥"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -7529,7 +7565,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 无情 已检查
 				spellID = 358588,
 				tip = L["TIP无情"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 350, hide_title = true},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 350},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},

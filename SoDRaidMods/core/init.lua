@@ -26,6 +26,7 @@ G.media = {
 	blank = "Interface\\Buttons\\WHITE8x8",
 	sounds = "Interface\\AddOns\\SoDRaidMods\\media\\sounds\\",
 	count = "Interface\\AddOns\\SoDRaidMods\\media\\sounds\\count\\",
+	spellsounds = "Interface\\AddOns\\SoDRaidMods\\media\\sounds\\spell\\",
 	arrowUp = "Interface\\AddOns\\SoDRaidMods\\media\\up",
 	arrowDown = "Interface\\AddOns\\SoDRaidMods\\media\\down",
 	gradient = "Interface\\AddOns\\SoDRaidMods\\media\\gradient",

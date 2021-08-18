@@ -88,3 +88,16 @@ StaticPopupDialogs[G.addon_name.."Cannot Import"] = {
 	whileDead = true,
 	preferredIndex = 3,
 }
+
+StaticPopupDialogs[G.addon_name.."My Nick Name"] = {
+	text = L["输入昵称"],
+	button1 = ACCEPT,
+	hideOnEscape = 1, 
+	whileDead = true,
+	preferredIndex = 3,
+	hasEditBox = true,
+	OnShow = function (self, data)
+		self.editBox:SetText(SoD_CDB["General"]["tl_bar_mynickname"])
+		self.editBox:HighlightText()
+	end,
+}
