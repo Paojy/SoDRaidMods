@@ -1373,7 +1373,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{type = "HLAuras", spellID = 350388}, -- 悲伤前行 已检查
 			{type = "HLAuras", spellID = 349890}, -- 苦难 待检查
 			{type = "HLAuras", spellID = 350469, Glow = true}, -- 怨毒 已检查
-			{type = "HLAuras", spellID = 350073}, -- 折磨 已检查
+			{type = "HLAuras", spellID = 350073, stack = 2}, -- 折磨 已检查
 		},
 		PlateAlert = {
 			{type = "PlateAuras", spellID = 355790}, -- 永恒折磨 已检查
