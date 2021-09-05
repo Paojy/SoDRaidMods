@@ -1550,7 +1550,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				init = function(frame)
 					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
 					frame.text:SetPoint("TOPLEFT", 5, -5)
-					frame.text:SetText(string.format(L["下一次怨恨"], "x", "x"))
+					
 					frame.spell_index = { -- 转阶段怨恨
 						--M
 						[354519] = true, -- p2
