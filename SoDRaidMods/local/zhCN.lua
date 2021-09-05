@@ -10,6 +10,8 @@ L["TANK_ICON_SMALL"]		  = "|TInterface\\EncounterJournal\\UI-EJ-Icons.blp:15:15:
 L["DAMAGE_ICON_SMALL"]		  = "|TInterface\\EncounterJournal\\UI-EJ-Icons.blp:15:15:0:3:255:66:40:55:5:27|t" -- NO TRANSLATE
 L["HEALER_ICON_SMALL"]		  = "|TInterface\\EncounterJournal\\UI-EJ-Icons.blp:15:15:0:3:255:66:71:87:5:25|t" -- NO TRANSLATE
 
+L["缩写名字"]				  = "缩写名字"
+L["缩写时名字长度"]			  = "缩写时名字最大长度"
 L["过期"]					  = [[|cFFFFFF00[|r%s|cFFFFFF00]|r
 你的版本%s|cFFFFFF00(%s)|r已过期，
 请下载最新版本%s|cFFFFFF00(%s)|r。]]
@@ -27,7 +29,7 @@ L["启用所有"]				  = "启用所有"
 L["禁用所有"]                 = "禁用所有" 
 L["禁用团队标记"]			  = "禁用团队标记"
 L["隐藏小地图图标"]			  = "隐藏小地图图标"
-L["职责启用"]                 = "按职责启用" 
+L["职责启用"]                 = "按职责启用"
 L["锚点"]                     = "锚点"
 L["锚点框体"] 				  = "锚点框体"
 L["选中的框体"]               = "选中的框体"

@@ -1117,7 +1117,7 @@ end
 
 local options = T.CreateOptions(L["通用"], gui, true)
 
-T.CreateTitle(options.sfa, L["通用"], -20, -120)
+T.CreateTitle(options.sfa, L["通用"], -20, -170)
 
 local resetposbutton = T.createUIPanelButton(options.sfa, addon_name.."ResetPosButton", 150, 25, L["重置位置"])
 resetposbutton:SetFrameLevel(options.sfa:GetFrameLevel()+4)
@@ -1190,15 +1190,18 @@ options.Mark_enable = createcheckbutton(options.sfa, 370, -90, L["禁用团队�
 options.Minimapbutton_enable = createcheckbutton(options.sfa, 530, -90, L["隐藏小地图图标"], "General", false, "hide_minimap")
 options.Minimapbutton_enable.apply = function() T.ToggleMinimapButton() end
 
-T.CreateTitle(options.sfa, L["图标提示"], -130, -330)
+options.short_name = createcheckbutton(options.sfa, 50, -140, L["缩写名字"], "General", false, "short_name")
+options.name_length = createslider(options.sfa, 210, -145, L["缩写时名字长度"], "General", false, "name_length", 1, 6, 1)
 
-options.AlertFrame_enable = createcheckbutton(options.sfa, 50, -160, L["启用"], "AlertFrame", false, "enable")
+T.CreateTitle(options.sfa, L["图标提示"], -180, -380)
+
+options.AlertFrame_enable = createcheckbutton(options.sfa, 50, -210, L["启用"], "AlertFrame", false, "enable")
 options.AlertFrame_enable.apply = function() T.EditAlertFrame("enable") end
 
-options.AlertFrame_spellname = createcheckbutton(options.sfa, 210, -160, L["显示法术名字"], "AlertFrame", false, "show_spellname")
+options.AlertFrame_spellname = createcheckbutton(options.sfa, 210, -210, L["显示法术名字"], "AlertFrame", false, "show_spellname")
 options.AlertFrame_spellname.apply = function() T.EditAlertFrame("spelltext") end
 
-options.AlertFrame_cdreverse = createcheckbutton(options.sfa, 370, -160, L["反转冷却"], "AlertFrame", false, "reverse_cooldown")
+options.AlertFrame_cdreverse = createcheckbutton(options.sfa, 370, -210, L["反转冷却"], "AlertFrame", false, "reverse_cooldown")
 options.AlertFrame_cdreverse.apply = function() T.EditAlertFrame("cdreverse") end
 
 local growdirection_group = {
@@ -1208,28 +1211,28 @@ local growdirection_group = {
 	{"TOP",    L["下"]},	
 }
 
-options.AlertFrame_icon_size = createslider(options.sfa, 80, -210, L["图标大小"], "AlertFrame", false, "icon_size", 40, 100, 1)
+options.AlertFrame_icon_size = createslider(options.sfa, 80, -260, L["图标大小"], "AlertFrame", false, "icon_size", 40, 100, 1)
 options.AlertFrame_icon_size.apply = function() T.EditAlertFrame("icon_size") end
 
-options.AlertFrame_icon_space = createslider(options.sfa, 400, -210, L["图标间距"], "AlertFrame", false, "icon_space", 0, 20, 1)
+options.AlertFrame_icon_space = createslider(options.sfa, 400, -260, L["图标间距"], "AlertFrame", false, "icon_space", 0, 20, 1)
 options.AlertFrame_icon_space.apply = function() T.EditAlertFrame("icon_space") end
 
-options.AlertFrame_font_size = createslider(options.sfa, 80, -250, L["大字体大小"], "AlertFrame", false, "font_size", 15, 30, 1)
+options.AlertFrame_font_size = createslider(options.sfa, 80, -300, L["大字体大小"], "AlertFrame", false, "font_size", 15, 30, 1)
 options.AlertFrame_font_size.apply = function() T.EditAlertFrame("font_size") end
 
-options.AlertFrame_ifont_size = createslider(options.sfa, 400, -250, L["小字体大小"], "AlertFrame", false, "ifont_size", 10, 20, 1)
+options.AlertFrame_ifont_size = createslider(options.sfa, 400, -300, L["小字体大小"], "AlertFrame", false, "ifont_size", 10, 20, 1)
 options.AlertFrame_ifont_size.apply = function() T.EditAlertFrame("ifont_size") end
 
-options.AlertFrame_grow_dir = createradiobuttongroup(options.sfa, 50, -290, L["排列方向"], "AlertFrame", false, "grow_dir", growdirection_group)
+options.AlertFrame_grow_dir = createradiobuttongroup(options.sfa, 50, -340, L["排列方向"], "AlertFrame", false, "grow_dir", growdirection_group)
 options.AlertFrame_grow_dir.apply = function() T.EditAlertFrame("grow_dir") end
 
-T.CreateTitle(options.sfa, L["团队高亮图标"], -340, -490)
+T.CreateTitle(options.sfa, L["团队高亮图标"], -390, -540)
 
-options.HL_Frame_enable = createcheckbutton(options.sfa, 50, -370, L["启用"], "HL_Frame", false, "enable")
+options.HL_Frame_enable = createcheckbutton(options.sfa, 50, -420, L["启用"], "HL_Frame", false, "enable")
 
-options.HL_Frame_icon_size = createslider(options.sfa, 80, -420, L["图标大小"], "HL_Frame", false, "iconSize", 15, 40, 1)
+options.HL_Frame_icon_size = createslider(options.sfa, 80, -470, L["图标大小"], "HL_Frame", false, "iconSize", 15, 40, 1)
 
-options.HL_Frame_icon_alpha = createslider(options.sfa, 400, -420, L["图标透明度"], "HL_Frame", false, "iconAlpha", 10, 100, 1)
+options.HL_Frame_icon_alpha = createslider(options.sfa, 400, -470, L["图标透明度"], "HL_Frame", false, "iconAlpha", 10, 100, 1)
 
 local anchors = {
 	{"CENTER",		 L["中间"]}, 
@@ -1243,35 +1246,35 @@ local anchors = {
 	{"BOTTOMRIGHT",	 L["右下"]},
 }
 
-options.HL_Frame_position = createradiobuttongroup(options.sfa, 50, -460, L["锚点"], "HL_Frame", false, "position", anchors)
+options.HL_Frame_position = createradiobuttongroup(options.sfa, 50, -510, L["锚点"], "HL_Frame", false, "position", anchors)
 options.HL_Frame_position.apply = function() T.EditHL() end
 
-T.CreateTitle(options.sfa, L["姓名板图标"], -500, -660)
+T.CreateTitle(options.sfa, L["姓名板图标"], -550, -710)
 
-options.PlateAlerts_enable = createcheckbutton(options.sfa, 50, -530, L["启用"], "PlateAlerts", false, "enable")
+options.PlateAlerts_enable = createcheckbutton(options.sfa, 50, -580, L["启用"], "PlateAlerts", false, "enable")
 options.PlateAlerts_enable.apply = function() T.EditPlateIcons("enable") end
 
-options.PlateAlerts_size = createslider(options.sfa, 80, -580, L["图标大小"], "PlateAlerts", false, "size", 20, 50, 1)
+options.PlateAlerts_size = createslider(options.sfa, 80, -630, L["图标大小"], "PlateAlerts", false, "size", 20, 50, 1)
 options.PlateAlerts_size.apply = function() T.EditPlateIcons("icon_size") end
 
-options.PlateAlerts_fsize = createslider(options.sfa, 400, -580, L["字体大小"], "PlateAlerts", false, "fsize", 6, 16, 1)
+options.PlateAlerts_fsize = createslider(options.sfa, 400, -630, L["字体大小"], "PlateAlerts", false, "fsize", 6, 16, 1)
 options.PlateAlerts_fsize.apply = function() T.EditPlateIcons("font_size") end
 
-options.PlateAlerts_y = createslider(options.sfa, 80, -620, L["垂直距离"], "PlateAlerts", false, "y", -50, 50, 1)
+options.PlateAlerts_y = createslider(options.sfa, 80, -670, L["垂直距离"], "PlateAlerts", false, "y", -50, 50, 1)
 options.PlateAlerts_y.apply = function() T.EditPlateIcons("y") end
 
-T.CreateTitle(options.sfa, L["文字提示"], -670, -790)
+T.CreateTitle(options.sfa, L["文字提示"], -720, -830)
 
-options.PlateAlerts_enable = createcheckbutton(options.sfa, 50, -700, L["启用"], "TextFrame", false, "enable")
+options.PlateAlerts_enable = createcheckbutton(options.sfa, 50, -750, L["启用"], "TextFrame", false, "enable")
 options.PlateAlerts_enable.apply = function() T.EditTextFrame("enable") end
 
-options.TextFrame_font_size = createslider(options.sfa, 80, -750, L["字体大小"], "TextFrame", false, "font_size", 20, 80, 1)
+options.TextFrame_font_size = createslider(options.sfa, 80, -800, L["字体大小"], "TextFrame", false, "font_size", 20, 80, 1)
 options.TextFrame_font_size.apply = function() T.EditTextFrame("font_size") end
 
-T.CreateTitle(options.sfa, L["喊话提示"], -800, -920)
+T.CreateTitle(options.sfa, L["喊话提示"], -850, -970)
 
-options.ChatMsg_enable = createcheckbutton(options.sfa, 50, -830, L["启用"], "ChatMsg", false, "enable")
-options.ChatMsg_customfontsize = createcheckbutton(options.sfa, 210, -830, L["变更字体大小"], "ChatMsg", false, "custom_fsize")
+options.ChatMsg_enable = createcheckbutton(options.sfa, 50, -880, L["启用"], "ChatMsg", false, "enable")
+options.ChatMsg_customfontsize = createcheckbutton(options.sfa, 210, -880, L["变更字体大小"], "ChatMsg", false, "custom_fsize")
 options.ChatMsg_customfontsize.apply = function() 
 	if SoD_CDB["ChatMsg"]["custom_fsize"] then
 		ChatBubbleFont:SetFont(G.Font, SoD_CDB["ChatMsg"]["fsize"], "OUTLINE")
@@ -1280,15 +1283,15 @@ options.ChatMsg_customfontsize.apply = function()
 	end
 end
 
-options.ChatMsg_fsize = createslider(options.sfa, 80, -880, L["字体大小"], "ChatMsg", false, "fsize", 10, 30, 2)
+options.ChatMsg_fsize = createslider(options.sfa, 80, -930, L["字体大小"], "ChatMsg", false, "fsize", 10, 30, 2)
 
 
-T.CreateTitle(options.sfa, L["首领模块"], -930, -1060)
+T.CreateTitle(options.sfa, L["首领模块"], -980, -1110)
 
-options.BossMods_enable = createcheckbutton(options.sfa, 50, -960, L["启用"], "BM", false, "enable")
+options.BossMods_enable = createcheckbutton(options.sfa, 50, -1010, L["启用"], "BM", false, "enable")
 options.BossMods_enable.apply = function() T.EditBossModsFrame("enable") end
 
-options.BossMods_scale = createslider(options.sfa, 80, -1010, L["尺寸"], "BM", false, "scale", 50, 200, 1)
+options.BossMods_scale = createslider(options.sfa, 80, -1060, L["尺寸"], "BM", false, "scale", 50, 200, 1)
 options.BossMods_scale.apply = function() T.EditBossModsFrame("scale") end
 
 options.import = T.createUIPanelButton(options, addon_name.."ImportButton", 50, 20, L["导入"])

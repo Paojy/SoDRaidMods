@@ -10,6 +10,8 @@ L["TANK_ICON_SMALL"]		  = "|TInterface\\EncounterJournal\\UI-EJ-Icons.blp:15:15:
 L["DAMAGE_ICON_SMALL"]		  = "|TInterface\\EncounterJournal\\UI-EJ-Icons.blp:15:15:0:3:255:66:40:55:5:27|t" -- NO TRANSLATE
 L["HEALER_ICON_SMALL"]		  = "|TInterface\\EncounterJournal\\UI-EJ-Icons.blp:15:15:0:3:255:66:71:87:5:25|t" -- NO TRANSLATE
 
+L["缩写名字"]				  = "縮寫名字"
+L["缩写时名字长度"]			  = "縮寫時名字最大長度"
 L["过期期"]					  = [[|cFFFFFF00[|r%s|cFFFFFF00]|r
 你的版本%s|cFFFFFF00(%s)|r已過期，
 請下載最新版本%s|cFFFFFF00(%s)|r。]]

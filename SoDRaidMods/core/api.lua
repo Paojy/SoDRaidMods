@@ -144,8 +144,8 @@ G.RTIconsList = RTIconsList
 
 T.ColorUnitName = function(unit, name, short, nort)
 	local name_text
-	if short then
-		name_text = T.utf8sub(name, 4)
+	if short and SoD_CDB["General"]["short_name"] then
+		name_text = T.utf8sub(name, SoD_CDB["General"]["name_length"])
 	else
 		name_text = name
 	end
@@ -171,8 +171,8 @@ end
 
 T.ColorName = function(name, short)
 	local name_text
-	if short then
-		name_text = T.utf8sub(name, 4)
+	if short and SoD_CDB["General"]["short_name"] then
+		name_text = T.utf8sub(name, SoD_CDB["General"]["name_length"])
 	else
 		name_text = name
 	end
@@ -185,8 +185,8 @@ end
 
 T.ColorCustomName = function(name, short)
 	local name_text
-	if short then
-		name_text = T.utf8sub(name, 4)
+	if short and SoD_CDB["General"]["short_name"] then
+		name_text = T.utf8sub(name, SoD_CDB["General"]["name_length"])
 	else
 		name_text = name
 	end
