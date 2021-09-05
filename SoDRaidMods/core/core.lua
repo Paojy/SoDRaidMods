@@ -1829,11 +1829,11 @@ T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, au
 				
 				if #frame.auras > 1 then
 					table.sort(frame.auras, function(a, b)
-						if a.count and b.count and a.count > b.count then
+						if a.count and a.count > b.count then
 							return true
-						elseif a.exp and b.exp and a.exp > b.exp then
+						elseif a.exp and a.exp > b.exp then
 							return true
-						elseif a.amount and b.amount and a.amount > b.amount then
+						elseif a.amount and a.amount > b.amount then
 							return true
 						elseif a.name > b.name then
 							return true
