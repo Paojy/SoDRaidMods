@@ -143,9 +143,8 @@ L["显示姓名板动画边框"]		  = "Show anime glow broder on nameplate for |
 L["文字提示"]			      = "Texts"
 L["点你"]					  = "%s ON YOU"
 L["显示图标提示"]             = "Show icon for %s"
-L["点我时显示图标提示"]		  = "Show icon for %s (when aura on me)"
+L["点我时显示图标提示"]		  = "Show icon for %s (when casting on me)"
 L["显示图标提示光环"]		  = "Show icon for %s (Aura)"
-L["显示图标提示多人光环"]	  = "Show icon for %s (Multiple aura on raid)"
 L["显示图标提示施法"]		  = "Show icon for %s (cast)"
 L["显示图标提示DBM"]		  = "Show icon for %s (DBM)"
 L["显示图标提示BW"]			  = "Show icon for %s (Bigwigs)"
@@ -178,6 +177,7 @@ L["注意自保血量"]			  = "WATCH HEALTH HP:%d%%"
 L["注意自保"]				  = "WATCH HEALTH"
 L["颜色随血量渐变"]			  = "Color Gradiant"
 L["显示血量百分比"]			  = "Show HP Percentage"
+L["多人光环提示"]			  = "%s aura track."
 --[[ 1 ]]--
 
 L["TIP捕食者之嚎"]			  = "Automatically assign healer dispel debuff, and show on RaidFrames"

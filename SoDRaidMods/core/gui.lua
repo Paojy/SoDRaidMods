@@ -514,8 +514,6 @@ T.Create_AlertIcon_Options = function(parent, dif, v, addon_only, role, tip)
 		str	= string.format(L["点我时显示图标提示"], T.GetIconLink(spell_id))
 	elseif spell_type == "aura" then
 		str	= string.format(L["显示图标提示光环"], T.GetIconLink(spell_id))
-	elseif spell_type == "auras" then
-		str	= string.format(L["显示图标提示多人光环"], T.GetIconLink(spell_id))
 	elseif spell_type == "cast" then
 		str	= string.format(L["显示图标提示施法"], T.GetIconLink(spell_id))
 	elseif spell_type == "bwspell" or spell_type == "bwtext" then
@@ -904,8 +902,6 @@ T.CreateEncounterOptions = function(parent, index, data)
 				
 				if args.type == "aura" then
 					T.CreateAura(ef, dif, index, v, hl, args.role, args.tip, args.aura_type, args.unit, args.index)
-				elseif args.type == "auras" then
-					T.CreateAuras(ef, dif, index, v, hl, args.role, args.tip, args.aura_type, args.index)
 				elseif args.type == "log" then
 					T.CreateLog(ef, dif, index, v, hl, args.role, args.tip, args.event_type, args.targetID, args.dur)
 				elseif args.type == "cast" then

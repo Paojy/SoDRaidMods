@@ -175,8 +175,6 @@ G.Encounters["trash1159"] = { -- 小怪
 			{type = "aura", role="healer", tip = "注意分散", hl = "no", spellID = 41635,  aura_type = "HELPFUL", unit = "player"}, -- 恢复
 			{type = "aura", hl = "hl", spellID = 974,  aura_type = "HELPFUL", unit = "player"},
 			{type = "aura", role="healer", tip = "注意分散字数", hl = "hl", spellID = 61295,  aura_type = "HELPFUL", unit = "player"},
-			{type = "auras", role="healer", hl = "no", spellID = 139,  aura_type = "HELPFUL"}, -- 恢复
-			{type = "auras", role="healer", hl = "no", spellID = 232698,  aura_type = "HELPFUL"}, -- 恢复
 			{type = "log", tip = "BOSS火焰光环", hl = "hl", spellID = 139, event_type = "SPELL_AURA_REMOVED", dur = 3, targetID = "player"}, -- 灵魂熔炉之约
 			{type = "bmsg", hl = "hl", spellID = 116841,  role="tank", event = "CHAT_MSG_SAY", msg = "又是你", dur = 3}, -- 已检查
 		},

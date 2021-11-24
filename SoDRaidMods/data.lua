@@ -18,7 +18,7 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 	alerts = {
 		AlertIcon = {
 			{type = "com", role = "tank", hl = "hl", spellID = 346985}, -- 压制
-			{type = "auras", role = "tank", hl = "no", spellID = 346986, aura_type = "HARMFUL"}, -- 粉碎护甲
+			{type = "aura", role = "tank", hl = "no", spellID = 346986, aura_type = "HARMFUL", unit = "player"}, -- 粉碎护甲
 			
 			{type = "cast", tip = "点名锁链", hl = "hl", spellID = 350280}, -- 永恒锁链 
 			{type = "aura", tip = "快去|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_4:0|t", hl = "no", spellID = 347269, aura_type = "HARMFUL", unit = "player"}, -- 永恒锁链
@@ -101,6 +101,185 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 			{sub_event = "SPELL_CAST_START", spellID = 348313}, -- 典狱长的凝视
 		},
 		BossMods = {
+			{ -- 粉碎护甲
+				spellID = 346986,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(346986)),
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 100},				
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {346986}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 捕食者之嚎
 				spellID = 347283,
 				role = "healer",
@@ -394,7 +573,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 	alerts = {
 		AlertIcon = {
 			{type = "com", role = "tank", hl = "hl", spellID = 350828}, -- 死亡锁链
-			{type = "auras", role = "tank", hl = "no", spellID = 351143, aura_type = "HARMFUL"}, -- 死亡锁链 待检查
+			{type = "aura", role = "tank", hl = "no", spellID = 351143, aura_type = "HARMFUL", unit = "player"}, -- 死亡锁链
 			{type = "cast", tip = "准备大怪", hl = "hl", spellID = 348117}, -- 冥河喷发 		
 			{type = "cast", tip = "全团AE", hl = "hl", spellID = 349030}, -- 死亡泰坦凝视		
 			{type = "aura", tip = "拉开大怪", hl = "no", spellID = 351826, aura_type = "HARMFUL", unit = "player"}, -- 苦难 待检查
@@ -406,7 +585,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{type = "log", tip = "帮忙锁链", hl = "hl", spellID = 358609, dif = {[15] = true, [16] = true}, event_type = "SPELL_AURA_APPLIED", dur = 4}, -- 牵引锁链
 			{type = "aura", tip = "拉断锁链", hl = "no", spellID = 349979, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 牵引锁链	
 			{type = "com", role = "tank", hl = "hl", spellID = 348074, dif = {[15] = true, [16] = true}}, -- 痛击长枪
-			{type = "auras", role = "tank", hl = "no", spellID = 348074, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL"}, -- 痛击长枪		
+			{type = "aura", role = "tank", hl = "no", spellID = 348074, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 痛击长枪		
 			{type = "aura", tip = "减速", hl = "no", spellID = 350713, aura_type = "HARMFUL", unit = "player"}, -- 倦怠腐化
 			{type = "aura", tip = "出去放圈", hl = "no", spellID = 351827, aura_type = "HARMFUL", unit = "player"}, -- 蔓延痛苦
 			{type = "aura", tip = "别踩", hl = "hl", spellID = 350809, aura_type = "HARMFUL", unit = "player"}, -- 典狱长的痛苦	
@@ -497,6 +676,184 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{sub_event = "SPELL_CAST_START", spellID = 348974}, -- 即刻屠灭
 		},
 		BossMods = {
+			{ -- 死亡锁链 和 痛击长枪
+				spellID = 351143,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(351143).." "..T.GetIconLink(348074)),			
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {351143, 348074}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 轻蔑与忿怒
 				spellID = 355232,
 				tip = L["TIP轻蔑与忿怒"],
@@ -943,7 +1300,7 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{type = "cast", tip = "远离", hl = "hl", spellID = 352756}, -- 愤怒之翼 待检查
 			{type = "cast", tip = "小怪", role = "dps", hl = "hl", spellID = 350342}, -- 无形物质					
 			{type = "com", role = "tank", hl = "hl", spellID = 350202}, -- 无尽之击
-			{type = "auras", role = "tank", hl = "no", spellID = 350202, aura_type = "HARMFUL"}, -- 无尽之击
+			{type = "aura", role = "tank", hl = "no", spellID = 350202, aura_type = "HARMFUL", unit = "player"}, -- 无尽之击
 			
 			{type = "cast", tip = "靠近", hl = "hl", spellID = 350385}, -- 激荡高歌
 			{type = "cast", tip = "靠近", hl = "hl", spellID = 352752}, -- 激荡高歌 待检查
@@ -956,7 +1313,7 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{type = "aura", tip = "分散", hl = "hl", spellID = 350109, aura_type = "HARMFUL", unit = "player"}, -- 布琳佳的悲恸挽歌
 			
 			{type = "com", role = "tank", hl = "hl", spellID = 350475}, -- 灵魂穿透
-			{type = "auras", role = "tank", hl = "no", spellID = 350475, aura_type = "HARMFUL"}, -- 灵魂穿透
+			{type = "aura", role = "tank", hl = "no", spellID = 350475, aura_type = "HARMFUL", unit = "player"}, -- 灵魂穿透
 			
 			{type = "log", tip = "点名出去", hl = "hl", spellID = 350541, event_type = "SPELL_CAST_START", dur = 2}, -- 命运残片
 			{type = "log", tip = "点名出去", hl = "hl", spellID = 352744, dif = {[16] = true}, event_type = "SPELL_CAST_START", dur = 2}, -- 命运残片 待检查
@@ -1027,6 +1384,185 @@ G.Encounters[3] = { -- 九武神 已过初检
 			{sub_event = "SPELL_CAST_SUCCESS", spellID = 350745}, -- 斯凯亚的攻势
 		},
 		BossMods = {
+			{ -- 无尽之击 和 灵魂穿透
+				spellID = 350202,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(350202).." "..T.GetIconLink(350475)),			
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 100},	
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {350202, 350475}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 命运残片驱散
 				spellID = 350542,
 				tip = L["TIP命运残片"],
@@ -1328,7 +1864,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{type = "aura", tip = "怨毒点你", hl = "no", spellID = 350469, aura_type = "HARMFUL", unit = "player"}, -- 怨毒 待检查
 			{type = "aura", tip = "别踩", hl = "no", spellID = 350489, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 怨毒残迹 待检查
 			{type = "cast", role = "tank", hl = "hl", spellID = 350894}, -- 苦难 已检查 
-			{type = "auras", role = "tank", hl = "no", spellID = 349890, aura_type = "HARMFUL"}, -- 苦难 已检查
+			{type = "aura", role = "tank", hl = "no", spellID = 349890, aura_type = "HARMFUL", unit = "player"}, -- 苦难 已检查
 			{type = "cast", tip = "躲地板", hl = "hl", spellID = 355123}, -- 怨恨之握 已检查
 			{type = "aura", tip = "沉默", hl = "no", spellID = 354534, aura_type = "HARMFUL", unit = "player"}, -- 怨恨 待检查
 			{type = "cast", tip = "P2 复制冲击", hl = "hl", spellID = 351066}, -- 碎裂 已检查
@@ -1396,6 +1932,185 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{sub_event = "SPELL_CAST_START", spellID = 351073}, -- 碎裂		
 		},
 		BossMods = {
+			{ -- 苦难
+				spellID = 349890,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(349890)),			
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 250, width = 250, height = 100},	
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {349890}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 群体驱散 已检查
 				spellID = 32375,
 				tip = L["TIP群体驱散读条"],
@@ -1590,7 +2305,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{ -- 怨毒 已检查 需要检查CD交互
 				spellID = 350469,
 				tip = L["TIP怨毒"],
-				points = {width = 300, height = 120},
+				points = {width = 250, height = 150},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["CHAT_MSG_ADDON"] = true,
@@ -1620,7 +2335,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 					frame.create_bar = function(GUID)
 						local bar = CreateFrame("StatusBar", nil, frame)
 						bar:SetHeight(30)
-						bar:SetWidth(300)
+						bar:SetWidth(250)
 						T.createborder(bar)
 						
 						bar:SetStatusBarTexture(G.media.blank)
@@ -1871,7 +2586,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{type = "aura", tip = "拾起锁链", hl = "no", spellID = 350927, aura_type = "HARMFUL", unit = "player"}, -- 好战者枷锁 已检查
 			{type = "cast", tip = "处理时限", hl = "no", spellID = 350411}, -- 地狱咆哮 已检查			
 			{type = "com", role = "tank", hl = "hl", spellID = 350422}, -- 毁灭之刃 已检查
-			{type = "auras", role = "tank", hl = "no", spellID = 350422, aura_type = "HARMFUL"}, -- 毁灭之刃 已检查				
+			{type = "aura", role = "tank", hl = "no", spellID = 350422, aura_type = "HARMFUL", unit = "player"}, -- 毁灭之刃 已检查				
 			{type = "cast", tip = "孤儿圈", hl = "hl", spellID = 350648}, -- 折磨烙印 已检查
 			{type = "aura", tip = "孤儿圈点你", hl = "hl", spellID = 350647, aura_type = "HARMFUL", unit = "player"}, -- 折磨烙印 已检查
 			{type = "aura", tip = "躲开圈", hl = "no", spellID = 353429, aura_type = "HARMFUL", unit = "player"}, -- 饱受磨难 已检查	
@@ -1918,6 +2633,185 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{sub_event = "SPELL_AURA_APPLIED_DOSE", spellID = 350415}, -- 开始拉锁链
 		},
 		BossMods = {
+			{ -- 毁灭之刃
+				spellID = 350422,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(350422)),			
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 300, width = 250, height = 100},	
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {350422}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 锁链
 				spellID = 350415,
 				tip = L["TIP好战者枷锁"],
@@ -2583,14 +3477,14 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 	img = 4079051,
 	alerts = {
 		AlertIcon = {			
-			{type = "auras", tip = "AE+十字刺", hl = "hl", spellID = 355568, aura_type = "HARMFUL"}, --十字斧
-			{type = "auras", tip = "AE+扩散刺", hl = "hl", spellID = 348508, aura_type = "HARMFUL"}, --振荡铁锤
-			{type = "auras", tip = "AE+组合刺", hl = "hl", spellID = 355778, aura_type = "HARMFUL"}, --双刃镰刀		
-			{type = "auras", role = "tank", hl = "no", spellID = 355786, aura_type = "HARMFUL"}, -- 黑化护甲 已检查
+			{type = "aura", tip = "AE+十字刺", hl = "hl", spellID = 355568, aura_type = "HARMFUL", unit = "player"}, --十字斧
+			{type = "aura", tip = "AE+扩散刺", hl = "hl", spellID = 348508, aura_type = "HARMFUL", unit = "player"}, --振荡铁锤
+			{type = "aura", tip = "AE+组合刺", hl = "hl", spellID = 355778, aura_type = "HARMFUL", unit = "player"}, --双刃镰刀		
+			{type = "aura", role = "tank", hl = "no", spellID = 355786, aura_type = "HARMFUL", unit = "player"}, -- 黑化护甲 已检查
 			{type = "cast", tip = "转火铁球", role = "dps", hl = "hl", spellID = 352052}, -- 尖刺铁球 已检查
 			{type = "aura", tip = "孤儿圈点你", hl = "hl", spellID = 355505, aura_type = "HARMFUL", unit = "player"}, -- 影铸锁链 已检查
 			{type = "aura", hl = "hl", spellID = 348456, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 烈焰套索陷阱 待检查
-			{type = "auras", hl = "no", spellID = 348456, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL"}, -- 烈焰套索陷阱
+			--{type = "auras", hl = "no", spellID = 348456, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL"}, -- 烈焰套索陷阱
 			{type = "aura", tip = "爆炸", hl = "no", spellID = 356870, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 烈焰套索爆炸 已检查
 			{type = "cast", tip = "躲圈", hl = "no", spellID = 355525}, -- 锻造武器 已检查
 			{type = "aura", role = "healer", hl = "no", spellID = 356472, aura_type = "HARMFUL", unit = "player"}, -- 黑暗灼热 待检查
@@ -2645,6 +3539,185 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{sub_event = "SPELL_AURA_APPLIED", spellID = 355525}, -- 锻造武器开始
 		},
 		BossMods = {
+			{ -- 十字斧 振荡铁锤 双刃镰刀 黑化护甲
+				spellID = 355568,
+				role = "tank",
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 300, width = 250, height = 100},
+				tip = string.format(L["多人光环提示"], T.GetIconLink(355568).." "..T.GetIconLink(348508).." "..T.GetIconLink(355778).." "..T.GetIconLink(355786)),			
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {355568, 348508, 355778, 355786}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 烈焰陷阱爆炸 待检查
 				spellID = 348456,
 				tip = L["TIP烈焰套索陷阱"],
@@ -2980,7 +4053,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 	alerts = {
 		AlertIcon = {
 			{type = "aura", tip = "AE光环", hl = "no", spellID = 350534, aura_type = "HELPFUL", unit = "boss1"}, -- 净化协议 待检查	
-			{type = "auras", role = "tank", hl = "no", spellID = 350732, aura_type = "HARMFUL"}, -- 破甲 已检查
+			{type = "aura", role = "tank", hl = "no", spellID = 350732, aura_type = "HARMFUL", unit = "player"}, -- 破甲 已检查
 			{type = "aura", tip = "湮灭易伤", hl = "no", spellID = 358619, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 湮灭 待检查					
 			{type = "cast", tip = "召唤小怪", hl = "hl", spellID = 352660}, -- 组合哨卫 已检查
 			{type = "cast", tip = "召唤三圈", hl = "hl", spellID = 356090}, -- 净除威胁 待检查
@@ -3025,6 +4098,185 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{sub_event = "SPELL_AURA_APPLIED", on_me = true, spellID = 350496}, -- 净除威胁
 		},
 		BossMods = {
+			{ -- 破甲 湮灭
+				spellID = 350732,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(350732).." "..T.GetIconLink(358619)),
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 100, width = 250, height = 100},				
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {350732, 358619}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 净化协议读条计数 已检查
 				spellID = 352538,
 				tip = L["TIP净化协议读条计数"],
@@ -3163,7 +4415,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 湮灭分担顺序 Exrt技能安排联动 待检查
 				spellID = 355352,
 				tip = L["TIP湮灭"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 350, width = 250, height = 100},	
+				points = {width = 250, height = 100},	
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -3256,7 +4508,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 净除威胁 已检查
 				spellID = 350496,
 				tip = L["TIP净除威胁"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 250, width = 250, height = 100},			
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 300, width = 250, height = 100},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -3422,7 +4674,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 能量核心能量 已检查
 				spellID = 356093,
 				tip = L["TIP能量核心能量"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 150,width = 250, height = 100},					
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 100},					
 				events = {
 					["UNIT_POWER_UPDATE"] = true,
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
@@ -3668,7 +4920,6 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{type = "cast", tip = "准备接圈", hl = "hl", spellID = 354367, dif = {[16] = true}}, -- 恐怖征兆 待检查
 			{type = "log", tip = "接圈点你", hl = "hl", spellID = 354365, dif = {[16] = true}, event_type = "SPELL_AURA_APPLIED", dur = 11, targetID = "player"}, -- 恐怖征兆 待检查
 			{type = "cast", role = "tank", hl = "hl", spellID = 351680}, -- 祈求宿命 待检查
-			{type = "auras", tip = "全团AE", hl = "hl", spellID = 351680, aura_type = "HARMFUL"}, -- 祈求宿命 已检查
 			{type = "aura", tip = "风筝小怪", role = "tank", hl = "no", spellID = 353432, aura_type = "HARMFUL", unit = "player"}, -- 命运重担 待检查
 			{type = "aura", tip = "注意自保", hl = "hl", spellID = 353435, aura_type = "HARMFUL", unit = "player"}, -- 不堪重负 已检查
 			{type = "com", role = "tank", hl = "hl", spellID = 353603}, -- 预言家的查验 待检查
@@ -3732,6 +4983,185 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{sub_event = "SPELL_AURA_APPLIED", spellID = 357739}, -- 命运重构开始
 		},
 		BossMods = {
+			{ -- 命运重担
+				spellID = 353432,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(353432)),
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = -200, width = 250, height = 100},				
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {353432}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 符文亲和 已检查
 				spellID = 354964,
 				tip = L["TIP符文亲和"],
@@ -4715,7 +6145,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{type = "aura", tip = "快走开", hl = "no", spellID = 354208, aura_type = "HARMFUL", unit = "player"}, -- 咆哮风暴 已检查
 			{type = "cast", tip = "复活小怪", hl = "hl", spellID = 352530}, -- 黑暗唤醒 已检查			
 			{type = "cast", tip = "灵魂碎裂", role = "tank", hl = "hl", spellID = 348071}, -- 灵魂碎裂 已检查
-			{type = "auras", role = "tank", hl = "no", spellID = 348978, aura_type = "HARMFUL"}, -- 灵魂疲惫 已检查
+			{type = "aura", role = "tank", hl = "no", spellID = 348978, aura_type = "HARMFUL", unit = "player"}, -- 灵魂疲惫 已检查
 			{type = "cast", tip = "准备尖刺", hl = "hl", spellID = 346459}, -- 冰川之怒 已检查
 			{type = "aura", tip = "去放尖刺", hl = "hl", spellID = 353808, aura_type = "HARMFUL", unit = "player"}, -- 冰川之怒 已检查
 			{type = "aura", tip = "尖刺爆炸", hl = "no", spellID = 346530, aura_type = "HARMFUL", unit = "player"}, -- 冰封毁灭 已检查
@@ -4831,6 +6261,185 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{sub_event = "SPELL_CAST_START", spellID = 352293}, -- 复仇毁灭		
 		},
 		BossMods = {
+			{ -- 灵魂疲惫
+				spellID = 348978,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(348978)),
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 50, width = 250, height = 100},				
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {348978}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 小怪复活计时条 已检查
 				spellID = 358679,
 				tip = L["TIP不死"],
@@ -5181,7 +6790,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{ -- 冰川尖刺血量监视 已检查
 				spellID = 338560,
 				tip = L["TIP冰川尖刺"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 50, width = 250, height = 200},				
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 250, width = 250, height = 200},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 					["CHAT_MSG_ADDON"] = true,
@@ -5602,7 +7211,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{type = "aura", tip = "小怪盯你", hl = "no", spellID = 358711, dif = {[16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 怒气 已检查
 			{type = "aura", role = "tank", hl = "no", spellID = 352650, aura_type = "HELPFUL", unit = "boss1"}, -- 游侠的觅心箭 已检查
 			{type = "com", role = "tank", hl = "hl", spellID = 352663}, -- 游侠的觅心箭 待检查
-			{type = "auras", role = "tank", hl = "no", spellID = 347607, aura_type = "HARMFUL"}, -- 女妖的印记 已检查
+			{type = "aura", role = "tank", hl = "no", spellID = 347607, aura_type = "HARMFUL", unit = "player"}, -- 女妖的印记 已检查
 					
 			-- P2
 			{type = "aura", tip = "减速+吸收治疗", hl = "no", spellID = 351092, aura_type = "HARMFUL", unit = "player"}, -- 动荡能量 待检查
@@ -5774,6 +7383,185 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{sub_event = "SPELL_CAST_SUCCESS", spellID = 357102}, -- 团队副本传送门：奥利波斯		
 		},
 		BossMods = {
+			{ -- 女妖的印记
+				spellID = 347607,
+				role = "tank",
+				tip = string.format(L["多人光环提示"], T.GetIconLink(347607)),
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 100, width = 250, height = 100},				
+				events = {
+					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
+				},
+				difficulty_id = {
+					["all"] = true,
+				},
+				init = function(frame)
+					frame.aura_spell_ids = {347607}
+					frame.aura_spells = {}
+					for i, v in pairs(frame.aura_spell_ids) do
+						frame.aura_spells[v] = {aura = GetSpellInfo(v), icon = select(3, GetSpellInfo(v))}
+					end
+					
+					frame.bars = {}
+						
+					frame.create_bar = function(tag, spellID, player)
+						local bar = CreateFrame("StatusBar", nil, frame)
+						bar:SetHeight(30)
+						bar:SetWidth(250)
+						
+						bar:SetStatusBarTexture(G.media.blank)
+						bar:SetStatusBarColor(1, .8, .3)
+						T.createborder(bar)
+						
+						bar.icon = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon:SetTexCoord( .1, .9, .1, .9)
+						bar.icon:SetSize(30, 30)
+						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
+						T.createbdframe(bar.icon)
+						
+						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
+						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+											
+						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
+						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+						
+						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+						bar.glow:SetBackdrop({
+							bgFile = "Interface\\Buttons\\WHITE8x8",
+							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+							edgeSize = 7,
+								insets = { left = 7, right = 7, top = 7, bottom = 7,}
+						})
+						bar.glow:SetBackdropColor(0, 0, 0, 0)
+						bar.glow:SetBackdropBorderColor(1, 1, 0)
+						bar.glow:Hide()
+						
+						bar.anim = bar:CreateAnimationGroup()
+						bar.anim:SetLooping("REPEAT")
+						bar.timer = bar.anim:CreateAnimation()
+						bar.timer:SetDuration(.5)
+						
+						bar:GetStatusBarTexture():SetHorizTile(false)
+						bar:GetStatusBarTexture():SetVertTile(false)
+						bar:SetOrientation("HORIZONTAL")
+											
+						bar.t = 0
+						bar.update_rate = .02
+						bar.name = player
+						bar.spellID = spellID
+						
+						bar:Hide()
+					
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, count, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar.anim_played = false
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText((count > 0 and "|cffFFFF00["..count.."]|r " or "")..T.FormatTime(remain))
+									self:SetValue(dur - remain)
+									if remain < 3 then -- 即将消失
+										if not self.anim_played then
+											self.anim_played = true
+											self.glow:Show()
+											self.anim:Play()
+										end
+										self.glow:SetAlpha(self.anim:GetProgress())
+									end
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+									self.anim:Stop()
+									self.glow:Hide()
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
+					end
+					
+					frame.lineup = function()
+						local t = {}
+						for GUID, bar in pairs(frame.bars) do
+							if bar and bar:IsVisible() then
+								table.insert(t, bar)
+							end
+						end
+						if #t > 1 then
+							table.sort(t, function(a, b) 
+								if a.spellID < b.spellID then
+									return true
+								elseif a.spellID == b.spellID and a.exp < b.exp then
+									return true
+								end
+							end)
+						end
+						local lastbar
+						for i, bar in pairs(t) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 30, -5)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end			
+				end,
+				update = function(frame, event, ...)
+					if event == "COMBAT_LOG_EVENT_UNFILTERED" then						
+						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE" or sub_event == "SPELL_AURA_REMOVED_DOSE") and frame.aura_spells[spellID] then						
+							local dest = string.split("-", destName)				
+							if destGUID and AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local count, _, dur, exp_time = select(3, AuraUtil.FindAuraByName(frame.aura_spells[spellID]["aura"], dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[spellID.."_"..destGUID] then
+									frame.create_bar(spellID.."_"..destGUID, spellID, dest)
+								end
+								
+								local bar = frame.bars[spellID.."_"..destGUID]
+								frame.updatebar(bar, count, dur, exp_time)
+								
+								frame.lineup()
+							end
+						elseif sub_event == "SPELL_AURA_REMOVED" and frame.aura_spells[spellID] then
+							if destGUID and frame.bars[spellID.."_"..destGUID] then
+								local bar = frame.bars[spellID.."_"..destGUID]
+								bar:Hide()
+								bar:SetScript("OnUpdate", nil)
+								bar.anim:Stop()
+								bar.glow:Hide()
+								frame.lineup()
+							end
+						end
+					end	
+				end,
+				reset = function(frame)
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)
+						bar.anim:Stop()
+						bar.glow:Hide()
+					end				
+					frame.bars = table.wipe(frame.bars)
+					frame:Hide()
+				end,
+			},
 			{ -- 全团倒刺之箭层数监视 已检查
 				spellID = 347807,
 				tip = L["TIP倒刺之箭"],

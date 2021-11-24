@@ -15,6 +15,7 @@ G.Plate_Alerts = {
 	PlayerAuraSource = {},
 	PlatePower = {},
 	PlateSpells = {},
+	PlateSpells = {},
 	PlateNpcID = {},
 }
 G.Plate_AurabyBossMod = {}
@@ -23,7 +24,7 @@ G.Msgs = {}
 G.Sounds = {}
 
  -- 需要转团队
-G.Test_Mod = true
+G.Test_Mod = false
 ----------------------------------------------------------
 -----------------[[    Frame Holder    ]]------------------
 ----------------------------------------------------------
@@ -1451,23 +1452,23 @@ T.CreateAlertIcon = function(v, hl, index, tip, r, g, b, role)
 		frame.role_btn:Hide()
 	end
 	
-	frame.bottomtext = T.createtext(frame, "OVERLAY", 12, "OUTLINE", "CENTER")
+	frame.bottomtext = T.createtext(frame, "OVERLAY", 12, "OUTLINE", "CENTER") -- 技能名字
 	frame.bottomtext:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", -5, 0)
 	frame.bottomtext:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5, 0)
 	frame.bottomtext:SetHeight(12)	
 	frame.bottomtext:SetTextColor(1, 1, 0)
 	frame.bottomtext:SetText(frame.spell_name)
 	
-	frame.toptext = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "CENTER")
+	frame.toptext = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "CENTER") -- 层数
 	frame.toptext:SetPoint("TOPLEFT", frame, "TOPLEFT", -2, -10)
 	frame.toptext:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 2, -10)
 	frame.toptext:SetHeight(25)
 	frame.toptext:SetTextColor(0, 1, 1)
 	
-	frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")
+	frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT") -- 时间
 	frame.text:SetTextColor(r, g, b)
 		
-	frame.text2 = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "CENTER")	
+	frame.text2 = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "CENTER") -- 应对tip
 	frame.text2:SetTextColor(0, 1, .5)
 	frame.text2:SetText(tip)
 	
@@ -1730,251 +1731,6 @@ T.CreateAura = function(option_page, difficulty_id, index, v, hl, role, tip, aur
 
 	frame:SetScript("OnEvent", function(self, event, ...)	
 		frame.update_onevent(event, ...)	
-	end)
-	
-	frame:SetScript("OnUpdate", function(self, e)
-		frame.t = frame.t + e
-		if frame.t > update_rate then	
-			frame.Update_layout()
-			frame.t = 0
-		end
-	end)
-	
-	AlertFrame.QueueIcon(frame)	
-	
-	G.Icons[v] = frame
-	
-	T.Create_AlertIcon_Options(option_page, difficulty_id, v, nil, role, tip)
-	
-end
-
-T.CreateAuras = function(option_page, difficulty_id, index, v, hl, role, tip, aura_type, arg_index)
-	local frame = T.CreateAlertIcon(v, hl, index, tip, 1, 1, 1, role)
-	frame.num = 0
-	
-	frame.reset = function()
-		frame:Hide()
-		frame.str = ""
-	end
-	
-	frame.update_onedit = function(option)
-		if option == "all" or option == "enable" then
-		
-			frame.enable = SoD_CDB["Icons"][v] and SoD_CDB["AlertFrame"]["enable"]
-			if frame.enable then
-				if type(frame.boss_index) == "string" then
-					frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-				else
-					frame:RegisterEvent("ENCOUNTER_START")
-					frame:RegisterEvent("ENCOUNTER_END")
-				end
-			else
-				if type(frame.boss_index) == "string" then
-					frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
-				else
-					frame:UnregisterEvent("ENCOUNTER_START")
-					frame:UnregisterEvent("ENCOUNTER_END")
-				end
-			end
-			
-			frame.update_onevent("INIT")		
-		end
-		
-		if option == "all" or option == "icon_size" then
-			frame:SetSize(SoD_CDB["AlertFrame"]["icon_size"], SoD_CDB["AlertFrame"]["icon_size"])
-			frame.glow:SetPoint("TOPLEFT", -SoD_CDB["AlertFrame"]["icon_size"]/3, SoD_CDB["AlertFrame"]["icon_size"]/3)
-			frame.glow:SetPoint("BOTTOMRIGHT", SoD_CDB["AlertFrame"]["icon_size"]/3, -SoD_CDB["AlertFrame"]["icon_size"]/3)			
-		end
-		
-		if option == "all" or option == "font_size" then
-			frame.text:SetFont(G.Font, SoD_CDB["AlertFrame"]["font_size"], "OUTLINE")
-			frame.text2:SetFont(G.Font, SoD_CDB["AlertFrame"]["font_size"], "OUTLINE")
-		end
-		
-		if option == "all" or option == "ifont_size" then
-			frame.bottomtext:SetFont(G.Font, SoD_CDB["AlertFrame"]["ifont_size"], "OUTLINE")
-		end
-		
-		if option == "all" or option == "grow_dir" or option == "icon_space" then
-			AlertFrame.LineUpIcons()
-		end
-		
-		if option == "all" or option == "spelltext" then
-			if SoD_CDB["AlertFrame"]["show_spellname"] then
-				frame.bottomtext:Show()
-			else
-				frame.bottomtext:Hide()
-			end
-		end
-		
-		if option == "all" or option == "cdreverse" then
-			if SoD_CDB["AlertFrame"]["reverse_cooldown"] then
-				frame.cooldown:SetReverse(true)
-			else
-				frame.cooldown:SetReverse(false)
-			end
-		end
-	end
-	
-	frame.encounter_check = function(event, ...)
-		if event == "INIT" then
-			if type(frame.boss_index) == "string" then
-				local map = select(8, GetInstanceInfo())
-				if frame.enable and map == frame.mapID then
-					frame:RegisterEvent("UNIT_AURA")
-				else
-					frame:UnregisterEvent("UNIT_AURA")
-					frame.reset()
-				end
-			else
-				local guid = UnitGUID("boss1")
-				if guid then
-					local NPC_ID = select(6, strsplit("-", UnitGUID("boss1")))
-					local difficultyID = select(3, GetInstanceInfo())
-					if frame.enable and NPC_ID == frame.npcID and (difficulty_id["all"] or difficulty_id[difficultyID]) then
-						frame:RegisterEvent("UNIT_AURA")
-					end
-				end
-			end
-		elseif event == "ENCOUNTER_START" then
-			local encounterID, encounterName, difficultyID, groupSize = ...
-			if frame.enable and encounterID == frame.engageID and (difficulty_id["all"] or difficulty_id[difficultyID]) then
-				frame:RegisterEvent("UNIT_AURA")
-			end
-		elseif event == "ENCOUNTER_END" then
-			local encounterID, encounterName, difficultyID, groupSize = ...
-			if encounterID == frame.engageID then
-				frame:UnregisterEvent("UNIT_AURA")
-				frame.reset()
-			end
-		elseif event == "PLAYER_ENTERING_WORLD" then
-			local map = select(8, GetInstanceInfo())
-			if frame.enable and map == frame.mapID then
-				frame:RegisterEvent("UNIT_AURA")
-			else
-				frame:UnregisterEvent("UNIT_AURA")
-				frame.reset()
-			end
-		end
-	end
-	
-	frame.players = {} -- 无序
-	frame.auras = {} -- 有序
-	frame.Update_data = function(unitID)
-		if frame.enable then
-			if unitID and UnitInRaid(unitID) then	
-				local player = UnitName(unitID)
-				if AuraUtil.FindAuraByName(frame.spell_name, unitID, aura_type) then -- 有光环
-					if not frame.players[player] then
-						frame.players[player] = {}
-					end		
-					frame.players[player].count, _, frame.players[player].dur, frame.players[player].exp = select(3, AuraUtil.FindAuraByName(frame.spell_name, unitID, aura_type))						
-					if arg_index then -- 取某一数值
-						frame.players[player].amount = select(arg_index, AuraUtil.FindAuraByName(frame.spell_name, unitID, aura_type))
-					end
-				else -- 无光环
-					if frame.players[player] then
-						frame.players[player] = nil
-					end
-				end
-			
-				frame.auras = table.wipe(frame.auras)
-				for player, info in pairs(frame.players) do
-					if player and info then
-						table.insert(frame.auras, {
-							name = player,
-							count = info.count,
-							exp = info.exp,
-							dur = info.dur,
-							amount = info.amount
-						})
-					end
-				end
-				
-				if #frame.auras > 1 then
-					table.sort(frame.auras, function(a, b)
-						if a.count and a.count > b.count then
-							return true
-						elseif a.exp and a.exp > b.exp then
-							return true
-						elseif a.amount and a.amount > b.amount then
-							return true
-						elseif a.name > b.name then
-							return true
-						end
-					end)
-				elseif #frame.auras == 0 then
-					frame.reset()
-				end
-			end
-		else
-			frame.reset()
-		end
-	end
-	
-	frame.Update_layout = function()
-		if frame.enable and #frame.auras > 0 then
-			frame.str = ""
-			
-			for i, info in pairs(frame.auras) do			
-				if info.exp and (info.exp == 0 or info.exp > GetTime()) then
-					if info.exp > 0 and info.exp < GetTime() then
-						frame.players[info.name] = nil
-						table.remove(frame.auras, i)
-					end
-					
-					local name, count, amount, remain			
-					
-					name = T.ColorName(info.name, true)
-					
-					if info.count > 0 then
-						count = "|cffFFA500["..info.count.."]|r"
-					else
-						count = ""
-					end
-					
-					if info.amount then
-						amount = "|cff00BFFF["..T.ShortValue(info.amount).."]|r"
-					else
-						amount = ""
-					end
-				
-					if info.dur ~= 0 then -- 有持续时间
-						remain = T.FormatTime(info.exp - GetTime())
-					else
-						remain = ""
-					end	
-					
-					if frame.str == "" then
-						frame.str = name.." "..count..remain..amount
-					else
-						frame.str = frame.str.."\n"..name.." "..count..remain..amount
-					end
-				else
-					frame.players[info.name] = nil
-					table.remove(frame.auras, i)
-				end
-			end
-					
-			frame.text:SetText(frame.str)
-			frame:Show()		
-		else
-			frame.reset()
-		end
-	end
-	
-	frame.update_onevent = function(event, ...)
-		if event == "INIT" or event == "ENCOUNTER_START" or event == "ENCOUNTER_END" or event == "PLAYER_ENTERING_WORLD" then
-			frame.encounter_check(event, ...)
-		elseif event == "UNIT_AURA" then
-			local unitID = ...
-			frame.Update_data(unitID)
-			frame.Update_layout()
-		end
-	end
-	
-	frame:SetScript("OnEvent", function(self, event, ...)
-		frame.update_onevent(event, ...)
 	end)
 	
 	frame:SetScript("OnUpdate", function(self, e)
