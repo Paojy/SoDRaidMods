@@ -90,9 +90,8 @@ L["无昵称"]					  = "无"
 L["输入昵称"]				  = "为了在战术板中识别你，输入你的昵称。多个昵称请用空格隔开。没有昵称时仅识别当前角色名字。"
 L["时间轴"]					  = "时间轴"
 L["战斗结束"]				  = "战斗结束"
-L["来源"]					  = "战术板类别"
-L["个人战术板"]				  = "个人战术板"
-L["团队战术板"]				  = "团队战术板"
+L["个人战术板"]				  = "从个人战术板获取信息"
+L["团队战术板"]				  = "从团队战术板获取信息"
 L["显示战术板时间"]			  = "显示战术板时间"
 L["显示倒数时间"]			  = "显示倒数时间"
 L["提前时间"]				  = "提前时间"
@@ -235,12 +234,12 @@ L["准备苦难"]				  = "准备苦难，转宝珠 %d/100"
 
 --[[ 5 ]]--
 
-L["TIP好战者枷锁"]			  = [[根据MRT战术板提示下一轮拉断锁链的人，并在轮到自己时特别提示。可在拉锁链的三个人后面加上本轮需要放的技能。MRT战术板示例：
+L["TIP好战者枷锁"]			  = [[根据MRT战术板提示下一轮拉断锁链的人，并在轮到自己时特别提示。MRT战术板示例：
 锁链顺序
-1 |cffcc6819张三|r  |cff2133dd张三|r  |cffb2050f张三|r  技能:|cff2133dd张三|r{spell:31821}|cff2133dd张三|r{spell:62618}|cff2133dd张三|r{spell:97462}
-2 |cffffffff张三|r  |cffffffff张三|r  |cffc18ef2张三|r  技能:|cff2133dd张三|r{spell:64901}|cff2133dd张三|r{spell:15286}|cff2133dd张三|r{spell:196718}
-3 |cffcc6819张三|r  |cffffffff张三|r  |cffff9b00张三|r 	技能:|cff2133dd张三|r{spell:31821}|cff2133dd张三|r{spell:62618}|cff2133dd张三|r{spell:97462}
-4 |cff26efef张三|r  |cff1c9b05张三|r  |cffb2050f张三|r 	技能:|cff2133dd张三|r{spell:64901}|cff2133dd张三|r{spell:15286}|cff2133dd张三|r{spell:196718}
+1 |cffcc6819张三|r  |cff2133dd张三|r  |cffb2050f张三|r
+2 |cffffffff张三|r  |cffffffff张三|r  |cffc18ef2张三|r
+3 |cffcc6819张三|r  |cffffffff张三|r  |cffff9b00张三|r
+4 |cff26efef张三|r  |cff1c9b05张三|r  |cffb2050f张三|r
 end]]
 L["下一轮锁链"]				  = "锁链|cFF00FFFF[%d]|r |cFFFFFF00[左]|r%s |cFFFFFF00[中]|r%s |cFFFFFF00[右]|r%s"
 L["锁链顺序"]				  = "锁链顺序"
@@ -264,13 +263,7 @@ L["即将折磨喷发"]			  = "即将折磨喷发 %d/100"
 
 --[[ 6 ]]--
 
-L["TIP烈焰套索陷阱"]		  = [[显示烈焰套索陷阱数量及本轮应对减伤技能。MRT战术板示例：
-陷阱顺序
-|cff2133dd张三|r{spell:31821}|cff2133dd张三|r{spell:62618}|cff2133dd张三|r{spell:97462}
-|cff2133dd张三|r{spell:64901}|cff2133dd张三|r{spell:15286}|cff2133dd张三|r{spell:196718}
-|cff2133dd张三|r{spell:31821}|cff2133dd张三|r{spell:62618}|cff2133dd张三|r{spell:97462}
-|cff2133dd张三|r{spell:64901}|cff2133dd张三|r{spell:15286}|cff2133dd张三|r{spell:196718}
-end]]
+L["TIP烈焰套索陷阱"]		  = "显示烈焰套索陷阱数量。"
 L["陷阱数量"]				  = "|cffFFFF00[第%d轮]|r陷阱数量: |cff%s[%d]|r"
 L["陷阱顺序"]				  = "陷阱顺序"
 L["陷阱出现"]				  = "陷阱出现"
@@ -301,18 +294,11 @@ L["破甲"]                     = "破甲"
 L["分解"]                     = "躲开正面"
 L["熔毁"]                     = "AE"
 
-L["TIP净化协议减伤安排"]	  = [[根据MRT战术板提示下一组净化协议的减伤安排。MRT战术板示例：
-净化协议减伤顺序
-1 |cffcc6819张三|r{spell:31821}|cff2133dd张三|r{spell:62618}|cffb2050f张三|r{spell:97462}
-2 |cffffffff张三|r{spell:196718}|cffffffff张三|r{spell:15286}|cffc18ef2张三|r{spell:64901}
-3 |cffcc6819张三|r{spell:31821}|cffffffff张三|r{spell:62618}|cffff9b00张三|r{spell:97462}
-end]]
-L["净化协议减伤顺序"]		  = "净化协议减伤顺序"
-
 L["TIP净化协议读条计数"]	  = "显示净化协议的读条并计数，每一轮到第三次施法开始以后高亮。"
 
 L["能量核心"]				  = "能量核心"
 L["BOSS能量"]				  = "BOSS能量 %d/0"
+
 --[[ 8 ]]--
 
 L["TIP符文亲和"] 			  = "监测中符文亲和的人，根据团队顺序依次安排6人到1~6环（剩余人员待命），\n并提供一个【逆时针，需要加人】的按钮，点击按钮即分配其他待命人员之一到此环进行帮助。\n显示每一环的分配情况，并对自己的状态（去N环/待命/帮助N环）特别提示。\n1~6环的对应光柱标记依次为|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:0|t|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_2:0|t|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_3:0|t|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_4:0|t|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_5:0|t|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_6:0|t"
@@ -330,14 +316,6 @@ L["绝望距离过近"]			  = "|cffFF0000危险|r"
 L["TIP宿命联结"]              = "显示宿命联结的读条及出伤倒计时。"
 L["连线出现"]				  = "连线出现(%d)"
 L["连线生效"]                 = "连线生效(%d)"
-
-L["TIP扭曲命运减伤安排"]      = [[根据MRT战术板提示下一次扭曲命运的减伤安排。MRT战术板示例：
-扭曲命运减伤顺序
-1 |cffcc6819张三|r{spell:31821}|cff2133dd张三|r{spell:62618}|cffb2050f张三|r{spell:97462}
-2 |cffffffff张三|r{spell:196718}|cffffffff张三|r{spell:15286}|cffc18ef2张三|r{spell:64901}
-3 |cffcc6819张三|r{spell:31821}|cffffffff张三|r{spell:62618}|cffff9b00张三|r{spell:97462}
-end]]
-L["扭曲命运减伤顺序"]		  = "扭曲命运减伤顺序"
 
 --[[ 9 ]]--
 

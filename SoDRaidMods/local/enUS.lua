@@ -90,9 +90,8 @@ L["无昵称"]					  = "none"
 L["输入昵称"]				  = "In order to identify you in the MRT notes, enter your nickname. Please separate multiple nicknames with spaces. If there is no nickname, only the current character name will be recognized."
 L["时间轴"]					  = "Timer"
 L["战斗结束"]				  = "Encounter end"
-L["来源"]					  = "MRT notes type"
-L["个人战术板"]				  = "Personal MRT notes"
-L["团队战术板"]				  = "Raid MRT notes"
+L["个人战术板"]				  = "Get information from the personal MRT notes"
+L["团队战术板"]				  = "Get information from the raid MRT notes"
 L["显示战术板时间"]			  = "Show MRT Notes timer"
 L["显示倒数时间"]			  = "Show countdown"
 L["提前时间"]				  = "Warning time in advance"
@@ -237,10 +236,10 @@ L["准备苦难"]				  = "Suffering incoming, kill orb. %d/100"
 
 L["TIP好战者枷锁"]			  = [[Show a announce for destroy Warmonger Shackles. List basic by MRT notes, announce next round, and special announce on yourself round. MRT notes example:
 Shackles Order
-1 |cffcc6819Tom|r  |cff2133ddTom|r  |cffb2050fTom|r	Use:|cff2133ddTom|r{spell:31821}|cff2133ddTom|r{spell:62618}|cff2133ddTom|r{spell:97462}
-2 |cffffffffTom|r  |cffffffffTom|r  |cffc18ef2Tom|r Use:|cff2133ddTom|r{spell:64901}|cff2133ddTom|r{spell:15286}|cff2133ddTom|r{spell:196718}
-3 |cffcc6819Tom|r  |cffffffffTom|r  |cffff9b00Tom|r Use:|cff2133ddTom|r{spell:31821}|cff2133ddTom|r{spell:62618}|cff2133ddTom|r{spell:97462}
-4 |cff26efefTom|r  |cff1c9b05Tom|r  |cffb2050fTom|r Use:|cff2133ddTom|r{spell:64901}|cff2133ddTom|r{spell:15286}|cff2133ddTom|r{spell:196718}
+1 |cffcc6819Tom|r  |cff2133ddTom|r  |cffb2050fTom|r
+2 |cffffffffTom|r  |cffffffffTom|r  |cffc18ef2Tom|r
+3 |cffcc6819Tom|r  |cffffffffTom|r  |cffff9b00Tom|r
+4 |cff26efefTom|r  |cff1c9b05Tom|r  |cffb2050fTom|r
 end]]
 L["下一轮锁链"]				  = "Shackles|cFF00FFFF[%d]|r |cFFFFFF00[LEFT]|r%s |cFFFFFF00[CENTER]|r%s |cFFFFFF00[RIGHT]|r%s"
 L["锁链顺序"]				  = "Shackles order"
@@ -264,13 +263,7 @@ L["即将折磨喷发"]			  = "Tormented Eruptions Incoming %d/100"
 
 --[[ 6 ]]--
 
-L["TIP烈焰套索陷阱"]		  = [[Show count of Flameclasp Trap and coping raid cooldown spells for every round. MRT note example:
-TrapOrder
-|cff2133ddTom|r{spell:31821}|cff2133ddTom|r{spell:62618}|cff2133ddTom|r{spell:97462}
-|cff2133ddTom|r{spell:64901}|cff2133ddTom|r{spell:15286}|cff2133ddTom|r{spell:196718}
-|cff2133ddTom|r{spell:31821}|cff2133ddTom|r{spell:62618}|cff2133ddTom|r{spell:97462}
-|cff2133ddTom|r{spell:64901}|cff2133ddTom|r{spell:15286}|cff2133ddTom|r{spell:196718}
-end]]
+L["TIP烈焰套索陷阱"]		  = "Show count of Flameclasp Trap."
 L["陷阱数量"]				  = "|cffFFFF00[%d round]|rTrap count: |cff%s[%d]|r"
 L["陷阱顺序"]				  = "Flameclasp Trap order"
 L["陷阱出现"]				  = "Trap Incoming"
@@ -301,14 +294,6 @@ L["破甲"]                     = "Sunder"
 L["分解"]                     = "Avoid the front"
 L["熔毁"]                     = "AE"
 
-L["TIP净化协议减伤安排"]	  = [[Show raid cooldown spells plan for every round Purification Protocol. MRT note example:
-ProtocolOrder
-1 |cffcc6819Tom|r{spell:31821}|cff2133ddTom|r{spell:62618}|cffb2050fTom|r{spell:97462}
-2 |cffffffffTom|r{spell:196718}|cffffffffTom|r{spell:15286}|cffc18ef2Tom|r{spell:64901}
-3 |cffcc6819Tom|r{spell:31821}|cffffffffTom|r{spell:62618}|cffff9b00Tom|r{spell:97462}
-end]]
-L["净化协议减伤顺序"]		  = "Protocol cooldown Order"
-
 L["TIP净化协议读条计数"]	  = "Show Purification Protocol cast bar and count and highlight over 3rd cast every round"
 
 L["能量核心"]				  = "Energy Core"
@@ -331,14 +316,6 @@ L["绝望距离过近"]			  = "|cffFF0000DANGER|r"
 L["TIP宿命联结"]              = "Show Fated Conjunction cast bar and damage delay countdown."
 L["连线出现"]				  = "Beams Spawn (%d)"
 L["连线生效"]                 = "Beams Effect (%d)"
-
-L["TIP扭曲命运减伤安排"]      = [[Show raid cooldown spells plan for next Twist Fate. MRT note example:
-TwistFateOrder
-1 |cffcc6819Tom|r{spell:31821}|cff2133ddTom|r{spell:62618}|cffb2050fTom|r{spell:97462}
-2 |cffffffffTom|r{spell:196718}|cffffffffTom|r{spell:15286}|cffc18ef2Tom|r{spell:64901}
-3 |cffcc6819Tom|r{spell:31821}|cffffffffTom|r{spell:62618}|cffff9b00Tom|r{spell:97462}
-end]]
-L["扭曲命运减伤顺序"]		  = "Twist Fate cooldown order"
 
 --[[ 9 ]]--
 

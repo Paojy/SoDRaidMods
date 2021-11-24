@@ -90,9 +90,8 @@ L["无昵称"]					  = "无"
 L["输入昵称"]				  = "为了在战术板中识别你，输入你的昵称。多个昵称请用空格隔开。没有昵称时仅识别当前角色名字。"
 L["时间轴"]					  = "時間軸"
 L["战斗结束"]				  = "戰鬥結束"
-L["来源"]					  = "戰術板類別"
-L["个人战术板"]				  = "個人戰術板"
-L["团队战术板"]				  = "團隊戰術板"
+L["个人战术板"]				  = "從個人戰術板獲取信息"
+L["团队战术板"]				  = "從團隊戰術板獲取信息"
 L["显示战术板时间"]			  = "顯示戰術板時間"
 L["显示倒数时间"]			  = "顯示倒數時間"
 L["提前时间"]				  = "提前時間"
@@ -235,12 +234,12 @@ L["准备苦难"]				  = "準備苦難，轉火折磨之球 %d/100"
 
 --[[ 5 ]]--
 
-L["TIP好战者枷锁"]			  = [[根據MRT戰術板提示下一輪拉斷鎖鏈的人，並在輪到自己時特別提示。可在拉鎖鏈的三個人後面加上本輪使用的技能。MRT戰術板示例：
+L["TIP好战者枷锁"]			  = [[根據MRT戰術板提示下一輪拉斷鎖鏈的人，並在輪到自己時特別提示。MRT戰術板示例：
 鎖鏈順序
-1 |cffcc6819張三|r  |cff2133dd張三|r  |cffb2050f張三|r  技能:|cff2133dd張三|r{spell:31821}|cff2133dd張三|r{spell:62618}|cff2133dd張三|r{spell:97462}
-2 |cffffffff張三|r  |cffffffff張三|r  |cffc18ef2張三|r  技能:|cff2133dd張三|r{spell:64901}|cff2133dd張三|r{spell:15286}|cff2133dd張三|r{spell:196718}
-3 |cffcc6819張三|r  |cffffffff張三|r  |cffff9b00張三|r 	技能:|cff2133dd張三|r{spell:31821}|cff2133dd張三|r{spell:62618}|cff2133dd張三|r{spell:97462}
-4 |cff26efef張三|r  |cff1c9b05張三|r  |cffb2050f張三|r 	技能:|cff2133dd張三|r{spell:64901}|cff2133dd張三|r{spell:15286}|cff2133dd張三|r{spell:196718}
+1 |cffcc6819張三|r  |cff2133dd張三|r  |cffb2050f張三|r
+2 |cffffffff張三|r  |cffffffff張三|r  |cffc18ef2張三|r
+3 |cffcc6819張三|r  |cffffffff張三|r  |cffff9b00張三|r
+4 |cff26efef張三|r  |cff1c9b05張三|r  |cffb2050f張三|r
 end]]
 L["下一轮锁链"]				  = "鎖鏈|cFF00FFFF[%d]|r |cFFFFFF00[左]|r%s |cFFFFFF00[中]|r%s |cFFFFFF00[右]|r%s"
 L["锁链顺序"]				  = "鎖鏈順序"
@@ -264,13 +263,7 @@ L["即将折磨喷发"]			  = "即將折磨爆發 %d/100"
 
 --[[ 6 ]]--
 
-L["TIP烈焰套索陷阱"]		  = [[顯示鉤焰陷阱數量及本輪應對減傷技能。MRT戰術板示例：
-陷阱順序
-|cff2133dd張三|r{spell:31821}|cff2133dd張三|r{spell:62618}|cff2133dd張三|r{spell:97462}
-|cff2133dd張三|r{spell:64901}|cff2133dd張三|r{spell:15286}|cff2133dd張三|r{spell:196718}
-|cff2133dd張三|r{spell:31821}|cff2133dd張三|r{spell:62618}|cff2133dd張三|r{spell:97462}
-|cff2133dd張三|r{spell:64901}|cff2133dd張三|r{spell:15286}|cff2133dd張三|r{spell:196718}
-end]]
+L["TIP烈焰套索陷阱"]		  = "顯示鉤焰陷阱數量。"
 L["陷阱数量"]				  = "|cffFFFF00[第%d輪]|r陷阱數量: |cff%s[%d]|r"
 L["陷阱顺序"]				  = "陷阱順序"
 L["陷阱出现"]				  = "陷阱出現"
@@ -301,14 +294,6 @@ L["破甲"]                     = "破甲"
 L["分解"]                     = "躲開正面"
 L["熔毁"]                     = "AE"
 
-L["TIP净化协议减伤安排"]	  = [[根據MRT戰術板提示下一組凈化程序的減傷安排。MRT戰術板示例：
-凈化協議減傷順序
-1 |cffcc6819張三|r{spell:31821}|cff2133dd張三|r{spell:62618}|cffb2050f張三|r{spell:97462}
-2 |cffffffff張三|r{spell:196718}|cffffffff張三|r{spell:15286}|cffc18ef2張三|r{spell:64901}
-3 |cffcc6819張三|r{spell:31821}|cffffffff張三|r{spell:62618}|cffff9b00張三|r{spell:97462}
-end]]
-L["净化协议减伤顺序"]		  = "凈化程序減傷順序"
-
 L["TIP净化协议读条计数"]	  = "顯示凈化程序的施法條並計數，每一輪到第三次施法開始以後高亮。"
 
 L["能量核心"]				  = "能量核心"
@@ -331,14 +316,6 @@ L["绝望距离过近"]			      = "|cffFF0000危險|r"
 L["TIP宿命联结"]              = "顯示命定聚合的施法條及出傷倒計時。"
 L["连线出现"]				  = "連線出現(%d)"
 L["连线生效"]                 = "連線生效(%d)"
-
-L["TIP扭曲命运减伤安排"]      = [[根據MRT戰術板提示下一次扭曲命運的減傷安排。MRT戰術板示例：
-扭曲命運減傷順序
-1 |cffcc6819張三|r{spell:31821}|cff2133dd張三|r{spell:62618}|cffb2050f張三|r{spell:97462}
-2 |cffffffff張三|r{spell:196718}|cffffffff張三|r{spell:15286}|cffc18ef2張三|r{spell:64901}
-3 |cffcc6819張三|r{spell:31821}|cffffffff張三|r{spell:62618}|cffff9b00張三|r{spell:97462}
-end]]
-L["扭曲命运减伤顺序"]		  = "扭曲命運減傷順序"
 
 --[[ 9 ]]--
 

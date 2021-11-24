@@ -23,8 +23,7 @@ G.Msgs = {}
 G.Sounds = {}
 
  -- 需要转团队
-G.Test_Mod = false
-G.Test_Exrt = false
+G.Test_Mod = true
 ----------------------------------------------------------
 -----------------[[    Frame Holder    ]]------------------
 ----------------------------------------------------------
@@ -388,7 +387,13 @@ Timeline.LineUpLines = function()
 		end
 	end
 	if #t > 1 then
-		table.sort(t, function(a, b) return a.ind < b.ind end)
+		table.sort(t, function(a, b) 
+			if a.row_time < b.row_time then
+				return true
+			elseif a.row_time == b.row_time and a.ind < b.ind then
+				return true
+			end
+		end)
 	end
 	local lastline
 	for i, line in pairs(t) do
@@ -500,7 +505,13 @@ Timeline.LineUpBars = function()
 		end
 	end
 	if #t > 1 then
-		table.sort(t, function(a, b) return a.ind < b.ind end)
+		table.sort(t, function(a, b) 
+			if a.row_time < b.row_time then
+				return true
+			elseif a.row_time == b.row_time and a.ind < b.ind then
+				return true
+			end
+		end)
 	end
 	local lastbar
 	for i, bar in pairs(t) do
@@ -547,13 +558,6 @@ Timeline.CreateBar = function(ind, str, exp_time, row_time)
 	frame.tex:SetVertexColor(0, 0, 0)
 	frame.tex:SetSize(2, SoD_CDB["General"]["tl_bar_height"])
 	frame.tex:SetPoint("LEFT", frame:GetStatusBarTexture(), "RIGHT", 0, 0)
-	
-	frame.tex2 = frame:CreateTexture(nil, "BACKGROUND", 1)
-	frame.tex2:SetTexture("Interface\\AddOns\\SoDRaidMods\\media\\arrow")
-	frame.tex2:SetDesaturated(true)
-	frame.tex2:SetVertexColor(1, 1, 0)
-	frame.tex2:SetSize(SoD_CDB["General"]["tl_bar_height"], SoD_CDB["General"]["tl_bar_height"])
-	frame.tex2:SetPoint("BOTTOM", frame:GetStatusBarTexture(), "TOPRIGHT", 0, 3)
 
 	frame.update_onedit = function(option)
 		if option == "all" or option == "bar" then
@@ -570,9 +574,8 @@ Timeline.CreateBar = function(ind, str, exp_time, row_time)
 	end
 	
 	frame.Play = function()
-		if not frame.played and not SoD_CDB["General"]["disable_sound"] and SoD_CDB["General"]["tl_bar_sound"] then
+		if not SoD_CDB["General"]["disable_sound"] and SoD_CDB["General"]["tl_bar_sound"] then
 			if GetTime() > Timeline.BarParent.soundexp then
-				--print(ind)
 				local spell_voice = {}
 				local spell_voice_id_tag = {}
 				for i, name in pairs(Timeline.MyNames) do
@@ -622,18 +625,10 @@ Timeline.CreateBar = function(ind, str, exp_time, row_time)
 			local remain = self.exp_time - GetTime()	
 			if remain > 0 then				
 				if remain < SoD_CDB["General"]["tl_bar_sound_dur"] then
-					local min_ind
 					for i, bar in pairs(Timeline.ActiveBars) do
 						if not frame.played then
-							if not min_ind then
-								min_ind = bar.ind
-							else
-								min_ind = min(min_ind, bar.ind)
-							end
+							self.Play()
 						end
-					end
-					if frame.ind == min_ind then
-						self.Play()
 					end
 				end
 				self.right:SetText(T.FormatTime(remain))
@@ -676,64 +671,130 @@ Timeline:SetScript("OnUpdate", function(self, e)
 end)
 
 Timeline.PhaseTable = {}
+Timeline.Encounter_Tags = {}
 
 Timeline:RegisterEvent("ADDON_LOADED")
 Timeline:SetScript("OnEvent", function(self, event, ...)
 	if event == "ENCOUNTER_START" then
+		local encounterID = ...
+		
 		self.t_offset = 0
 		self.start = GetTime()
 		self:Show()
         self.assignment_cd = table.wipe(self.assignment_cd)
         self.phase_cd = table.wipe(self.phase_cd)
-		
-        if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
-            local text = SoD_CDB["General"]["tl_use_self"] == "self" and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
-            local betweenLine = false
-            local count = 0
-            for line in text:gmatch('[^\r\n]+') do
-                if line:match(L["战斗结束"]) then
-                    betweenLine = false
-                end
-                if betweenLine then                
-                    local str = line:gsub("||", "|")
-					local phase_str, reset_m, reset_s = string.match(str, "P(%d+) (%d+):(%d+)")
-					if phase_str then
-						local reset_phase = tonumber(phase_str)
-						if reset_phase > 1 and reset_m and reset_s then
-							local engageID = ...
-							if Timeline.PhaseTable[engageID] and Timeline.PhaseTable[engageID]["phase"..phase_str] then				
-								if not self.phase_cd["phase"..phase_str] then
-									self.phase_cd["phase"..phase_str] = {}
-									self.phase_cd["phase"..phase_str]["to_time"] = {}					
-									self.phase_cd["phase"..phase_str]["sub_event"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["sub_event"]
-									self.phase_cd["phase"..phase_str]["spellID"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["spellID"]
-									self.phase_cd["phase"..phase_str]["current"] = 1
+				
+        if IsAddOnLoaded("MRT") and (_G.VExRT.Note) then
+			if SoD_CDB["General"]["tl_use_raid"] and _G.VExRT.Note.Text1 then
+				local text = _G.VExRT.Note.Text1
+				local betweenLine = false
+				for line in text:gmatch('[^\r\n]+') do
+					if line:match(L["战斗结束"]) then
+						betweenLine = false
+					end
+					if betweenLine then                
+						local str = line:gsub("||", "|")
+						local phase_str, reset_m, reset_s = string.match(str, "P(%d+) (%d+):(%d+)")
+						if phase_str then
+							local reset_phase = tonumber(phase_str)
+							if reset_phase > 1 and reset_m and reset_s then
+								local engageID = ...
+								if Timeline.PhaseTable[engageID] and Timeline.PhaseTable[engageID]["phase"..phase_str] then				
+									if not self.phase_cd["phase"..phase_str] then
+										self.phase_cd["phase"..phase_str] = {}
+										self.phase_cd["phase"..phase_str]["to_time"] = {}					
+										self.phase_cd["phase"..phase_str]["sub_event"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["sub_event"]
+										self.phase_cd["phase"..phase_str]["spellID"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["spellID"]
+										self.phase_cd["phase"..phase_str]["current"] = 1
+									end
+									local r = tonumber(reset_m)*60+tonumber(reset_s)
+									table.insert(self.phase_cd["phase"..phase_str]["to_time"], r)
 								end
-								local r = tonumber(reset_m)*60+tonumber(reset_s)
-								table.insert(self.phase_cd["phase"..phase_str]["to_time"], r)
+							end
+						else
+							local m, s = string.match(str, "(%d+):(%d+)")
+							if m and s then
+								local r = tonumber(m)*60+tonumber(s)
+								local t = max(r - SoD_CDB["General"]["tl_advance"], 0)
+								local info = {
+									cd_str = str,
+									row_time = r,
+									show_time = t,
+									hide_time = r + SoD_CDB["General"]["tl_dur"],
+								}
+								table.insert(self.assignment_cd, info)
+								--print(#self.assignment_cd, str, r, t)
 							end
 						end
-					else
-						local m, s = string.match(str, "(%d+):(%d+)")
-						
-						if m and s then
-							count = count + 1
-							local r = tonumber(m)*60+tonumber(s)
-							local t = max(r - SoD_CDB["General"]["tl_advance"], 0)
-							
-							--print(count, str, r, t)
-							self.assignment_cd[count] = {}
-							self.assignment_cd[count]["cd_str"] = str
-							self.assignment_cd[count]["row_time"] = r
-							self.assignment_cd[count]["show_time"] = t
-							self.assignment_cd[count]["hide_time"] = r + SoD_CDB["General"]["tl_dur"]
+					end
+					if line:match(L["时间轴"]) then
+						betweenLine = true
+					end
+				end    
+			end
+			if SoD_CDB["General"]["tl_use_self"] and _G.VExRT.Note.SelfText then
+				
+				local text = _G.VExRT.Note.SelfText
+				local betweenLine = false
+				local phase_cd_cache = {}
+				
+				for line in text:gmatch('[^\r\n]+') do
+					if line:match(L["战斗结束"]) then
+						betweenLine = false
+					end
+					if betweenLine then                
+						local str = line:gsub("||", "|")
+						local phase_str, reset_m, reset_s = string.match(str, "P(%d+) (%d+):(%d+)")
+						if phase_str then
+							local reset_phase = tonumber(phase_str)
+							if reset_phase > 1 and reset_m and reset_s then
+								local engageID = ...
+								if Timeline.PhaseTable[engageID] and Timeline.PhaseTable[engageID]["phase"..phase_str] then				
+									if not phase_cd_cache["phase"..phase_str] then
+										phase_cd_cache["phase"..phase_str] = {}
+										phase_cd_cache["phase"..phase_str]["to_time"] = {}					
+										phase_cd_cache["phase"..phase_str]["sub_event"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["sub_event"]
+										phase_cd_cache["phase"..phase_str]["spellID"] = Timeline.PhaseTable[engageID]["phase"..phase_str]["spellID"]
+										phase_cd_cache["phase"..phase_str]["current"] = 1
+									end
+									local r = tonumber(reset_m)*60+tonumber(reset_s)
+									table.insert(phase_cd_cache["phase"..phase_str]["to_time"], r)
+								end
+							end
+						else
+							local m, s = string.match(str, "(%d+):(%d+)")
+							if m and s then
+								local r = tonumber(m)*60+tonumber(s)
+								local t = max(r - SoD_CDB["General"]["tl_advance"], 0)
+								local info = {
+									cd_str = str,
+									row_time = r,
+									show_time = t,
+									hide_time = r + SoD_CDB["General"]["tl_dur"],
+								}
+								table.insert(self.assignment_cd, info)
+								--print(#self.assignment_cd, str, r, t)
+							end
 						end
 					end
-                end
-                if line:match(L["时间轴"]) then
-                    betweenLine = true
-                end
-            end
+					if line:match(Timeline.Encounter_Tags[encounterID]..L["时间轴"]) then
+						betweenLine = true
+					end
+				end
+				-- 覆盖转阶段信息
+				for p, info in pairs(phase_cd_cache) do
+					if not self.phase_cd[p] then
+						self.phase_cd[p] = {}
+						self.phase_cd[p]["to_time"] = {}					
+						self.phase_cd[p]["sub_event"] = phase_cd_cache[p]["sub_event"]
+						self.phase_cd[p]["spellID"] = phase_cd_cache[p]["spellID"]
+						self.phase_cd[p]["current"] = 1
+					end
+					for index, v in pairs(phase_cd_cache[p]["to_time"]) do
+						self.phase_cd[p]["to_time"][index] = v
+					end
+				end
+			end
         end
         
     elseif event == "ENCOUNTER_END" then
@@ -817,6 +878,9 @@ Timeline:SetScript("OnEvent", function(self, event, ...)
 							Timeline.PhaseTable[data.engage_id]["phase"..i] = {sub_event = args.sub_event, spellID = args.spellID}
 						end
 					end
+				end
+				if data.engage_id then
+					Timeline.Encounter_Tags[data.engage_id] = G.raid_short..index
 				end
 			end
 			self:UnregisterEvent("ADDON_LOADED")
@@ -5648,12 +5712,10 @@ T.EditBossModsFrame = function(option)
 	end
 end
 
-T.CreateBossMod = function(ef, index, v, tip, points, events, difficulty_id, width, height, init, reset, update)
+T.CreateBossMod = function(ef, index, v, role, tip, points, events, difficulty_id, init, reset, update)
 	local frame = CreateFrame("Frame", addon_name.."_"..v.."_Mods", G.FrameHolder)
 	
 	frame.events = events
-	frame.width = width
-	frame.height = height	
 	frame.init = init
 	frame.reset = reset
 	frame.update = update
@@ -5663,11 +5725,10 @@ T.CreateBossMod = function(ef, index, v, tip, points, events, difficulty_id, wid
 	frame.t = 0	
 	
 	frame:Hide()
-	frame:SetSize(frame.width, frame.height)
-
 	frame.movingname = EJ_GetEncounterInfo(G.Encounters[index]["id"])..GetSpellInfo(v)..L["首领模块"]
 	frame.movingtag = index
 	if not points.hide then
+		frame:SetSize(points.width, points.height)
 		frame.point = { a1 = points.a1, parent = "UIParent", a2 = points.a2, x = points.x, y = points.y }
 		T.CreateDragFrame(frame)
 	else
@@ -5758,7 +5819,7 @@ T.CreateBossMod = function(ef, index, v, tip, points, events, difficulty_id, wid
 	
 	G.BossMods[v] = frame
 	
-	T.Create_BossMod_Options(ef, difficulty_id, v, tip)
+	T.Create_BossMod_Options(ef, role, difficulty_id, v, tip)
 end
 
 ----------------------------------------------------------

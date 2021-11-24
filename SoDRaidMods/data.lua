@@ -4,14 +4,7 @@ if select(4, GetBuildInfo()) <= 90005 then return end
 -- /dump EncounterJournalBossButton1Creature:GetTexture() -- "Interface\\EncounterJournal\\UI-EJ-BOSS-Default"
 local LCG = LibStub("LibCustomGlow-1.0")
 local LGF = LibStub("LibGetFrame-1.0")
---[[
 
-points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 0, hide = true},
-points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400}
-
-, tip = ""
-
-]]
 
 G.shared_sound = {
 	
@@ -110,7 +103,8 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 		BossMods = {
 			{ -- 捕食者之嚎
 				spellID = 347283,
-				tip = L["TIP捕食者之嚎"],
+				role = "healer",
+				tip = L["TIP捕食者之嚎"],			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["GROUP_ROSTER_UPDATE"] = true,
@@ -121,8 +115,6 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 200,
 				init = function(frame)
 					frame.spellID = 347283
 					frame.aura = GetSpellInfo(frame.spellID)
@@ -301,15 +293,13 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 			{ -- 贪噬迷雾读条计数
 				spellID = 354080,
 				tip = L["TIP贪噬迷雾读条计数"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
-				events = {	
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},				
+				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(354080)
 										
@@ -454,20 +444,7 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 					["UNIT_AURA"] = true,
 				},
 				update = function(self, event, ...)
-					if event == "UNIT_POWER_UPDATE" then
-						local unit = ...
-						if unit == "boss1" then
-							local pp = UnitPower("boss1")
-							local spell = GetSpellInfo(348805)
-							if pp >= 85 and not AuraUtil.FindAuraByName(spell, "boss1", "HELPFUL") then
-								self.text:SetText(string.format(L["即将射线"], pp))
-								self:Show()
-							else
-								self.text:SetText("")
-								self:Hide()
-							end
-						end
-					elseif event == "UNIT_AURA" then
+					if event == "UNIT_POWER_UPDATE" or event == "UNIT_AURA" then
 						local unit = ...
 						if unit == "boss1" then
 							local pp = UnitPower("boss1")
@@ -523,15 +500,13 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			{ -- 轻蔑与忿怒
 				spellID = 355232,
 				tip = L["TIP轻蔑与忿怒"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 250},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 250, width = 70, height = 70},		
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true
 				},
 				difficulty_id = {
 					[16] = true,
 				},
-				width = 70,
-				height = 70,
 				init = function(frame)
 					frame.spell1 = 355245
 					frame.spell2 = 355240
@@ -781,16 +756,15 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			},			
 			{ -- 血量对比监视
 				spellID = 351994,
+				role = "dps",
 				tip = L["TIP垂死苦难"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300, width = 150, height = 50},					
 				events = {
 					["UNIT_HEALTH"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 150,
-				height = 50,
 				init = function(frame)
 					frame.unit1 = "boss2"
 					frame.unit2 = "boss3"
@@ -850,8 +824,8 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 			},
 			{ -- 毁灭凝视
 				spellID = 351413,
-				tip = L["TIP毁灭凝视"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				tip = L["TIP毁灭凝视"],	
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},				
 				events = {	
 					["UNIT_SPELLCAST_START"] = true,
 					["UNIT_SPELLCAST_CHANNEL_START"] = true,
@@ -860,8 +834,6 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(351413)
 										
@@ -1065,9 +1037,6 @@ G.Encounters[3] = { -- 九武神 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				hide = true,
-				width = 10,
-				height = 10,
 				init = function(frame)
 					frame.aura = GetSpellInfo(350542)
 					
@@ -1183,16 +1152,15 @@ G.Encounters[3] = { -- 九武神 已过初检
 			},
 			{ -- 血量对比监视
 				spellID = 350745,
+				role = "dps",
 				tip = L["TIP斯凯亚"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300},
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = 300, width = 150, height = 50},				
 				events = {
 					["UNIT_HEALTH"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 150,
-				height = 50,
 				init = function(frame)
 					frame.unit1 = "boss2"
 					frame.unit2 = "boss3"
@@ -1252,7 +1220,7 @@ G.Encounters[3] = { -- 九武神 已过初检
 			},
 			{ -- 瓦格里的召唤
 				spellID = 350467,
-				tip = L["TIP召回咒文"],
+				tip = L["TIP召回咒文"],			
 				events = {
 					["UNIT_SPELLCAST_SUCCEEDED"] = true,
 					["CHAT_MSG_MONSTER_YELL"] = true,
@@ -1261,8 +1229,6 @@ G.Encounters[3] = { -- 九武神 已过初检
 					[15] = true,
 					[16] = true,
 				},
-				width = 250,
-				height = 200,
 				init = function(frame)				
 					frame.info = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")	
 					frame.info:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -5)
@@ -1433,15 +1399,13 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{ -- 群体驱散 已检查
 				spellID = 32375,
 				tip = L["TIP群体驱散读条"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},		
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellID = 32375
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
@@ -1538,15 +1502,13 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{ -- 怨恨 已检查
 				spellID = 354534,
 				tip = L["TIP怨恨"],
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30, width = 250, height = 100},	
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
 					frame.text:SetPoint("TOPLEFT", 5, -5)
@@ -1628,15 +1590,14 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{ -- 怨毒 已检查 需要检查CD交互
 				spellID = 350469,
 				tip = L["TIP怨毒"],
+				points = {width = 300, height = 120},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["CHAT_MSG_ADDON"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
-				},
-				width = 250,
-				height = 150,
+				},				
 				init = function(frame)-- GetSpellCooldown(102417)
 					frame.spell1 = 350469
 					frame.spell2 = 355151
@@ -1960,6 +1921,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{ -- 锁链
 				spellID = 350415,
 				tip = L["TIP好战者枷锁"],
+				points = {width = 250, height = 100},
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -1967,8 +1929,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					[15] = true,
 					[16] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.spellID = 348987 -- 好战者枷锁 
 					frame.spellID2 = 354231 -- 灵魂镣铐 
@@ -1977,16 +1937,13 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame.debuff2 = GetSpellInfo(frame.spellID2)
 					frame.debuff3 = GetSpellInfo(frame.spellID3)
 					
-					frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT") -- 显示拉锁链人员
+					frame.text = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT") -- 显示计划拉锁链人员
 					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -5)
-					
-					frame.text2 = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT") -- 显示减伤
-					frame.text2:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
-					
+										
 					frame.text_center = T.createtext(frame, "OVERLAY", 40, "OUTLINE", "LEFT") -- 点我的时候显示
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
-					frame.bars = {}
+					frame.bars = {} -- 显示正在拉锁链的人
 					frame.ind = 0
 					frame.exp = 0
 					
@@ -2098,7 +2055,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame.index_str = {L["左"], L["中间"], L["右"]}
 					
 					frame.assignment = {}
-					frame.assignment_cd = {}
 					frame.counter = 0
 					frame.display_counter = 0
 					
@@ -2135,15 +2091,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 							frame.display_counter = counter_index
 						else
 							frame.text:SetText("nodata")
-						end
-						if frame.assignment_cd[counter_index] then
-							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text2:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
-							else
-								frame.text2:SetText("")
-							end
-						else
-							frame.text2:SetText("nodata")
 						end
 					end
 					
@@ -2239,42 +2186,14 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 								frame.updatetext(frame.display_counter)
 							end
 						end
-						
-						if sub_event == "SPELL_CAST_SUCCESS" then
-							if frame.assignment_cd[frame.display_counter] and sourceName then
-								local source = string.split("-", sourceName)
-								local cur_str = frame.assignment_cd[frame.display_counter]["cd_str"]
-								local pos = 1
-								while cur_str and strfind(cur_str, source, pos) do
-									local target_pos, target_end = strfind(cur_str, source, pos)
-									local spell_start, spell_end = strfind(cur_str, spellID, target_end)
-									pos = target_end -- 看看后面这个人还出现没
-									if spell_start then-- 这个人后面有当前技能，看看下一个人的位置
-										local next_player = strfind(cur_str, "|c", target_end)
-										if not next_player or spell_end < next_player then -- 这技能就是他的
-											local str_before = strsub(cur_str, 1, spell_start-10)
-											local str_after = strsub(cur_str,spell_start-9)
-											if not strfind(strsub(str_after, 1, 12), "red") then
-												str_after = gsub(str_after, "spell:", "spellred:", 1)
-											end
-											new_str = str_before..str_after
-											frame.assignment_cd[frame.display_counter]["cd_str"] = new_str
-											frame.updatetext(frame.display_counter)
-											break
-										end
-									end
-								end
-							end
-						end
 					elseif event == "ENCOUNTER_START" then
 						frame.assignment = table.wipe(frame.assignment)
-						frame.assignment_cd = table.wipe(frame.assignment_cd)
 						
 						frame.counter = 0
 						frame.display_counter = 0
 						
-						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
-							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
+						if IsAddOnLoaded("MRT") and _G.VExRT.Note and _G.VExRT.Note.Text1 then
+							local text = _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0
 							for line in text:gmatch('[^\r\n]+') do
@@ -2284,18 +2203,12 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 								if betweenLine then
 									count = count + 1
 									frame.assignment[count] = {}
-									frame.assignment_cd[count] = {}
 									local idx = 0
 									for name in line:gmatch("|c%x%x%x%x%x%x%x%x([^|]+)|") do
 										if idx < 3 then
 											idx = idx + 1
 											frame.assignment[count][name] = idx
 										end
-									end
-									
-									for cd_str in line:gmatch("技能(.+)") do
-										local str = cd_str:gsub("||", "|")
-										frame.assignment_cd[count]["cd_str"] = str
 									end
 								end
 								if line:match(L["锁链顺序"]) then
@@ -2317,7 +2230,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 				reset = function(frame)
 					frame:Hide()
 					frame.text:SetText("")
-					frame.text2:SetText("")
 					frame.text_center:SetText("")
 					
 					for tag, bar in pairs(frame.bars) do
@@ -2336,15 +2248,13 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{ -- 折磨
 				spellID = 350217,
 				tip = L["TIP折磨"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},	
 				events = {	
 					["UNIT_SPELLCAST_SUCCEEDED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					-- 349873 折磨
 					-- 352933 折磨喷发
@@ -2460,8 +2370,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 20,
-				height = 20,
 				init = function(frame)
 					frame.npcID = "177594" -- "97264"	
 					frame.used_mark = 0
@@ -2526,8 +2434,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 20,
-				height = 20,
 				init = function(frame)
 					frame.index = 0
 					
@@ -2566,7 +2472,7 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 			{ -- 碎裂之魂计时
 				spellID = 351229,
 				tip = L["TIP碎裂之魂"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, width = 250, height = 30},			
 				events = {
 					["UNIT_SPELLCAST_SUCCEEDED"] = true,
 					["UNIT_SPELLCAST_START"] = true,
@@ -2574,8 +2480,6 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 30,
 				init = function(frame)
 					frame.spell1 = 350766
 					frame.spell2 = 350411
@@ -2619,48 +2523,9 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame.bar = bar
 				end,
 				update = function(frame, event, ...)
-					if event == "UNIT_SPELLCAST_SUCCEEDED" then
+					if event == "UNIT_SPELLCAST_SUCCEEDED" or event == "UNIT_SPELLCAST_START" then
 						local spellId = select(3, ...)
-						if spellId == frame.spell1 then
-							frame.bar.exp = GetTime() + 8
-							
-							frame.bar.ind = 1						
-							frame.bar.left:SetText(string.format(L["躲白圈"], frame.bar.ind))
-							
-							frame.bar:SetScript("OnUpdate", function(self, e)
-								self.t = self.t + e
-								if self.t > self.update_rate then
-									local remain = self.exp - GetTime()
-									if remain > 0 then
-										if remain <= self.dur then
-											self:SetAlpha(1)
-											self:SetValue(self.dur - remain)
-											self.right:SetText(T.FormatTime(remain))
-										else
-											self:SetAlpha(0)
-											self:SetValue(0)
-											self.right:SetText("")
-										end								
-									else
-										if self.ind == 1 then
-											self.ind = self.ind + 1
-											self.exp = GetTime() + 5
-											self.left:SetText(string.format(L["躲白圈"], self.ind))
-										else
-											self:Hide()
-											self:SetScript("OnUpdate", nil)
-										end
-									end						
-									self.t = 0
-								end
-							end)
-
-							frame.bar:SetAlpha(0)
-							frame.bar:Show()
-						end
-					elseif event == "UNIT_SPELLCAST_START" then
-						local spellId = select(3, ...)
-						if spellId == frame.spell2 then
+						if (event == "UNIT_SPELLCAST_SUCCEEDED" and spellId == frame.spell1) or (event == "UNIT_SPELLCAST_START" and spellId == frame.spell2) then
 							frame.bar.exp = GetTime() + 8
 							
 							frame.bar.ind = 1						
@@ -2783,6 +2648,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{ -- 烈焰陷阱爆炸 待检查
 				spellID = 348456,
 				tip = L["TIP烈焰套索陷阱"],
+				points = {width = 250, height = 100},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -2790,8 +2656,6 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 					[15] = true,
 					[16] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.spellID = 348456
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
@@ -2849,27 +2713,11 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 						end
 					end
 					
-					frame.text2 = T.createtext(frame, "OVERLAY", 20, "OUTLINE", "LEFT")
-					frame.text2:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
-					
 					frame.prev = 0
-					frame.assignment_cd = {}
 					frame.counter = 0
-					frame.display_counter = 0
 					
 					frame.updatetext = function(counter_index)
 						frame.text:SetText(string.format(L["陷阱数量"], counter_index, frame.color[frame.trap] or "FF0000", frame.trap))
-						
-						if frame.assignment_cd[counter_index] then
-							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text2:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
-							else
-								frame.text2:SetText("")
-							end
-							frame.display_counter = counter_index
-						else
-							frame.text2:SetText("nodata")
-						end
 					end
 					
 					frame.trap = 0
@@ -2881,7 +2729,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 						if sub_event == "SPELL_AURA_REMOVED" and (spellID == frame.spellID) then
 							frame:Show()
 							frame.trap = frame.trap + 1
-							frame.updatetext(frame.display_counter)
+							frame.updatetext(frame.counter)
 							
 							if dest == G.PlayerName then
 								frame.cd_tex:SetCooldown(0, 0)
@@ -2890,14 +2738,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 							local dest = string.split("-", destName)
 							if UnitIsUnit(dest, frame.anchor) then -- 避免重复
 								frame.trap = frame.trap - 1
-								frame.updatetext(frame.display_counter)
-								if frame.trap <= 0 then-- 陷阱炸完了 显示下一轮
-									--print("等10秒")
-									C_Timer.After(5, function()  -- 等5秒
-										--print("10秒到，显示下一轮")
-										frame.updatetext(frame.counter+1)
-									end)
-								end
+								frame.updatetext(frame.counter)
 							end
 						elseif sub_event == "UNIT_DIED" then
 							frame.update_anchor()
@@ -2905,6 +2746,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 							if GetTime() - frame.prev > 5 then -- 新的一轮
 								frame.prev = GetTime()
 								frame.counter = frame.counter + 1
+								frame.updatetext(frame.counter)
 								
 								frame.bar.exp = GetTime() + 5
 								frame.bar:SetScript("OnUpdate", function(self, e)
@@ -2932,72 +2774,20 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 							end
 						end
 						
-						if sub_event == "SPELL_CAST_SUCCESS" then -- 减伤刷新
-							if frame.assignment_cd[frame.display_counter] and sourceName then
-								local source = string.split("-", sourceName)
-								local cur_str = frame.assignment_cd[frame.display_counter]["cd_str"]
-								local pos = 1
-								while cur_str and strfind(cur_str, source, pos) do
-									local target_pos, target_end = strfind(cur_str, source, pos)
-									local spell_start, spell_end = strfind(cur_str, spellID, target_end)
-									pos = target_end -- 看看后面这个人还出现没
-									if spell_start then-- 这个人后面有当前技能，看看下一个人的位置
-										local next_player = strfind(cur_str, "|c", target_end)
-										if not next_player or spell_end < next_player then -- 这技能就是他的
-											local str_before = strsub(cur_str, 1, spell_start-10)
-											local str_after = strsub(cur_str,spell_start-9)
-											if not strfind(strsub(str_after, 1, 12), "red") then
-												str_after = gsub(str_after, "spell:", "spellred:", 1)
-											end
-											new_str = str_before..str_after
-											frame.assignment_cd[frame.display_counter]["cd_str"] = new_str
-											frame.updatetext(frame.display_counter)
-											break
-										end
-									end
-								end
-							end
-						end
 					elseif event == "ENCOUNTER_START" then
 						frame.update_anchor()
-						frame.assignment_cd = table.wipe(frame.assignment_cd)
 						frame.prev = 0 -- 时间戳
 						frame.counter = 0
-						frame.display_counter = 1
-						
-						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
-							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
-							local betweenLine = false
-							local count = 0
-							for line in text:gmatch('[^\r\n]+') do
-								if line:match("end") then
-									betweenLine = false
-								end
-								if betweenLine then
-									count = count + 1
-									frame.assignment_cd[count] = {}
-									local str = line:gsub("||", "|")
-									frame.assignment_cd[count]["cd_str"] = str
-								end
-								if line:match(L["陷阱顺序"]) then
-									betweenLine = true
-								end
-							end
-						end
-						
-						frame.updatetext(frame.counter+1)
 					end
 				end,
 				reset = function(frame)
 					frame:Hide()
-					frame.text:SetText("")
-					frame.text2:SetText("")
+					frame.text:SetText("")				
+					frame.bar:SetScript("OnUpdate", nil)
+					bar:Hide()
 					
 					frame.prev = 0
-					frame.assignment_cd = table.wipe(frame.assignment_cd)
-					frame.counter = 0
-					frame.display_counter = 0
-					
+					frame.counter = 0				
 					frame.trap = 0
 					frame.anchor = "raid1"
 				end,
@@ -3005,15 +2795,13 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{ -- 尖刺提示 已检查
 				spellID = 356808,
 				tip = L["TIP尖刺"],
+				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = -40, width = 20, height = 20},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
-				points = {a1 = "CENTER", a2 = "CENTER", x = -0, y = -40},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 20,
-				height = 20,
 				init = function(frame)
 					frame.bar = CreateFrame("Frame", nil, frame)
 					frame.bar:SetHeight(20)
@@ -3091,15 +2879,13 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{ -- 熔炉烈焰 
 				spellID = 359033,
 				tip = L["TIP熔炉烈焰"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},	
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(359033)
 										
@@ -3242,15 +3028,13 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 净化协议读条计数 已检查
 				spellID = 352538,
 				tip = L["TIP净化协议读条计数"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},				
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(352538)
 										
@@ -3375,114 +3159,11 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					frame.bar.anim:Stop()
 					frame.bar.glow:Hide()
 				end,
-			},	
-			{ -- 净化协议减伤 已检查
-				spellID = 352394,
-				tip = L["TIP净化协议减伤安排"],
-				events = {
-					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
-				},
-				difficulty_id = {
-					["all"] = true,
-				},
-				width = 250,
-				height = 50,
-				init = function(frame)
-					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
-					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -5)
-												
-					frame.assignment_cd = {}
-					frame.counter = 0
-					frame.display_counter = 0
-					
-					frame.updatetext = function(counter_index)		
-						if frame.assignment_cd[counter_index] then
-							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
-							else
-								frame.text:SetText("")
-							end
-							frame.display_counter = counter_index
-						else
-							frame.text:SetText("nodata")
-						end
-					end
-				end,
-				update = function(frame, event, ...)
-					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-						local timestamp, sub_event, _, sourceGUID, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-						if sub_event == "SPELL_CAST_SUCCESS" and spellID == 352589 then -- 熔毁
-							frame.counter = frame.counter + 1
-							frame.updatetext(frame.counter)
-						end
-						
-						if sub_event == "SPELL_CAST_SUCCESS" then -- 减伤刷新
-							if frame.assignment_cd[frame.display_counter] and sourceName then
-								local source = string.split("-", sourceName)
-								local cur_str = frame.assignment_cd[frame.display_counter]["cd_str"]
-								local pos = 1
-								while cur_str and strfind(cur_str, source, pos) do
-									local target_pos, target_end = strfind(cur_str, source, pos)
-									local spell_start, spell_end = strfind(cur_str, spellID, target_end)
-									pos = target_end -- 看看后面这个人还出现没
-									if spell_start then-- 这个人后面有当前技能，看看下一个人的位置
-										local next_player = strfind(cur_str, "|c", target_end)
-										if not next_player or spell_end < next_player then -- 这技能就是他的
-											local str_before = strsub(cur_str, 1, spell_start-10)
-											local str_after = strsub(cur_str,spell_start-9)
-											if not strfind(strsub(str_after, 1, 12), "red") then
-												str_after = gsub(str_after, "spell:", "spellred:", 1)
-											end
-											new_str = str_before..str_after
-											frame.assignment_cd[frame.display_counter]["cd_str"] = new_str
-											frame.updatetext(frame.display_counter)
-											break
-										end
-									end
-								end
-							end
-						end
-					elseif event == "ENCOUNTER_START" then
-						frame.assignment_cd = table.wipe(frame.assignment_cd)
-						frame.counter = 1
-						frame.display_counter = 1
-						
-						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
-							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
-							local betweenLine = false
-							local count = 0
-							for line in text:gmatch('[^\r\n]+') do
-								if line:match("end") then
-									betweenLine = false
-								end
-								if betweenLine then
-									count = count + 1
-									frame.assignment_cd[count] = {}
-									local str = line:gsub("||", "|")
-									frame.assignment_cd[count]["cd_str"] = str
-								end
-								if line:match(L["净化协议减伤顺序"]) then
-									betweenLine = true
-								end
-							end
-						end
-						
-						frame.updatetext(frame.counter)
-					end
-				end,
-				reset = function(frame)
-					frame:Hide()
-					frame.text:SetText("")
-
-					frame.assignment_cd = table.wipe(frame.assignment_cd)
-					frame.counter = 0
-					frame.display_counter = 0
-				end,
 			},
 			{ -- 湮灭分担顺序 Exrt技能安排联动 待检查
 				spellID = 355352,
 				tip = L["TIP湮灭"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 350},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 350, width = 250, height = 100},	
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -3490,8 +3171,6 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					[15] = true,
 					[16] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
 					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -5)
@@ -3536,8 +3215,8 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					elseif event == "ENCOUNTER_START" then
 						frame.counter = 0
 						frame.order = table.wipe(frame.order)
-						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then
-							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
+						if IsAddOnLoaded("MRT") and _G.VExRT.Note and _G.VExRT.Note.Text1 then
+							local text = _G.VExRT.Note.Text1
 							local betweenLine = false
 							local count = 0
 							for line in text:gmatch('[^\r\n]+') do
@@ -3577,15 +3256,13 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 净除威胁 已检查
 				spellID = 350496,
 				tip = L["TIP净除威胁"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 250},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 250, width = 250, height = 100},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.aura = GetSpellInfo(350496)
 					
@@ -3745,7 +3422,7 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 能量核心能量 已检查
 				spellID = 356093,
 				tip = L["TIP能量核心能量"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 150},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 150,width = 250, height = 100},					
 				events = {
 					["UNIT_POWER_UPDATE"] = true,
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
@@ -3753,8 +3430,6 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.bars = {}
 					
@@ -3846,15 +3521,13 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 			{ -- 读条 湮灭 破甲 分解 熔毁
 				spellID = 352589,
 				tip = L["TIP湮灭计时条"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, width = 350, height = 120},						
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 350,
-				height = 120,
 				init = function(frame)
 					frame.spellIDs = {
 						[355352] = { -- 湮灭
@@ -4062,6 +3735,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 符文亲和 已检查
 				spellID = 354964,
 				tip = L["TIP符文亲和"],
+				points = {width = 200, height = 600},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["CHAT_MSG_ADDON"] = true,
@@ -4070,8 +3744,6 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					[15] = true,
 					[16] = true,
 				},
-				width = 200,
-				height = 600,
 				init = function(frame)
 					frame.spellID = 354964
 					frame.aura = GetSpellInfo(frame.spellID) -- 符文亲和
@@ -4145,13 +3817,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 										
 					frame.bar.right = T.createtext(frame.bar, "OVERLAY", 18, "OUTLINE", "RIGHT")
 					frame.bar.right:SetPoint("RIGHT", frame.bar, "RIGHT", -10, 0)
-					
-					--frame.bar.mark = frame.bar:CreateTexture(nil, "OVERLAY")
-					--frame.bar.mark:SetTexture(G.media.blank)
-					--frame.bar.mark:SetSize(1, 30)
-					--frame.bar.mark:SetVertexColor(0, 0, 0)
-					--frame.bar.mark:SetPoint("LEFT", frame.bar, "LEFT", 40, 0)
-					
+									
 					frame.bar.t = 0
 					frame.countdown = function()
 						local dur 
@@ -4554,7 +4220,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 随演命运选择按钮
 				spellID = 353195,
 				tip = L["TIP随演命运"],
-				points = {a1 = "CENTER", a2 = "CENTER", x = 0, y = 0},
+				points = {a1 = "CENTER", a2 = "CENTER", x = 0, y = 0, width = 250, height = 30},						
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["CHAT_MSG_ADDON"] = true,
@@ -4563,8 +4229,6 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					[15] = true,
 					[16] = true,
 				},
-				width = 250,
-				height = 30,
 				init = function(frame)
 					frame.btns = {}
 					frame.spellID = 354964
@@ -4699,15 +4363,13 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 绝望距离检查
 				spellID = 357144,
 				tip = L["TIP绝望距离检查"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, width = 250, height = 60},								
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					[16] = true,
 				},
-				width = 250,
-				height = 60,
 				init = function(frame)
 					frame.spellID = 357144 -- 绝望
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
@@ -4887,15 +4549,13 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 			{ -- 宿命联结
 				spellID = 350421,
 				tip = L["TIP宿命联结"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 60},			
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 60,
 				init = function(frame)
 					frame.spellID = 350421 -- 宿命联结
 					frame.spellID2 = 351969 -- 命运重构
@@ -5040,118 +4700,6 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					frame:Hide()					
 				end,
 			},			
-			{ -- 扭曲命运减伤
-				spellID = 353931,
-				tip = L["TIP扭曲命运减伤安排"],
-				events = {
-					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
-				},
-				difficulty_id = {
-					["all"] = true,
-				},
-				width = 250,
-				height = 50,
-				init = function(frame)
-					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
-					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -5)
-						
-					frame.assignment_cd = {}
-					frame.counter = 0
-					frame.display_counter = 0
-					frame.in_cd = false
-					
-					frame.updatetext = function(counter_index)		
-						if frame.assignment_cd[counter_index] then
-							if frame.assignment_cd[counter_index] and frame.assignment_cd[counter_index]["cd_str"] then
-								frame.text:SetText(frame.assignment_cd[counter_index]["cd_str"]:gsub("{spell:(%d+)}", function(w) return T.GetIconLink(w, true) end):gsub("{spellred:(%d+)}", function(w) return T.GetIconLinkRed(w, true) end))
-							else
-								frame.text:SetText("")
-							end
-							frame.display_counter = counter_index
-						else
-							frame.text:SetText("nodata")
-						end
-					end
-				end,
-				update = function(frame, event, ...)
-					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-						local timestamp, sub_event, _, sourceGUID, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-						if sub_event == "SPELL_AURA_APPLIED" and spellID == 353931 then -- 扭曲命运
-							
-							if not frame.in_cd then
-								frame.in_cd = true
-								frame.counter = frame.counter + 1
-								frame.updatetext(frame.counter)
-								C_Timer.After(10, function()
-									frame.in_cd = false
-								end)
-							end
-						end
-						
-						if sub_event == "SPELL_CAST_SUCCESS" then -- 减伤刷新
-							if frame.assignment_cd[frame.display_counter] and sourceName then
-								local source = string.split("-", sourceName)
-								local cur_str = frame.assignment_cd[frame.display_counter]["cd_str"]
-								local pos = 1
-								while cur_str and strfind(cur_str, source, pos) do
-									local target_pos, target_end = strfind(cur_str, source, pos)
-									local spell_start, spell_end = strfind(cur_str, spellID, target_end)
-									pos = target_end -- 看看后面这个人还出现没
-									if spell_start then-- 这个人后面有当前技能，看看下一个人的位置
-										local next_player = strfind(cur_str, "|c", target_end)
-										if not next_player or spell_end < next_player then -- 这技能就是他的
-											local str_before = strsub(cur_str, 1, spell_start-10)
-											local str_after = strsub(cur_str,spell_start-9)
-											if not strfind(strsub(str_after, 1, 12), "red") then
-												str_after = gsub(str_after, "spell:", "spellred:", 1)
-											end
-											new_str = str_before..str_after
-											frame.assignment_cd[frame.display_counter]["cd_str"] = new_str
-											frame.updatetext(frame.display_counter)
-											break
-										end
-									end
-								end
-							end
-						end
-					elseif event == "ENCOUNTER_START" then
-						frame.assignment_cd = table.wipe(frame.assignment_cd)
-						frame.counter = 1
-						frame.display_counter = 1
-						frame.in_cd = false
-						
-						if IsAddOnLoaded("MRT") and (_G.VExRT.Note) and (_G.VExRT.Note) and (G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1) then		
-							local text = G.Test_Exrt and _G.VExRT.Note.SelfText or _G.VExRT.Note.Text1
-							local betweenLine = false
-							local count = 0
-							for line in text:gmatch('[^\r\n]+') do
-								if line:match("end") then
-									betweenLine = false
-								end
-								if betweenLine then
-									count = count + 1
-									frame.assignment_cd[count] = {}
-									local str = line:gsub("||", "|")
-									frame.assignment_cd[count]["cd_str"] = str
-								end
-								if line:match(L["扭曲命运减伤顺序"]) then
-									betweenLine = true
-								end
-							end
-						end
-						
-						frame.updatetext(frame.counter)
-					end
-				end,
-				reset = function(frame)
-					frame:Hide()
-					frame.text:SetText("")
-
-					frame.assignment_cd = table.wipe(frame.assignment_cd)
-					frame.counter = 0
-					frame.display_counter = 0
-				end,
-			},
 		},
 	},
 }
@@ -5285,15 +4833,14 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 		BossMods = {
 			{ -- 小怪复活计时条 已检查
 				spellID = 358679,
-				tip = L["TIP不死"],				
+				tip = L["TIP不死"],
+				points = {width = 250, height = 150},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 150,
 				init = function(frame)
 					frame.npcs = {
 						["176973"] = 2492256, -- 憎恶
@@ -5502,8 +5049,6 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 20,
-				height = 20,
 				init = function(frame)
 					frame.npcID = "176974"
 					frame.used_mark = 5
@@ -5570,8 +5115,6 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 20,
-				height = 20,
 				init = function(frame)
 					frame.npcID = "176605" --97264
 					frame.used_mark = 0
@@ -5638,7 +5181,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{ -- 冰川尖刺血量监视 已检查
 				spellID = 338560,
 				tip = L["TIP冰川尖刺"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 50},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 50, width = 250, height = 200},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 					["CHAT_MSG_ADDON"] = true,
@@ -5646,8 +5189,6 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 200,
 				init = function(frame)
 					frame.npcID = "175861" --"97264"
 					frame.t = 0
@@ -5887,15 +5428,13 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{ -- 内场读条 腐溃之风 冻结冲击 冰川之风 亡灵之怒
 				spellID = 352379,
 				tip = L["TIP冻结冲击计时条"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, width = 350, height = 120},								
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 350,
-				height = 120,
 				init = function(frame)
 					frame.spellIDs = {
 						[355127] = { -- 腐溃之风
@@ -6238,15 +5777,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 全团倒刺之箭层数监视 已检查
 				spellID = 347807,
 				tip = L["TIP倒刺之箭"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250, width = 250, height = 250},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 250,
 				init = function(frame)
 					frame.aura_spell_id = 347807
 					frame.aura, _, frame.icon = GetSpellInfo(frame.aura_spell_id)
@@ -6349,8 +5886,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			},
 			{ -- 锁链时倒刺之箭情况 已检查
 				spellID = 349419,
-				tip = L["TIP统御锁链"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400},
+				tip = L["TIP统御锁链"],		
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 					["UNIT_AURA"] = true,
@@ -6360,8 +5896,6 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 200,
 				init = function(frame)
 					frame.aura_spell_id = 347807 -- 倒刺
 					frame.aura, _, frame.icon = GetSpellInfo(frame.aura_spell_id)
@@ -6497,15 +6031,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 全团女妖的灾厄层数监视 已检查
 				spellID = 353929,
 				tip = L["TIP女妖的灾厄"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -950, y = 250, width = 250, height = 250},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 250,
 				init = function(frame)
 					frame.aura_spell_id = 353929
 					frame.aura, _, frame.icon = GetSpellInfo(frame.aura_spell_id)
@@ -6602,8 +6134,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			},
 			{ -- 女妖之怒时高亮框架 已检查
 				spellID = 354068,
+				role = "healer",
 				tip = L["TIP女妖之怒"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -6611,8 +6144,6 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					[15] = true,
 					[16] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellID = 354068
 					frame.spellID2 = 353929
@@ -6764,6 +6295,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			},
 			{ -- 黑暗帷幕吸收量团队框架发光指示 已检查
 				spellID = 347704,
+				role = "healer",
 				tip = L["TIP黑暗帷幕"],
 				points = {hide = true},
 				events = {
@@ -6772,8 +6304,6 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 20,
-				height = 20,
 				init = function(frame)
 					
 				end,
@@ -6797,7 +6327,7 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 黑暗帷幕读条计数 已检查
 				spellID = 347726,
 				tip = L["TIP黑暗帷幕读条计数"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 300, width = 400, height = 40},				
 				events = {	
 					["CHAT_MSG_RAID_BOSS_EMOTE"] = true,
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
@@ -6806,8 +6336,6 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellID = 347726
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
@@ -6916,15 +6444,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 哀痛箭/黑蚀箭 已检查
 				spellID = 348064,
 				tip = L["TIP哀痛箭"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 100},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.aura_spell_id = 139 --348064
 					frame.aura = GetSpellInfo(frame.aura_spell_id)
@@ -7186,15 +6712,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 死亡飞刀 待检查
 				spellID = 358434,
 				tip = L["TIP死亡飞刀"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 100},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
 				difficulty_id = {
 					[16] = true,
 				},
-				width = 250,
-				height = 100,
 				init = function(frame)
 					frame.aura_spell_id = 358434
 					frame.aura = GetSpellInfo(frame.aura_spell_id)
@@ -7373,15 +6897,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 读条 造桥 妖魂索命 传送奥利波斯 劈裂 女妖哀嚎 女妖尖啸 毁灭 破城箭 已检查
 				spellID = 352842,
 				tip = L["TIP造桥"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 150, width = 350, height = 120},			
 				events = {	
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},
-				width = 350,
-				height = 120,
 				init = function(frame)
 					frame.spellIDs = {
 						[352842] = { -- 大地召唤 已检查
@@ -7565,15 +7087,13 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 			{ -- 无情 已检查
 				spellID = 358588,
 				tip = L["TIP无情"],
-				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 350},
+				points = {a1 = "BOTTOM", a2 = "CENTER", x = 0, y = 350, width = 400, height = 40},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
 				difficulty_id = {
 					[16] = true,
 				},
-				width = 400,
-				height = 40,
 				init = function(frame)
 					frame.spellID = 358588
 					frame.spellID2 = 354147

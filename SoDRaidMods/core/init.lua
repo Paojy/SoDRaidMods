@@ -13,6 +13,7 @@ ns[4] = {} -- G, globals (Optionnal)
 local T, C, L, G = unpack(select(2, ...))
 
 G.addon_name = "SoDRaidMods"
+G.raid_short = "SOD"
 G.addon_cname = select(2, GetAddOnInfo(G.addon_name))
 G.addon_c = "|cffff0000"
 

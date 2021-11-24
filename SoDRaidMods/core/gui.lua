@@ -779,7 +779,7 @@ T.Create_Sound_Options = function(parent, tag, role, event, sub_event, spellID, 
 end
 
 -- 首领模块
-T.Create_BossMod_Options = function(parent, dif, v, tip)
+T.Create_BossMod_Options = function(parent, role, dif, v, tip)
 	if not parent.BossMod_Options then
 		CreateSubTitle(parent, L["首领模块"])
 		parent.BossMod_Options = true
@@ -884,8 +884,16 @@ T.CreateEncounterOptions = function(parent, index, data)
 	for Alert_Type, Alerts in T.pairsByKeys(data["alerts"]) do
 		if Alert_Type == "BossMods" then -- 已改
 			for i, args in pairs(Alerts) do
-				local points = args.points or {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 400, hide = false}
-				T.CreateBossMod(ef, index, args.spellID, args.tip, points, args.events, args.difficulty_id, args.width, args.height, args.init, args.reset, args.update, args.update_onframe, args.update_rate)
+				local points = args.points or {}
+				if not points.hide then -- 默认位置和大小
+					points.a1 = args.points and args.points.a1 or "TOPLEFT"
+					points.a2 = args.points and args.points.a2 or "CENTER"
+					points.x = args.points and args.points.x or -700
+					points.y = args.points and args.points.y or 400					
+					points.width = args.points and args.points.width or 250
+					points.height = args.points and args.points.height or 200
+				end
+				T.CreateBossMod(ef, index, args.spellID, args.role, args.tip, points, args.events, args.difficulty_id, args.init, args.reset, args.update, args.update_onframe, args.update_rate)
 			end
 		elseif Alert_Type == "AlertIcon" then
 			for i, args in pairs(Alerts) do -- 已改			
@@ -1335,11 +1343,8 @@ T.CreateTitle(tool_options.sfa, L["动态战术板"], -220, -630)
 tool_options.tl_enable = createcheckbutton(tool_options.sfa, 50, -250, L["启用"], "General", false, "tl")
 tool_options.tl_enable.apply = function() T.EditTimeline("enable") end
 
-local tl_source = {
-	{"self", L["个人战术板"]}, 
-	{"raid", L["团队战术板"]},
-}
-tool_options.tl_use_self = createradiobuttongroup(tool_options.sfa, 250, -255, L["来源"], "General", false, "tl_use_self", tl_source)
+tool_options.tl_use_raid = createcheckbutton(tool_options.sfa, 250, -255, L["团队战术板"], "General", false, "tl_use_raid")
+tool_options.tl_use_self = createcheckbutton(tool_options.sfa, 470, -255, L["个人战术板"], "General", false, "tl_use_self")
 
 tool_options.tl_show_time = createcheckbutton(tool_options.sfa, 50, -290, L["显示战术板时间"], "General", false, "tl_show_time")
 tool_options.tl_show_time.apply = function() T.EditTimeline("format") end

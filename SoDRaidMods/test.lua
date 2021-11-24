@@ -150,8 +150,8 @@ G.Encounters[100] = { -- Test
 			{spellID = 41635, event = "COMBAT_LOG_EVENT_UNFILTERED", sub_event = "SPELL_AURA_APPLIED_DOSE" , unit = "player"}, -- 愈合祷言
 		},
 		Phase_Change = {
-			{sub_event = "SPELL_CAST_START", spellID = 2060},
-			{sub_event = "SPELL_CAST_START", spellID = 2061},
+			{empty = true},
+			{sub_event = "SPELL_CAST_START", spellID = 116670}, -- 活血术
 		},
 	},
 }
