@@ -122,59 +122,12 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
-						frame.bars[tag] = bar			
+						bar.name = player
+						frame.bars[tag] = bar
 					end
-				
+					
 					frame.updatebar = function(bar, count, dur, exp_time)
 						bar.left:SetText(T.ColorName(bar.name, true))
 						
@@ -481,39 +434,11 @@ G.Encounters[1] = { -- 塔拉格鲁 已过精检
 				},
 				init = function(frame)
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(354080)
-										
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true, 400, 40, 25, 1, 1, 0)
+					
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)	
-					
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
 					bar:SetMinMaxValues(0, 4)
-					
-					bar.t = 0
-					bar.update_rate = .02
 					bar.ind = 0
-					bar:Hide()
 					
 					frame.bar = bar
 				end,
@@ -696,56 +621,9 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
+						bar.name = player
 						frame.bars[tag] = bar			
 					end
 				
@@ -1192,38 +1070,11 @@ G.Encounters[2] = { -- 典狱长之眼 已过精检
 					["all"] = true,
 				},
 				init = function(frame)
-					frame.spellName, _, frame.iconTexture = GetSpellInfo(351413)
-										
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					frame.spellName, _, frame.iconTexture = GetSpellInfo(351413)								
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true, 400, 40, 25, 1, 1, 0)
+					
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
 					bar.left:SetText(frame.spellName)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)	
-					
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-							
-					bar.t = 0
-					bar.update_rate = .02
-					bar:Hide()
 					
 					frame.bar = bar
 				end,
@@ -1405,56 +1256,9 @@ G.Encounters[3] = { -- 九武神 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
+						bar.name = player
 						frame.bars[tag] = bar			
 					end
 				
@@ -1953,56 +1757,9 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
+						bar.name = player
 						frame.bars[tag] = bar			
 					end
 				
@@ -2124,41 +1881,11 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				init = function(frame)
 					frame.spellID = 32375
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
-					frame.cast_dur = 1.3
+					frame.cast_dur = 1.3					
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, true, true, 400, 40, 25, 1, 1, 0)
 					
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.mid = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "CENTER")
-					bar.mid:SetPoint("CENTER", bar, "CENTER", 0, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-									
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
 					bar:SetMinMaxValues(0, frame.cast_dur)
-					bar.t = 0
-					bar.update_rate = .02
-					bar:Hide()
 					
 					frame.bar = bar
 				end,
@@ -2217,7 +1944,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 			{ -- 怨恨 已检查
 				spellID = 354534,
 				tip = L["TIP怨恨"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30, width = 250, height = 100},	
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -400, y = -30, width = 250, height = 30},	
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
 				},
@@ -2225,9 +1952,7 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 					["all"] = true,
 				},
 				init = function(frame)
-					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
-					frame.text:SetPoint("TOPLEFT", 5, -5)
-					
+					frame.iconTexture = select(3, GetSpellInfo(354534))
 					frame.spell_index = { -- 转阶段怨恨
 						--M
 						[354519] = true, -- p2
@@ -2238,68 +1963,77 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 						[354441] = true, -- p3 已确认
 						[354440] = true, -- p4 已确认
 						--Test
-						--[139] = true, -- test			
+						--[100780] = true, -- test			
 					}
-					frame.t = 0
-					frame.update_rate = .05
 					
-					frame:Hide()
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, true, false, true)
+					
+					bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 32, -2)
+					bar:SetStatusBarColor(0, .8, 1)
+					bar:SetMinMaxValues(0, 15)
+					
+					frame.bar = bar
 				end,
 				update = function(frame, event, ...)
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+
 						local timestamp, sub_event, _, _, _, _, _, _, _, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
 						if sub_event == "SPELL_CAST_SUCCESS" and frame.spell_index[spellID] then
-						
-							frame:Show()
-							frame.wave = 1
-							frame.last_wave = 0
-							frame.start = GetTime()
+							frame.bar.wave = 1
+							frame.bar.last_wave = 0
+							frame.bar.start = GetTime()
 							
-							frame:SetScript("OnUpdate", function(self, e)
+							frame.bar:SetScript("OnUpdate", function(self, e)
 								self.t = self.t + e
 								if self.t > self.update_rate then						
-									if frame.last_wave ~= frame.wave then
-										frame.next_time = frame.start + 15*frame.wave
-										frame.played = false
-										frame.last_wave = frame.wave
+									if self.last_wave ~= self.wave then
+										self.next_time = self.start + 15*self.wave
+										self.last_wave = self.wave
+										self.left:SetText(string.format(L["怨恨序数"], self.wave))
+										self.anim_played = false					
+										self.anim:Stop()
+										self.glow:Hide()
 									end
 									
-									local dur = frame.next_time - GetTime()
+									local dur = self.next_time - GetTime()
 									
 									if dur > 0 then
-										if dur > 5 then
-											frame.text:SetTextColor(1, 1, 1)
-										elseif dur > 3 then
-											frame.text:SetTextColor(1, 1, 0)
-										else
-											frame.text:SetTextColor(1, 0, 0)
-										end
-										
+										self:SetValue(15 - dur)
+										self.right:SetText(T.FormatTime(dur))
+
 										if dur < 5 then
-											if not frame.played and not SoD_CDB["General"]["disable_sound"] then
-												PlaySoundFile(G.media.sounds.."RemnantofNerzhul\\spite.ogg", "Master") -- 语音 5秒后白圈
-												frame.played = true
+											if not self.anim_played then
+												self.anim_played = true
+												if not SoD_CDB["General"]["disable_sound"] then
+													PlaySoundFile(G.media.sounds.."RemnantofNerzhul\\spite.ogg", "Master") -- 语音 5秒后白圈
+												end
+												self.glow:Show()
+												self.anim:Play()
 											end
+											self.glow:SetAlpha(self.anim:GetProgress())
 										end
-										
-										frame.text:SetText(string.format(L["下一次怨恨"], frame.wave, T.FormatTime(dur)))
 									else
-										frame.wave = frame.wave + 1			
+										self.wave = self.wave + 1			
 									end
 									self.t = 0
 								end
 							end)
-						end	
+							
+							frame.bar:Show()
+						end
 					elseif event == "ENCOUNTER_START" then
-						frame.wave = 1
-						frame.last_wave = 0
-						frame:Hide()
+						frame.bar.wave = 1
+						frame.bar.last_wave = 0
+						frame.bar:Hide()
 					end
 				end,
 				reset = function(frame)
-					frame:Hide()
-					frame.wave = 1
-					frame.text:SetText("")
+					frame.bar.wave = 1
+					frame.bar.last_wave = 0
+					frame.bar:Hide()
+					frame.bar.anim:Stop()
+					frame.bar.glow:Hide()
+					frame.bar:SetScript("OnUpdate", nil)
 				end,	
 			},
 			{ -- 怨毒 已检查 需要检查CD交互
@@ -2333,36 +2067,9 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 					
 					frame.bars = {}
 					frame.create_bar = function(GUID)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
+						local bar = T.CreateTimerBar(frame)	
 						bar:SetStatusBarColor(.7, .7, 1)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 5, 0)
-						
-						bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -5, 0)
-							
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
-						
-						bar.t = 0
-						
 						frame.bars[GUID] = bar
-										
-						return bar
 					end
 					frame.lineup = function()
 						local t = {}
@@ -2654,56 +2361,9 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
+						bar.name = player
 						frame.bars[tag] = bar			
 					end
 				
@@ -2853,40 +2513,9 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					end)
 					
 					frame.create_bar = function(tag, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
+						local bar = T.CreateTimerBar(frame, frame.icon, false, true, true)
 						bar:SetStatusBarColor(.5, .5, .5)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.icon)
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-						
-						bar.center = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "CENTER")
-						bar.center:SetPoint("CENTER", bar, "CENTER", 0, 0)
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
 						bar.name = player
-						
-						bar:Hide()
-										
 						frame.bars[tag] = bar			
 					end
 				
@@ -2914,9 +2543,9 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 						end
 						
 						if AuraUtil.FindAuraByName(frame.debuff3, bar.name, G.Test_Mod and "HELPFUL" or "HARMFUL") then -- 有折磨烙印
-							bar.center:SetText(L["烙印"])
+							bar.mid:SetText(L["烙印"])
 						else
-							bar.center:SetText("")
+							bar.mid:SetText("")
 						end
 						
 					end
@@ -3150,42 +2779,10 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					["all"] = true,
 				},
 				init = function(frame)
-					-- 349873 折磨
-					-- 352933 折磨喷发
-					
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(350217)
 					
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true, 400, 40, 25, 1, 1, 0)	
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)
-					
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")			
-					
-					bar.t = 0
-					bar.update_rate = .02
-					bar:Hide()
-					
 					frame.bar = bar
 				end,
 				update = function(frame, event, ...)
@@ -3380,39 +2977,11 @@ G.Encounters[5] = { -- 裂魂者多尔玛赞 已过初检
 					
 					local spell_name, _, icon = GetSpellInfo(351229)
 						
-					local bar = CreateFrame("StatusBar", nil, frame)
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true, 350, 28, 20, .7, .7, .7)
 					bar.dur = 3
-					bar:SetHeight(28)
-					bar:SetWidth(250)
-					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(.7, .7, .7)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(28, 28)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(icon)
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)	
-					
-					bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
-					bar:SetMinMaxValues(0, bar.dur)
-					bar.t = 0
-					bar.update_rate = .02	
 					bar.ind = 1
-
-					bar:Hide()
+					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
+					bar:SetMinMaxValues(0, bar.dur)
 					
 					frame.bar = bar
 				end,
@@ -3483,8 +3052,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{type = "aura", role = "tank", hl = "no", spellID = 355786, aura_type = "HARMFUL", unit = "player"}, -- 黑化护甲 已检查
 			{type = "cast", tip = "转火铁球", role = "dps", hl = "hl", spellID = 352052}, -- 尖刺铁球 已检查
 			{type = "aura", tip = "孤儿圈点你", hl = "hl", spellID = 355505, aura_type = "HARMFUL", unit = "player"}, -- 影铸锁链 已检查
-			{type = "aura", hl = "hl", spellID = 348456, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 烈焰套索陷阱 待检查
-			--{type = "auras", hl = "no", spellID = 348456, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL"}, -- 烈焰套索陷阱
+			{type = "aura", hl = "hl", spellID = 348456, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 烈焰套索陷阱 待检查		
 			{type = "aura", tip = "爆炸", hl = "no", spellID = 356870, dif = {[15] = true, [16] = true}, aura_type = "HARMFUL", unit = "player"}, -- 烈焰套索爆炸 已检查
 			{type = "cast", tip = "躲圈", hl = "no", spellID = 355525}, -- 锻造武器 已检查
 			{type = "aura", role = "healer", hl = "no", spellID = 356472, aura_type = "HARMFUL", unit = "player"}, -- 黑暗灼热 待检查
@@ -3542,7 +3110,7 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{ -- 十字斧 振荡铁锤 双刃镰刀 黑化护甲
 				spellID = 355568,
 				role = "tank",
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 300, width = 250, height = 100},
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 100},
 				tip = string.format(L["多人光环提示"], T.GetIconLink(355568).." "..T.GetIconLink(348508).." "..T.GetIconLink(355778).." "..T.GetIconLink(355786)),			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
@@ -3560,57 +3128,10 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
-						frame.bars[tag] = bar			
+						bar.name = player
+						frame.bars[tag] = bar		
 					end
 				
 					frame.updatebar = function(bar, count, dur, exp_time)
@@ -3721,60 +3242,30 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 			{ -- 烈焰陷阱爆炸 待检查
 				spellID = 348456,
 				tip = L["TIP烈焰套索陷阱"],
-				points = {width = 250, height = 100},			
+				points = {width = 250, height = 200},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
 				difficulty_id = {
+					["all"] = true,
 					[15] = true,
 					[16] = true,
 				},
 				init = function(frame)
 					frame.spellID = 348456
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
-					
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(28)
-					bar:SetWidth(200)
-					bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 35, 0)
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1,1,0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(28, 28)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-										
-					bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					bar.left:SetText(L["陷阱出现"])
-					
-					bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
-					bar:SetMinMaxValues(0, 5)	
-					
-					bar.t = 0
-					bar.update_rate = .02
-					bar:Hide()
-					
-					frame.bar = bar
+					frame.trap = 0
+					frame.anchor = "raid1"
+					frame.prev = 0
+					frame.counter = 0
+					frame.bars = {}
+					frame.color = {"00FF00", "FFFF00", "FFA500", "FF0000"}
 					
 					frame.text = T.createtext(frame, "OVERLAY", 25, "OUTLINE", "LEFT")
-					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -35)
+					frame.text:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 					
 					frame.cd_tex = T.CreateCircleCD(frame, 50, 1, 1, 0)
 					frame.cd_tex:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-					
-					frame.color = {"00FF00", "FFFF00", "FFA500", "FF0000"}
 					
 					frame.update_anchor = function()
 						for i = 1, GetNumGroupMembers() do
@@ -3786,83 +3277,123 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 						end
 					end
 					
-					frame.prev = 0
-					frame.counter = 0
-					
-					frame.updatetext = function(counter_index)
-						frame.text:SetText(string.format(L["陷阱数量"], counter_index, frame.color[frame.trap] or "FF0000", frame.trap))
+					frame.updatetext = function()
+						frame.text:SetText(string.format(L["陷阱数量"], frame.counter, frame.color[frame.trap] or "FF0000", frame.trap))
+					end
+						
+					frame.create_bar = function(tag, player)
+						local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true)					
+						bar:SetStatusBarColor(1, 1, 0)
+						bar.name = player
+						frame.bars[tag] = bar			
+					end
+				
+					frame.updatebar = function(bar, dur, exp_time)
+						bar.left:SetText(T.ColorName(bar.name, true))
+						
+						bar.exp = exp_time
+						bar:SetMinMaxValues(0 , dur)
+						
+						bar:SetScript("OnUpdate", function(self, e)
+							self.t = self.t + e
+							if self.t > self.update_rate then		
+								local remain = exp_time - GetTime()
+								if remain > 0 then								
+									self.right:SetText(T.FormatTime(remain))
+									self:SetValue(dur - remain)
+								else
+									self:Hide()
+									self:SetScript("OnUpdate", nil)
+								end
+								self.t = 0
+							end
+						end)											
+						bar:Show()
 					end
 					
-					frame.trap = 0
-					frame.anchor = "raid1"	
+					frame.lineup = function()
+						local lastbar
+						for GUID, bar in pairs(frame.bars) do
+							bar:ClearAllPoints()
+							if bar:IsVisible() then
+								if not lastbar then
+									bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 35, -30)
+									lastbar = bar
+								else
+									bar:SetPoint("TOPLEFT", lastbar, "BOTTOMLEFT", 0, -5)
+									lastbar = bar
+								end
+							end
+						end
+					end
 				end,
 				update = function(frame, event, ...)
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-						local timestamp, sub_event, _, sourceGUID, sourceName, _, _, _, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
-						if sub_event == "SPELL_AURA_REMOVED" and (spellID == frame.spellID) then
-							frame:Show()
-							frame.trap = frame.trap + 1
-							frame.updatetext(frame.counter)
-							
-							if dest == G.PlayerName then
-								frame.cd_tex:SetCooldown(0, 0)
-							end
-						elseif (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE") and (spellID == 356870)  then
+						local timestamp, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
+			
+						if (sub_event == "SPELL_AURA_APPLIED" or sub_event == "SPELL_AURA_APPLIED_DOSE") and (spellID == 356870) then	 			
 							local dest = string.split("-", destName)
 							if UnitIsUnit(dest, frame.anchor) then -- 避免重复
 								frame.trap = frame.trap - 1
-								frame.updatetext(frame.counter)
+								frame.updatetext()
 							end
-						elseif sub_event == "UNIT_DIED" then
+							
+						elseif sub_event == "UNIT_DIED" then						
 							frame.update_anchor()
+							
 						elseif sub_event == "SPELL_AURA_APPLIED" and (spellID == frame.spellID) then -- 施放陷阱
+							
 							if GetTime() - frame.prev > 5 then -- 新的一轮
 								frame.prev = GetTime()
 								frame.counter = frame.counter + 1
-								frame.updatetext(frame.counter)
-								
-								frame.bar.exp = GetTime() + 5
-								frame.bar:SetScript("OnUpdate", function(self, e)
-									self.t = self.t + e
-									if self.t > self.update_rate then
-										local remain = self.exp - GetTime()
-										if remain > 0 then
-											self:SetValue(5 - remain)
-											self.right:SetText(T.FormatTime(remain))
-										else
-											self:Hide()	
-											self:SetScript("OnUpdate", nil)
-										end
-										self.t = 0
-									end
-								end)
-								
-								frame.bar:Show()
-								
-								local dest = string.split("-", destName)
-								if dest == G.PlayerName then
-									frame.cd_tex:SetCooldown(GetTime(), 5)
-								end
+								frame.updatetext()
 								--print("轮数+1")
 							end
+							
+							local dest = string.split("-", destName)
+							
+							if dest == G.PlayerName then
+								frame.cd_tex:SetCooldown(GetTime(), 5)
+							end
+							
+							if destGUID and AuraUtil.FindAuraByName(frame.spellName, dest, G.Test_Mod and "HELPFUL" or "HARMFUL") then
+								local dur, exp_time = select(5, AuraUtil.FindAuraByName(frame.spellName, dest, G.Test_Mod and "HELPFUL" or "HARMFUL"))
+								if not frame.bars[destGUID] then
+									frame.create_bar(destGUID, dest)
+								end
+								
+								local bar = frame.bars[destGUID]
+								frame.updatebar(bar, dur, exp_time)
+								frame.lineup()
+							end	
+								
+						elseif sub_event == "SPELL_AURA_REMOVED" and (spellID == frame.spellID) then
+							frame.trap = frame.trap + 1
+							frame.updatetext()
+							
+							local dest = string.split("-", destName)
+							if dest == G.PlayerName then
+								frame.cd_tex:SetCooldown(0, 0)
+							end						
 						end
 						
-					elseif event == "ENCOUNTER_START" then
+					elseif event == "ENCOUNTER_START" then						
 						frame.update_anchor()
 						frame.prev = 0 -- 时间戳
 						frame.counter = 0
+						frame.trap = 0
+						frame.anchor = "raid1"
+						frame.updatetext()
+						frame:Show()
 					end
 				end,
-				reset = function(frame)
+				reset = function(frame)					
+					for tag, bar in pairs(frame.bars) do
+						bar:ClearAllPoints()
+						bar:Hide()
+						bar:SetScript("OnUpdate", nil)	
+					end
 					frame:Hide()
-					frame.text:SetText("")				
-					frame.bar:SetScript("OnUpdate", nil)
-					bar:Hide()
-					
-					frame.prev = 0
-					frame.counter = 0				
-					frame.trap = 0
-					frame.anchor = "raid1"
 				end,
 			},
 			{ -- 尖刺提示 已检查
@@ -3960,40 +3491,11 @@ G.Encounters[6] = { -- 痛楚工匠莱兹纳尔 已过初检
 					["all"] = true,
 				},
 				init = function(frame)
-					frame.spellName, _, frame.iconTexture = GetSpellInfo(359033)
-										
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					frame.spellName, _, frame.iconTexture = GetSpellInfo(359033)									
+					
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true, 400, 40, 25, 1, 1, 0)				
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)
-					
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
-					bar:SetMinMaxValues(0, 5)
-					bar.t = 0
-					bar.update_rate = .02
-					bar:Hide()
-					
+					bar:SetMinMaxValues(0, 5)	
 					frame.bar = bar
 				end,
 				update = function(frame, event, ...)
@@ -4119,57 +3621,10 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
-						frame.bars[tag] = bar			
+						bar.name = player
+						frame.bars[tag] = bar	
 					end
 				
 					frame.updatebar = function(bar, count, dur, exp_time)
@@ -4290,57 +3745,10 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 				init = function(frame)
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(352538)
 										
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
-					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-					
-					bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-					bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-					bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-					bar.glow:SetBackdrop({
-						bgFile = "Interface\\Buttons\\WHITE8x8",
-						edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-						edgeSize = 7,
-							insets = { left = 7, right = 7, top = 7, bottom = 7,}
-					})
-					bar.glow:SetBackdropColor(0, 0, 0, 0)
-					bar.glow:SetBackdropBorderColor(1, 0, 0)
-					bar.glow:Hide()
-					
-					bar.anim = bar:CreateAnimationGroup()
-					bar.anim:SetLooping("REPEAT")
-					bar.timer = bar.anim:CreateAnimation()
-					bar.timer:SetDuration(.5)
-					
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, true, false, true, 400, 40, 25, 1, 1, 0)	
+					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")				
 					bar:SetMinMaxValues(0, 5)
-					
-					bar.t = 0
-					bar.update_rate = .02
-					bar.ind = 0
-					bar:Hide()
-					
+					bar.ind = 0				
 					frame.bar = bar
 				end,
 				update = function(frame, event, ...)
@@ -4684,36 +4092,19 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 				},
 				init = function(frame)
 					frame.bars = {}
-					
-					frame.create_bar = function()
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(20)
-						bar:SetWidth(250)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(.7, .7, .7)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 5, 0)
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -5, 0)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-						
-						bar:SetMinMaxValues(0, 60)					
-						return bar
-					end
-					
+
 					for i = 1, 4 do
-						frame.bars[i] = frame.create_bar()
+						frame.bars[i] = T.CreateTimerBar(frame)
+						frame.bars[i]:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -30*(i-1))
+						frame.bars[i]:SetStatusBarColor(.7, .7, .7)
+						frame.bars[i]:SetMinMaxValues(0, 60)
+						if i == 1 then -- BOSS
+							frame.bars[i].icon:SetTexture(4062733)
+						else -- 柱子
+							frame.bars[i].icon:SetTexture(442737)
+						end
 						frame.bars[i].unit = "boss"..i
-						frame.bars[i]:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -25*(i-1))
 					end
-						
 					
 				end,
 				update = function(frame, event, ...)
@@ -4812,39 +4203,12 @@ G.Encounters[7] = { -- 初诞者的卫士 已过初检
 					frame.CreateBar = function(spellID, r, g, b, ...)
 						local spell_name, _, icon, cast_time = GetSpellInfo(spellID)
 						
-						local bar = CreateFrame("StatusBar", nil, frame)
+						local bar = T.CreateTimerBar(frame, icon, false, false, true, 350, 28, 20, r, g, b)
 						bar.ind = 0
 						bar.dur = cast_time/1000
-						bar:SetHeight(28)
-						bar:SetWidth(350)
 						bar:SetPoint(...)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(r, g, b)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(28, 28)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(icon)
-						T.createbdframe(bar.icon)
-							
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)	
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
-						
 						bar:SetMinMaxValues(0, bar.dur)
-						bar.t = 0
-						bar.update_rate = .02	
 						
-						bar:Hide()
 						frame.bars[spellID] = bar
 					end
 					
@@ -5004,57 +4368,10 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
-						frame.bars[tag] = bar			
+						bar.name = player
+						frame.bars[tag] = bar		
 					end
 				
 					frame.updatebar = function(bar, count, dur, exp_time)
@@ -5238,7 +4555,7 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					end
 					
 					frame.bar = CreateFrame("StatusBar", nil, frame)
-					frame.bar:SetSize(160, 30)
+					frame.bar:SetSize(160, 25)
 					frame.bar:SetPoint("TOP", frame, "TOP", 0, -210)
 					T.createborder(frame.bar)
 					
@@ -5806,59 +5123,10 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					frame.bars = {}
 					
 					frame.CreateBar = function(unit)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(28)
-						bar:SetWidth(250)	
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .3, .8)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(28, 28)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.iconTexture)
-						T.createbdframe(bar.icon)
-							
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-						
-						bar.mid = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "CENTER")
-						bar.mid:SetPoint("CENTER", bar, "CENTER", 0, 0)
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 0, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
-						
+						local bar = T.CreateTimerBar(frame, frame.iconTexture, true, true, true, 350, 28, 20, 1, .3, .8)
 						bar:SetMinMaxValues(0, 2.6)
-						bar.t = 0
-						bar.update_rate = .02
 						bar.unit = unit
 						bar.inRange = false
-						
-						bar:Hide()
 						frame.bars[unit] = bar
 					end
 					
@@ -5993,59 +5261,11 @@ G.Encounters[8] = { -- 命运撰写师罗卡洛 已过初检
 					frame.bars = {}
 					
 					frame.CreateBar = function(tag, r, g, b, glow, dur, ...)
-						local bar = CreateFrame("StatusBar", nil, frame)
+						local bar = T.CreateTimerBar(frame, frame.iconTexture, glow, false, true, 350, 28, 20, r, g, b)
 						bar.ind = 0
 						bar.dur = dur
-						bar:SetHeight(28)
-						bar:SetWidth(400)
-						bar:SetPoint(...)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(r, g, b)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(28, 28)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.iconTexture)
-						T.createbdframe(bar.icon)
-							
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)	
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						if glow then
-							bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-							bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-							bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-							bar.glow:SetBackdrop({
-								bgFile = "Interface\\Buttons\\WHITE8x8",
-								edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-								edgeSize = 7,
-									insets = { left = 7, right = 7, top = 7, bottom = 7,}
-							})
-							bar.glow:SetBackdropColor(0, 0, 0, 0)
-							bar.glow:SetBackdropBorderColor(1, 0, 0)
-							bar.glow:Hide()
-							
-							bar.anim = bar:CreateAnimationGroup()
-							bar.anim:SetLooping("REPEAT")
-							bar.timer = bar.anim:CreateAnimation()
-							bar.timer:SetDuration(.5)													
-						end
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
-						
+						bar:SetPoint(...)	
 						bar:SetMinMaxValues(0, dur)
-						bar.t = 0
-						bar.update_rate = .02	
-						
-						bar:Hide()
 						frame.bars[tag] = bar
 					end
 					
@@ -6265,7 +5485,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 				spellID = 348978,
 				role = "tank",
 				tip = string.format(L["多人光环提示"], T.GetIconLink(348978)),
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 50, width = 250, height = 100},				
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 0, width = 250, height = 100},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -6282,56 +5502,9 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
+						bar.name = player
 						frame.bars[tag] = bar			
 					end
 				
@@ -6443,7 +5616,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{ -- 小怪复活计时条 已检查
 				spellID = 358679,
 				tip = L["TIP不死"],
-				points = {width = 250, height = 150},			
+				points = {width = 250, height = 200},			
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 				},
@@ -6462,33 +5635,10 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 					frame.boss = "boss2"
 					frame.bars = {}
 					
-					frame.create_bar = function(tag, max, text, icon, r, g, b, mark)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(20)
-						bar:SetWidth(250)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(r, g, b, .8)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(19, 19)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(icon)
-						
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 5, 0)
+					frame.create_bar = function(tag, max, text, icon, r, g, b)
+						local bar = T.CreateTimerBar(frame, icon)
+						bar:SetStatusBarColor(r, g, b)
 						bar.left:SetText(text)
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -5, 0)
-							
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
 						bar:SetMinMaxValues(0, max)
 						
 						if tag == "P2Timer" then
@@ -6511,8 +5661,6 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 							bar.mark2:SetVertexColor(0, 0, 0)
 							bar.mark2:SetPoint("LEFT", bar, "LEFT", 50, 0)
 						end
-						
-						bar.t = 0
 						
 						frame.bars[tag] = bar
 														
@@ -6556,7 +5704,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 								bar_timer.played = false
 								bar_timer:SetScript("OnUpdate", function(self, e)
 									self.t = self.t + e
-									if self.t > .2 then
+									if self.t > self.update_rate then
 										local remain = self.exp - GetTime()
 										if remain > 0 then
 											self.right:SetText(T.FormatTime(remain))
@@ -6612,7 +5760,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 								bar.exp = GetTime() + 10 -- 复活时间
 								bar:SetScript("OnUpdate", function(self, e)
 									self.t = self.t + e
-									if self.t > .2 then
+									if self.t > self.update_rate then
 										local remain = self.exp - GetTime()
 										if remain > 0 then
 											self.right:SetText(T.FormatTime(remain))
@@ -6790,7 +5938,7 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 			{ -- 冰川尖刺血量监视 已检查
 				spellID = 338560,
 				tip = L["TIP冰川尖刺"],
-				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 250, width = 250, height = 200},				
+				points = {a1 = "TOPLEFT", a2 = "CENTER", x = -700, y = 200, width = 250, height = 200},				
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,	
 					["CHAT_MSG_ADDON"] = true,
@@ -6890,30 +6038,10 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 					frame.bars = {}
 					frame.create_bar = function(GUID)
 						if GUID then
-							local bar = CreateFrame("StatusBar", nil, frame)
-							bar:SetHeight(20)
-							bar:SetWidth(200)
-							T.createborder(bar)
-							
-							bar:SetStatusBarTexture(G.media.blank)
+							local bar = T.CreateTimerBar(frame, 458718, false, true)
 							bar:SetStatusBarColor(.7, .7, 1)
-							
-							bar.left = T.createtext(bar, "OVERLAY", 16, "OUTLINE", "LEFT")
-							bar.left:SetPoint("LEFT", bar, "LEFT", 5, 0)
-							
-							bar.mid = T.createtext(bar, "OVERLAY", 16, "OUTLINE", "CENTER")
-							bar.mid:SetPoint("CENTER", bar, "CENTER", 0, 0)
-							
-							bar.right = T.createtext(bar, "OVERLAY", 16, "OUTLINE", "RIGHT")
-							bar.right:SetPoint("RIGHT", bar, "RIGHT", -5, 0)
-								
-							bar:GetStatusBarTexture():SetHorizTile(false)
-							bar:GetStatusBarTexture():SetVertTile(false)
-							bar:SetOrientation("HORIZONTAL")	
-							
 							bar.min = 500000
 							bar.max = 500000
-							bar.t = 0
 							bar.update_rate = 2
 							bar.GUID = GUID
 							
@@ -7076,39 +6204,12 @@ G.Encounters[9] = { -- 克尔苏加德 已过初检
 					frame.CreateBar = function(spellID, r, g, b, ...)
 						local spell_name, _, icon, cast_time = GetSpellInfo(spellID)
 						
-						local bar = CreateFrame("StatusBar", nil, frame)
+						local bar = T.CreateTimerBar(frame, icon, false, false, true, 350, 28, 20, r, g, b)
 						bar.ind = 0
 						bar.dur = cast_time/1000
-						bar:SetHeight(28)
-						bar:SetWidth(350)
 						bar:SetPoint(...)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(r, g, b)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(28, 28)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(icon)
-						T.createbdframe(bar.icon)
-							
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)	
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
-						
 						bar:SetMinMaxValues(0, bar.dur)
-						bar.t = 0
-						bar.update_rate = .02	
 						
-						bar:Hide()
 						frame.bars[spellID] = bar
 					end
 					
@@ -7404,56 +6505,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.bars = {}
 						
 					frame.create_bar = function(tag, spellID, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(1, .8, .3)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.aura_spells[spellID]["icon"])
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-											
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-						
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
+						local bar = T.CreateTimerBar(frame, frame.aura_spells[spellID]["icon"], true, false, true)
 						bar.spellID = spellID
-						
-						bar:Hide()
-					
+						bar.name = player
 						frame.bars[tag] = bar			
 					end
 				
@@ -7938,57 +6992,12 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
 					frame.spellName2, _, frame.iconTexture2 = GetSpellInfo(frame.spellID2)
 					
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, true, false, true, 400, 40, 25, .48, .4, .93)	
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(.48,.4,.93) -- 紫色
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-										
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-					
-					bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-					bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-					bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-					bar.glow:SetBackdrop({
-						bgFile = "Interface\\Buttons\\WHITE8x8",
-						edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-						edgeSize = 7,
-							insets = { left = 7, right = 7, top = 7, bottom = 7,}
-					})
-					bar.glow:SetBackdropColor(0, 0, 0, 0)
 					bar.glow:SetBackdropBorderColor(1, 0, 0)
-					bar.glow:Hide()
-					
-					bar.anim = bar:CreateAnimationGroup()
-					bar.anim:SetLooping("REPEAT")
-					bar.timer = bar.anim:CreateAnimation()
-					bar.timer:SetDuration(.5)			
-					
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
 					bar:SetMinMaxValues(0, 5)	
-					
-					bar.t = 0
-					bar.update_rate = .02
 					bar.count_down = 0
 					bar.ind = 0
-					bar:Hide()
 					
 					frame.bar = bar
 					
@@ -8129,37 +7138,10 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
 					frame.msg = "347704"
 					
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, false, false, true, 400, 40, 25, 1, 1, 0)			
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(1, 1, 0)
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-						
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-								
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-										
-					bar.t = 0
-					bar.update_rate = .02
 					bar.ind = 0
 					bar.count_down = 0
-					bar:Hide()
 					
 					frame.bar = bar
 					frame.stage = 1					
@@ -8266,55 +7248,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.cd_tex:SetPoint("CENTER", UIParent, "CENTER", 0, 0)					
 
 					frame.create_bar = function(tag, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
+						local bar = T.CreateTimerBar(frame, frame.icon, true, false, true)
 						bar:SetStatusBarColor(.5, .2, 1)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.icon)
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-						 
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-						
-						bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-						bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-						bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-						bar.glow:SetBackdrop({
-							bgFile = "Interface\\Buttons\\WHITE8x8",
-							edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-							edgeSize = 7,
-								insets = { left = 7, right = 7, top = 7, bottom = 7,}
-						})
-						bar.glow:SetBackdropColor(0, 0, 0, 0)
-						bar.glow:SetBackdropBorderColor(1, 1, 0)
-						bar.glow:Hide()
-						
-						bar.anim = bar:CreateAnimationGroup()
-						bar.anim:SetLooping("REPEAT")
-						bar.timer = bar.anim:CreateAnimation()
-						bar.timer:SetDuration(.5)
-					
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
-						
-						bar:Hide()
-										
+						bar.name = player									
 						frame.bars[tag] = bar			
 					end
 				
@@ -8531,37 +7467,9 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.text_center:SetPoint("BOTTOM", UIParent, "CENTER", 0, 200)
 					
 					frame.create_bar = function(tag, player)
-						local bar = CreateFrame("StatusBar", nil, frame)
-						bar:SetHeight(30)
-						bar:SetWidth(250)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(.5, .2, 1)
-						T.createborder(bar)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(30, 30)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(frame.icon)
-						T.createbdframe(bar.icon)
-						
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-						 
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-											
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")
-											
-						bar.t = 0
-						bar.update_rate = .02
-						bar.name = player
-						
-						bar:Hide()
-					
+						local bar = T.CreateTimerBar(frame, frame.icon, false, false, true)						
+						bar:SetStatusBarColor(.5, .2, 1)					
+						bar.name = player					
 						frame.bars[tag] = bar			
 					end
 				
@@ -8778,39 +7686,12 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.CreateBar = function(spellID, r, g, b, ...)
 						local spell_name, _, icon, cast_time = GetSpellInfo(spellID)
 						
-						local bar = CreateFrame("StatusBar", nil, frame)
+						local bar = T.CreateTimerBar(frame, icon, false, false, true, 350, 28, 20, r, g, b)
 						bar.ind = 0
 						bar.dur = cast_time/1000
-						bar:SetHeight(28)
-						bar:SetWidth(350)
-						bar:SetPoint(...)
-						T.createborder(bar)
-						
-						bar:SetStatusBarTexture(G.media.blank)
-						bar:SetStatusBarColor(r, g, b)
-						
-						bar.icon = bar:CreateTexture(nil, "OVERLAY")
-						bar.icon:SetTexCoord( .1, .9, .1, .9)
-						bar.icon:SetSize(28, 28)
-						bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-						bar.icon:SetTexture(icon)
-						T.createbdframe(bar.icon)
-							
-						bar.left = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "LEFT")
-						bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)	
-						
-						bar.right = T.createtext(bar, "OVERLAY", 20, "OUTLINE", "RIGHT")
-						bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-
-						bar:GetStatusBarTexture():SetHorizTile(false)
-						bar:GetStatusBarTexture():SetVertTile(false)
-						bar:SetOrientation("HORIZONTAL")	
-						
+						bar:SetPoint(...)	
 						bar:SetMinMaxValues(0, bar.dur)
-						bar.t = 0
-						bar.update_rate = .02	
 						
-						bar:Hide()
 						frame.bars[spellID] = bar
 					end
 					
@@ -8887,59 +7768,12 @@ G.Encounters[10] = { -- 希尔瓦娜斯·风行者
 					frame.spellID2 = 354147
 					frame.spellName, _, frame.iconTexture = GetSpellInfo(frame.spellID)
 										
-					local bar = CreateFrame("StatusBar", nil, frame)
-					bar:SetHeight(40)
-					bar:SetWidth(400)
+					local bar = T.CreateTimerBar(frame, frame.iconTexture, true, true, true, 400, 40, 25, .7,.7,.7)					
 					bar:SetPoint("TOPLEFT", frame, "TOPLEFT")
-					T.createborder(bar)
-					
-					bar:SetStatusBarTexture(G.media.blank)
-					bar:SetStatusBarColor(.7,.7,.7) -- 灰色
-					
-					bar.icon = bar:CreateTexture(nil, "OVERLAY")
-					bar.icon:SetTexCoord( .1, .9, .1, .9)
-					bar.icon:SetSize(40, 40)
-					bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
-					bar.icon:SetTexture(frame.iconTexture)				
-					T.createbdframe(bar.icon)
-										
-					bar.left = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "LEFT")
-					bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
-					
-					bar.right = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "RIGHT")
-					bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
-					
-					bar.mid = T.createtext(bar, "OVERLAY", 25, "OUTLINE", "CENTER")
-					bar.mid:SetPoint("CENTER", bar, "CENTER", 0, 0)
-					
-					bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
-					bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
-					bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
-					bar.glow:SetBackdrop({
-						bgFile = "Interface\\Buttons\\WHITE8x8",
-						edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
-						edgeSize = 7,
-							insets = { left = 7, right = 7, top = 7, bottom = 7,}
-					})
 					bar.glow:SetBackdropColor(1, 0, 0, 0.3)
 					bar.glow:SetBackdropBorderColor(1, 0, 0)
-					bar.glow:Hide()
-					
-					bar.anim = bar:CreateAnimationGroup()
-					bar.anim:SetLooping("REPEAT")
-					bar.timer = bar.anim:CreateAnimation()
-					bar.timer:SetDuration(.5)			
-					
-					bar:GetStatusBarTexture():SetHorizTile(false)
-					bar:GetStatusBarTexture():SetVertTile(false)
-					bar:SetOrientation("HORIZONTAL")	
-					
 					bar:SetMinMaxValues(0, 3.5)	
-					
-					bar.t = 0
-					bar.update_rate = .02
-					bar:Hide()
-					
+
 					frame.bar = bar
 					
 					frame.casts = {3, 2, 3, 3, 2, 2, 3, 3, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4} -- 每次攻击的台子

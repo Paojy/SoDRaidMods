@@ -725,3 +725,73 @@ T.CreateCircleCD = function(frame, size, r, g, b)
 	
 	return cd
 end
+
+T.CreateTimerBar = function(parent, icon, glow, midtext, hide, width, height, fontsize, red, green, blue)
+	local w = width or 205
+	local h = height or 25
+	local fs = fontsize or 18
+	local r = red or 1 -- 计时条颜色
+	local g = green or .8
+	local b = blue or .3
+	
+	local bar = CreateFrame("StatusBar", nil, parent)
+	bar:SetWidth(w)
+	bar:SetHeight(h)
+	
+	bar:SetStatusBarTexture(G.media.blank)
+	bar:SetStatusBarColor(r, g, b)
+	T.createborder(bar)
+	
+	bar.icon = bar:CreateTexture(nil, "OVERLAY")
+	bar.icon:SetTexCoord( .1, .9, .1, .9)
+	bar.icon:SetSize(h, h)
+	bar.icon:SetPoint("RIGHT", bar, "LEFT", -5, 0)
+	T.createbdframe(bar.icon)	
+	if icon then
+		bar.icon:SetTexture(icon)
+	end
+	
+	bar.left = T.createtext(bar, "OVERLAY", fs, "OUTLINE", "LEFT")
+	bar.left:SetPoint("LEFT", bar, "LEFT", 10, 0)
+						
+	bar.right = T.createtext(bar, "OVERLAY", fs, "OUTLINE", "RIGHT")
+	bar.right:SetPoint("RIGHT", bar, "RIGHT", -10, 0)
+	
+	if midtext then
+		bar.mid = T.createtext(bar, "OVERLAY", fs, "OUTLINE", "CENTER")
+		bar.mid:SetPoint("CENTER", bar, "CENTER", 0, 0)
+	end
+	
+	if glow then
+		bar.glow = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+		bar.glow:SetPoint("TOPLEFT", bar, -7, 7)
+		bar.glow:SetPoint("BOTTOMRIGHT", bar, 7, -7)
+		bar.glow:SetBackdrop({
+			bgFile = "Interface\\Buttons\\WHITE8x8",
+			edgeFile = "Interface\\AddOns\\SoDRaidMods\\media\\glow",
+			edgeSize = 7,
+				insets = { left = 7, right = 7, top = 7, bottom = 7,}
+		})
+		bar.glow:SetBackdropColor(0, 0, 0, 0)
+		bar.glow:SetBackdropBorderColor(1, 1, 0)
+		bar.glow:Hide()
+		
+		bar.anim = bar:CreateAnimationGroup()
+		bar.anim:SetLooping("REPEAT")
+		bar.timer = bar.anim:CreateAnimation()
+		bar.timer:SetDuration(.5)
+	end
+	
+	bar:GetStatusBarTexture():SetHorizTile(false)
+	bar:GetStatusBarTexture():SetVertTile(false)
+	bar:SetOrientation("HORIZONTAL")
+						
+	bar.t = 0
+	bar.update_rate = .02
+	
+	if hide then
+		bar:Hide()
+	end
+	
+	return bar
+end

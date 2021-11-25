@@ -225,7 +225,7 @@ L["就绪"]					  = "|cFF00FF00Ready|r"
 L["无技能"]					  = "|cFFFF0000No movement abilities|r"
 
 L["TIP怨恨"]				  = "Show timer for Spite, and voice countdown in 5 sec."
-L["下一次怨恨"]				  = "%s round Spite: %s"
+L["怨恨序数"]				  = "%s round Spite"
 
 L["TIP群体驱散读条"]	      = "Show castbar and caster name for Mass Dispel."
 L["施法中断"]				  = "|cFFFF0000Cast Stopped|r"
