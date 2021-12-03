@@ -4,6 +4,7 @@ if select(4, GetBuildInfo()) <= 90005 then return end
 -- /dump EncounterJournalBossButton1Creature:GetTexture() -- "Interface\\EncounterJournal\\UI-EJ-BOSS-Default"
 local LCG = LibStub("LibCustomGlow-1.0")
 local LGF = LibStub("LibGetFrame-1.0")
+local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
 
 G.shared_sound = {
@@ -2042,14 +2043,14 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				points = {width = 250, height = 150},
 				events = {
 					["COMBAT_LOG_EVENT_UNFILTERED"] = true,
-					["CHAT_MSG_ADDON"] = true,
 				},
 				difficulty_id = {
 					["all"] = true,
 				},				
 				init = function(frame)-- GetSpellCooldown(102417)
-					frame.spell1 = 350469
-					frame.spell2 = 355151
+					frame.spell1 = 350469 -- 怨毒
+					frame.spell2 = 355151 -- 胸甲的怨毒
+					
 					frame.class = {
 						["DEMONHUNTER"] = {spell = 131347, priority = 1},  -- 滑翔 无cd
 						["DRUID"] = {spell = 102401, priority = 2}, -- cd 野性冲锋 已检查
@@ -2069,6 +2070,21 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 					frame.create_bar = function(GUID)
 						local bar = T.CreateTimerBar(frame)	
 						bar:SetStatusBarColor(.7, .7, 1)
+						
+						bar.icon2 = bar:CreateTexture(nil, "OVERLAY")
+						bar.icon2:SetTexCoord( .1, .9, .1, .9)
+						bar.icon2:SetSize(25, 25)
+						bar.icon2:SetPoint("LEFT", bar, "RIGHT", 5, 0)
+						bar.icon2bg = T.createbdframe(bar.icon2)
+						bar.icon2:Hide()
+						bar.icon2bg:Hide()	
+						
+						bar.cooldown = CreateFrame("Cooldown", nil, bar, "CooldownFrameTemplate")
+						bar.cooldown:SetAllPoints(bar.icon2)
+						bar.cooldown:SetDrawEdge(false)
+						bar.cooldown:SetFrameLevel(bar:GetFrameLevel()+1)
+						bar:SetMinMaxValues(0, 21)
+						
 						frame.bars[GUID] = bar
 					end
 					frame.lineup = function()
@@ -2100,93 +2116,111 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 				update = function(frame, event, ...)
 					if event == "COMBAT_LOG_EVENT_UNFILTERED" then
 						local _, sub_event, _, _, _, _, _, destGUID, destName, _, _, spellID = CombatLogGetCurrentEventInfo()
-						if sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spell1 then
+						if sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spell1 then -- 玩家怨毒
 							if UnitInRaid(destName) then -- 确认中的人在团队中
-								if not frame.bars[destGUID] then
-									frame.create_bar(destGUID)
-								end
-								local bar = frame.bars[destGUID]
 								local class = select(2, UnitClass(destName))
 								
-								bar:SetStatusBarColor(G.Ccolors[class]["r"], G.Ccolors[class]["g"], G.Ccolors[class]["b"])
-								bar.spell = frame.class[class]["spell"]
-								bar.priority = frame.class[class]["priority"]
-								bar.icon:SetTexture(select(3, GetSpellInfo(bar.spell)))	
-								bar.left:SetText(destName)
-								bar.right:SetText(L["技能冷却未知"])
-								bar:Show()
-								frame.lineup()
-								
-								local start, duration, exp_time
-								if destName == G.PlayerName then -- 我被点哩
+								if destName == G.PlayerName then -- 被点的人是我,发技能信息
 									if frame.class[class]["spell2"] and GetSpecialization() == 2 then -- 狂徒修正
-										bar.spell = frame.class[class]["spell2"]
-										bar.priority = frame.class[class]["priority2"]
-										bar.icon:SetTexture(select(3, GetSpellInfo(bar.spell)))
-										
-										C_Timer.After(.3, function() -- 发信息给队友
-											C_ChatInfo.SendAddonMessage("sodpaopao", "my_movespell_change,"..bar.spell..","..bar.priority, "RAID")
-										end)
+										T.SendMyCD(frame.class[class]["spell2"])
+
+									else
+										T.SendMyCD(frame.class[class]["spell"])
 									end
-										
-									if bar.spell ~= 350469 and IsSpellKnown(bar.spell) then -- 有应对技能
-										local hascharges = GetSpellCharges(bar.spell)
-										if hascharges and hascharges > 0 then		
-											duration, exp_time = 0, 0
-											bar:SetScript("OnUpdate", nil)
-											bar:SetMinMaxValues(0, 1)
-											bar:SetValue(1)
-											bar.right:SetText(L["就绪"])
-										else
-											start, duration = GetSpellCooldown(bar.spell)
-											exp_time = start + duration
-											if duration > 1.5 then -- 冷却中		
-												bar:SetMinMaxValues(0, duration)
-												bar:SetScript("OnUpdate", function(self, e)
-													self.t = self.t + e
-													if self.t > .1 then
-														local remain = exp_time - GetTime()
-														if remain > 0 then
-															bar:SetValue(duration-remain)
-															bar.right:SetText(T.FormatTime(remain))
-														else
-															bar:SetScript("OnUpdate", nil)
-															bar:SetValue(duration)
-															bar.right:SetText(L["就绪"])
-														end									
-														self.t = 0
-													end
-												end)
-											else	
-												bar:SetScript("OnUpdate", nil)
-												bar:SetMinMaxValues(0, 1)
-												bar:SetValue(1)
-												bar.right:SetText(L["就绪"])
-											end
-										end
-									else -- 没技能
-										duration = "no"
-										exp_time = "no"
-										bar:SetMinMaxValues(0, 1)
-										bar:SetValue(1)
-										bar.right:SetText(L["无技能"])
+								end
+								
+								C_Timer.After(.3, function() -- 延迟等信息
+									if not frame.bars[destGUID] then
+										frame.create_bar(destGUID)
 									end
 									
-									C_Timer.After(.3, function() -- 发信息给队友
-										C_ChatInfo.SendAddonMessage("sodpaopao", "my_movespell_cd,"..duration..","..exp_time, "RAID")
+									local bar = frame.bars[destGUID]
+									local info = LGIST:GetCachedInfo(destGUID)
+									
+									if info and info.global_spec_id == 260 then-- 狂徒修正
+
+										bar.spell = frame.class[class]["spell2"]
+										bar.priority = frame.class[class]["priority2"]
+									else
+										bar.spell = frame.class[class]["spell"]
+										bar.priority = frame.class[class]["priority"]
+									end
+									
+									bar.icon:SetTexture(select(3, GetSpellInfo(350469)))
+									
+									bar.left:SetText(destName)
+									bar.left:SetTextColor(G.Ccolors[class]["r"], G.Ccolors[class]["g"], G.Ccolors[class]["b"])
+									
+									
+									if bar.spell ~= 350469 then -- 有应对技能
+										local ready, exp_time, dur = T.GetRaidCD(destName, bar.spell)
+										
+										ready = tonumber(ready)
+										exp_time = tonumber(exp_time)
+										dur = tonumber(dur)
+										
+										if ready then -- 收到信息
+											if ready == 1 then -- 就绪
+												bar.icon2:SetTexture(select(3, GetSpellInfo(bar.spell)))
+												bar.icon2:SetDesaturated(false)
+												bar.cooldown:SetCooldown(0, 0)
+												bar.icon2:Show()
+												bar.icon2bg:Show()
+											elseif dur == 0 then -- 技能未掌握 隐藏
+												bar.icon2:Hide()
+												bar.icon2bg:Hide()
+											else -- 冷却中
+												bar.icon2:SetTexture(select(3, GetSpellInfo(bar.spell)))
+												bar.icon2:SetDesaturated(true)
+												bar.cooldown:SetCooldown(exp_time-dur, dur)
+												bar.cooldown:SetScript("OnCooldownDone", function()
+													bar.icon2:SetDesaturated(false)
+													bar.cooldown:SetScript("OnCooldownDone", nil)
+												end)
+												bar.icon2:Show()
+												bar.icon2bg:Show()
+											end
+										else -- 未收到信息 显示
+											bar.icon2:SetTexture(134400)
+											bar.icon2:SetDesaturated(false)
+											bar.cooldown:SetCooldown(0, 0)
+											bar.icon2:Show()
+											bar.icon2bg:Show()
+										end
+									else -- 无应对技能 隐藏
+										bar.icon2:Hide()
+										bar.icon2bg:Hide()
+									end
+									
+									local debuff_exp_time = GetTime() + 21							
+									bar:SetScript("OnUpdate", function(self, e)
+										self.t = self.t + e
+										if self.t > .1 then
+											local remain = debuff_exp_time - GetTime()
+											if remain > 0 then
+												bar:SetValue(21-remain)
+												bar.right:SetText(T.FormatTime(remain))
+											else										
+												bar:Hide()
+												bar:SetScript("OnUpdate", nil)
+											end									
+											self.t = 0
+										end
 									end)
-								end
+									
+									bar:Show()
+									frame.lineup()
+								end)
 							end
-						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spell2 then
+						elseif sub_event == "SPELL_AURA_APPLIED" and spellID == frame.spell2 then -- 胸甲怨毒
 							if not frame.bars[destGUID] then
 								frame.create_bar(destGUID)
 							end
 							local bar = frame.bars[destGUID]
+							bar.icon:SetTexture(select(3, GetSpellInfo(351073)))
 							bar:SetStatusBarColor(.5, .5, .5) -- 灰色
-							bar.priority = 12
-							bar.icon:SetTexture(select(3, GetSpellInfo(351073)))	
-							bar.left:SetText(L["胸甲"])							
-							bar:SetMinMaxValues(0, 21)		
+							bar.priority = 12	
+							bar.left:SetText(L["胸甲"])
 							local exp_time = GetTime() + 21							
 							bar:SetScript("OnUpdate", function(self, e)
 								self.t = self.t + e
@@ -2211,60 +2245,6 @@ G.Encounters[4] = { -- 耐奥祖的残迹 已过初检
 								bar:Hide()
 								bar:SetScript("OnUpdate", nil)
 								frame.lineup()
-							end
-						end
-					elseif event == "CHAT_MSG_ADDON" then
-						local prefix, message, channel, sender = ... 
-						if prefix == "sodpaopao" then
-							local mark, duration, exp_time = string.split(",", message)
-							local player = string.split("-", sender)
-							if mark == "my_movespell_cd" and player ~= G.PlayerName then
-								local GUID = UnitGUID(player)
-								if frame.bars[GUID] and frame.bars[GUID]:IsVisible() then
-									local bar = frame.bars[GUID]
-									if duration == "no" then -- 这个笨笨没有应对技能
-										bar:SetMinMaxValues(0, 1)
-										bar:SetValue(1)
-										bar.right:SetText(L["无技能"])
-									else -- 有技能
-										duration = tonumber(duration)
-										exp_time = tonumber(exp_time)
-										if duration > 1.5 then -- 冷却中
-											bar:SetMinMaxValues(0, duration)
-											bar:SetScript("OnUpdate", function(self, e)
-												self.t = self.t + e
-												if self.t > .1 then
-													local remain = exp_time - GetTime()
-													if remain > 0 then
-														bar:SetValue(duration-remain)
-														bar.right:SetText(T.FormatTime(remain))
-													else
-														bar:SetScript("OnUpdate", nil)
-														bar:SetValue(duration)
-														bar.right:SetText(L["就绪"])
-													end									
-													self.t = 0
-												end
-											end)
-										else
-											bar:SetScript("OnUpdate", nil)
-											bar:SetMinMaxValues(0, 1)
-											bar:SetValue(1)
-											bar.right:SetText(L["就绪"])
-										end
-									end
-								end
-							elseif mark == "my_movespell_change" and player ~= G.PlayerName then
-								local GUID = UnitGUID(player)
-								if frame.bars[GUID] and frame.bars[GUID]:IsVisible() then
-									local bar = frame.bars[GUID]
-									duration = tonumber(duration) -- spellID
-									exp_time = tonumber(exp_time) -- priority
-									
-									bar.spell = duration
-									bar.priority = exp_time
-									bar.icon:SetTexture(select(3, GetSpellInfo(duration)))
-								end
 							end
 						end
 					end

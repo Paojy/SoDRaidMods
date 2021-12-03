@@ -1307,6 +1307,106 @@ DSFrame:SetScript("OnEvent", function(self, event, arg1)
 		DSFrame:Hide()
     end
 end)
+
+----------------------------------------------------------
+----------[[    Raid Members' Spell CD    ]]--------------
+----------------------------------------------------------
+local RMCD = CreateFrame("Frame", addon_name.."RMCDFrame", FrameHolder)
+
+local RaidCD = {}
+
+T.GetRaidCD = function(player, spell)
+	local ready, exp_time, dur, charge
+	if player == G.PlayerName then -- 我自己
+		local known = IsSpellKnown(spell)
+		local hascharges = GetSpellCharges(spell)
+		if known then
+			if hascharges and hascharges > 0 then
+				ready = 1
+				exp_time = 0
+				dur = 0
+				charge = hascharges
+			else
+				start, duration = GetSpellCooldown(spell)		
+				if duration > 1.5 then -- 冷却中		
+					ready = 0
+					exp_time = start + duration
+					dur = duration
+					charge = 0
+				else -- 就绪
+					ready = 1
+					exp_time = 0
+					dur = 0
+					charge = 0
+				end
+			end
+		else -- 技能未掌握
+			ready = 0
+			exp_time = 0
+			dur = 0
+			charge = 0
+		end
+	elseif RaidCD[player] and RaidCD[player][spell] then -- 队友
+		ready = RaidCD[player][spell]["ready"]
+		exp_time = RaidCD[player][spell]["exp_time"]
+		dur = RaidCD[player][spell]["dur"]
+		charge = RaidCD[player][spell]["charge"]
+		RaidCD[player][spell] = nil -- 用了就去掉
+	end
+	return ready, exp_time, dur, charge
+end
+
+T.RequestRaidCD = function(player, spell)
+	local target
+	local name, realm = UnitName(player)
+	if realm then
+		target = name.."-"..realm
+	else
+		target = name
+	end
+	C_ChatInfo.SendAddonMessage("sodpaopao", "RequestCD,"..spell, "WHISPER", target)
+end
+
+T.SendMyCD = function(spell, target)
+	local ready, exp_time, dur, charge = T.GetRaidCD(G.PlayerName, spell)
+	if target then
+		C_ChatInfo.SendAddonMessage("sodpaopao", "SendCD,"..spell..","..ready..","..exp_time..","..dur..","..charge, "WHISPER", target)
+	else
+		C_ChatInfo.SendAddonMessage("sodpaopao", "SendCD,"..spell..","..ready..","..exp_time..","..dur..","..charge, "RAID")
+	end
+end
+
+RMCD:SetScript("OnEvent", function(self, event, ...)
+	if event == "CHAT_MSG_ADDON" then
+		local prefix, message, channel, sender = ...
+		
+		if prefix == "sodpaopao" then
+			
+			local player = string.split("-", sender)
+			if player == G.PlayerName then return end
+			
+			local mark, spell, arg1, arg2, arg3, arg4 = string.split(",", message)
+			spell = tonumber(spell)
+			
+			if mark == "RequestCD" then -- 收到要求就发送CD
+				T.SendMyCD(spell, sender)
+			elseif mark == "SendCD" then -- 收到CD信息就记下来
+				
+				if not RaidCD[player] then
+					RaidCD[player] = {}
+				end
+				
+				RaidCD[player][spell] = {}
+				RaidCD[player][spell]["ready"] = tonumber(arg1)
+				RaidCD[player][spell]["exp_time"] = tonumber(arg2)
+				RaidCD[player][spell]["dur"] = tonumber(arg3)
+				RaidCD[player][spell]["charge"] = tonumber(arg4)
+			end
+		end
+	end
+end)
+
+RMCD:RegisterEvent("CHAT_MSG_ADDON")
 ----------------------------------------------------------
 -----------------[[    Alert Frame    ]]------------------
 ----------------------------------------------------------

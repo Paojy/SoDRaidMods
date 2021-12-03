@@ -3,7 +3,8 @@
 	<Script file="lib\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>	
 	<Script file="lib\LibGetFrame-1.0\LibGetFrame-1.0.lua"/>
 	<Include file="lib\LibCustomGlow-1.0\LibCustomGlow-1.0.xml"/>
-
+	<Include file="lib\LibGroupInSpecT-1.1\lib.xml"/>
+	
 	<Script file="core\init.lua"/>
 	
 	<Script file="local\enUS.lua"/>		

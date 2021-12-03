@@ -219,10 +219,7 @@ L["即将召唤"]				  = "Val'kyr Incoming %d/100"
 --[[ 4 ]]--
 
 L["TIP怨毒"]				  = "Show movement abilities CD for player gained Malevolence, list as CDs. This function only work when player using this addon.\nDemon Hunger: Glide\nDruid: Wild Charge\nHunter: Disengage\nWarriior: Heroic Leap\nRouge: Shadowstep, Grappling Hook\nWarlock: Demonic Circle Teleport\nDeath Knight: Death's Advance\nMonk: Transcendence\nMage: Alter Time"
-
-L["技能冷却未知"]			  = "|cFFFFFF00--|r"
-L["就绪"]					  = "|cFF00FF00Ready|r"
-L["无技能"]					  = "|cFFFF0000No movement abilities|r"
+L["胸甲"]					  = "Breastplate"
 
 L["TIP怨恨"]				  = "Show timer for Spite, and voice countdown in 5 sec."
 L["怨恨序数"]				  = "%s round Spite"

@@ -1,6 +1,6 @@
 ﻿## Interface: 90105
 ## Title: |cffff0000Skyline|r Sod Raid Mods
-## Version: 1.7
+## Version: 1.71
 ## X-Version: 21081501
 ## Author: Paopao001
 ## SavedVariables: SoD_DB
