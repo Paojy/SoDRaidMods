@@ -34,10 +34,18 @@ end
 T.GetNameFromNpcID = GetNameFromNpcID
 
 local ReskinCheck = function(f)
-	f:SetNormalTexture("")
-	f:SetPushedTexture("")
-	f:SetHighlightTexture(G.media.blank)
+	local nt = f:GetNormalTexture()
+	nt:SetAlpha(0)
+	local pt = f:GetPushedTexture()
+	pt:SetAlpha(0)
+	local dt = f:GetDisabledCheckedTexture()
+	dt:SetAlpha(0)
+
+	local ch = f:GetCheckedTexture()
+	ch:SetDesaturated(true)
+	ch:SetVertexColor(0, 1, 0)
 	
+	f:SetHighlightTexture(G.media.blank)
 	local hl = f:GetHighlightTexture()
 	hl:SetPoint("TOPLEFT", 5, -5)
 	hl:SetPoint("BOTTOMRIGHT", -5, 5)
@@ -54,10 +62,6 @@ local ReskinCheck = function(f)
 	tex:SetVertexColor(.5, .5, .5, .3)
 	tex:SetPoint("TOPLEFT", 4, -4)
 	tex:SetPoint("BOTTOMRIGHT", -4, 4)
-
-	local ch = f:GetCheckedTexture()
-	ch:SetDesaturated(true)
-	ch:SetVertexColor(0, 1, 0)
 end
 
 local createcheckbutton = function(parent, x, y, name, t1, t2, value, role, dif)
@@ -98,6 +102,7 @@ local createcheckbutton = function(parent, x, y, name, t1, t2, value, role, dif)
 
 	bu.Text:SetText(name..difstr..rolestr)
 	bu.Text:SetWidth(450)	
+	bu.Text:SetJustifyH("LEFT")
 	
 	bu:SetScript("OnDisable", function(self)
 		local tex = select(7, bu:GetRegions())
@@ -148,18 +153,15 @@ local function TestSlider_OnValueChanged(self, value)
  end
  
 local ReskinSlider = function(f)
-	f:SetBackdrop(nil)
-	f.SetBackdrop = function() end
+	f.NineSlice:SetAlpha(0)
+	f.Thumb:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+	f.Thumb:SetBlendMode("ADD")
 
 	local bd = CreateFrame("Frame", nil, f)
 	bd:SetPoint("TOPLEFT", 14, -2)
 	bd:SetPoint("BOTTOMRIGHT", -15, 3)
 	bd:SetFrameLevel(f:GetFrameLevel()-1)
 	T.createbdframe(bd)
-
-	local slider = select(4, f:GetRegions())
-	--slider:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-	--slider:SetBlendMode("ADD")
 end
 
 local createslider = function(parent, x, y, name, t1, t2, value, min, max, step)
@@ -174,7 +176,7 @@ local createslider = function(parent, x, y, name, t1, t2, value, min, max, step)
 	slider:SetWidth(200)
 	ReskinSlider(slider)
 	
-	BlizzardOptionsPanel_Slider_Enable(slider)
+	getmetatable(slider).__index.Enable(slider)
 	
 	slider:SetMinMaxValues(min, max)
 	_G[slider:GetName()..'Low']:SetText(min)
@@ -222,10 +224,16 @@ local createslider = function(parent, x, y, name, t1, t2, value, min, max, step)
 end
 
 local ReskinRadio = function(f)
-	f:SetNormalTexture("")
-	f:SetHighlightTexture("")
-	f:SetCheckedTexture(G.media.blank)
-
+	local nt = f:GetNormalTexture()
+	nt:SetAlpha(0)
+	
+	f:SetHighlightTexture(G.media.blank)
+	local hl = f:GetHighlightTexture()
+	hl:SetPoint("TOPLEFT", 5, -5)
+	hl:SetPoint("BOTTOMRIGHT", -5, 5)
+	hl:SetVertexColor(0, 1, 0, .2)
+	
+	f:SetCheckedTexture(G.media.blank)	
 	local ch = f:GetCheckedTexture()
 	ch:SetPoint("TOPLEFT", -3, 3)
 	ch:SetPoint("BOTTOMRIGHT", 3, -3)
@@ -342,7 +350,7 @@ T.CreateTitle = function(options, text, start_pos, end_pos)
 	line:SetPoint("TOPLEFT", options, "TOPLEFT", 20, start_pos-18)
 	line:SetPoint("BOTTOMRIGHT", options, "TOPRIGHT", 0, start_pos-20)
 	line:SetTexture(G.media.blank)
-	line:SetGradientAlpha("HORIZONTAL", 1, 1, 0, .8, 1, 0, 0, 0)
+	line:SetGradient("HORIZONTAL", CreateColor(1, 1, 0, .8), CreateColor(1, 0, 0, 0))
 	
 	local bgtex = options:CreateTexture(nil, "BACKGROUND")
 	bgtex:SetPoint("TOPLEFT", options, "TOPLEFT", 20, start_pos-20)
@@ -364,7 +372,7 @@ local CreateSubTitle = function(parent, text, start_x, start_y)
 	line:SetPoint("TOPLEFT", parent, "TOPLEFT", start_x or 20, start_pos-18)
 	line:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, start_pos-20)
 	line:SetTexture(G.media.blank)
-	line:SetGradientAlpha("HORIZONTAL", 1, 1, 0, .8, 1, 0, 0, 0)
+	line:SetGradient("HORIZONTAL", CreateColor(1, 1, 0, .8), CreateColor(1, 0, 0, 0))
 	
 	local bgtex = parent:CreateTexture(nil, "ARTWORK")	
 	bgtex:SetPoint("TOPLEFT", parent, "TOPLEFT", start_x or 20, start_pos-20)
